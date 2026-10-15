@@ -28,7 +28,7 @@ const CalendarApp = () => {
   );
 
   return (
-    <div className="no-visible-scrollbar relative mt-12 flex h-[32rem] flex-1 flex-col overflow-y-scroll px-3">
+    <div className="relative flex flex-col px-3">
       {screen === "home" && (
         <CalendarHome
           selectedDate={selectedDate}

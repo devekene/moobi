@@ -1,6 +1,91 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@plugin "tailwindcss-animate";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --breakpoint-xsx: 300px;
+  --breakpoint-xxs: 360px;
+  --breakpoint-xs: 420px;
+
+  --color-primary: #8b5cf6;
+  --color-walnut-50: #f5f5dc;
+  --color-walnut-300: #8a5a30;
+  --color-black: #000;
+  --color-black-100: #000319;
+  --color-black-200: #000010;
+  --color-purple: #cbacf9;
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  --animate-aurora: aurora 60s linear infinite;
+  --animate-shimmer: shimmer 2s linear infinite;
+  --animate-pulseCustom: pulseCustom 1.5s ease-in-out infinite;
+  --animate-flash: flash 1.5s ease-in-out infinite;
+  --animate-home-icon-wiggle: home-icon-wiggle 180ms ease-in-out infinite
+    alternate;
+
+  @keyframes aurora {
+    from {
+      background-position:
+        50% 50%,
+        50% 50%;
+    }
+    to {
+      background-position:
+        350% 50%,
+        350% 50%;
+    }
+  }
+
+  @keyframes shimmer {
+    from {
+      background-position: 0 0;
+    }
+    to {
+      background-position: -200% 0;
+    }
+  }
+
+  @keyframes pulseCustom {
+    0%,
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.2);
+      opacity: 0.6;
+    }
+  }
+
+  @keyframes flash {
+    0%,
+    100% {
+      color: #3b82f6;
+    }
+    50% {
+      color: #93c5fd;
+    }
+  }
+
+  @keyframes home-icon-wiggle {
+    from {
+      transform: rotate(-1.25deg);
+    }
+    to {
+      transform: rotate(1.25deg);
+    }
+  }
+}
 
 * {
   box-sizing: border-box;
@@ -9,12 +94,17 @@
 }
 
 html {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
   scroll-behavior: smooth;
 }
 
 body {
   font-family: Arial, Helvetica, sans-serif;
-  min-height: 100vh;
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
 }
 
 @layer base {
@@ -75,9 +165,108 @@ body {
   }
 }
 
+/* Phone colors are scoped to the simulated device and never follow the site theme. */
+.phone-theme {
+  --phone-shell: #14161b;
+  --phone-canvas: #090a0c;
+  --phone-surface: #1b1d22;
+  --phone-surface-elevated: #282b31;
+  --phone-text: #f7f7f8;
+  --phone-text-secondary: #d1d3d8;
+  --phone-text-muted: #a1a5ad;
+  --phone-border: #444851;
+  --phone-island-surface: #292d35;
+  --phone-focus: #9b8aff;
+  --phone-accent: #7660ed;
+  --phone-alarm-accent: #ff9f0a;
+  --phone-positive: #30d158;
+  --phone-on-accent: #fff;
+  --phone-overlay: rgb(7 8 10 / 82%);
+  --phone-wallpaper-opacity: 0.35;
+  --phone-control-center-backdrop: rgb(50 59 68 / 58%);
+  --phone-control-center-module: rgb(255 255 255 / 17%);
+  --phone-control-center-button: rgb(255 255 255 / 14%);
+  --phone-control-center-button-active: #2586e8;
+  --phone-control-center-green: #37bd78;
+  --phone-control-center-slider: #f4f5f7;
+  --phone-control-center-track: rgb(255 255 255 / 27%);
+  --phone-control-center-sun: #f3cb47;
+  --phone-control-center-volume: #42cbe7;
+  color: var(--phone-text);
+  color-scheme: dark;
+}
+
+.phone-theme[data-phone-theme="light"] {
+  --phone-shell: #d9dce2;
+  --phone-canvas: #f3f4f7;
+  --phone-surface: #fff;
+  --phone-surface-elevated: #e7e9ef;
+  --phone-text: #171920;
+  --phone-text-secondary: #383c46;
+  --phone-text-muted: #626875;
+  --phone-border: #b9bec9;
+  --phone-island-surface: #242832;
+  --phone-focus: #5140c4;
+  --phone-accent: #5b49d6;
+  --phone-alarm-accent: #a85c00;
+  --phone-positive: #24843b;
+  --phone-overlay: rgb(28 31 39 / 46%);
+  --phone-wallpaper-opacity: 0.12;
+  --phone-control-center-backdrop: rgb(50 59 68 / 58%);
+  --phone-control-center-module: rgb(255 255 255 / 17%);
+  --phone-control-center-button: rgb(255 255 255 / 14%);
+  --phone-control-center-button-active: #2586e8;
+  --phone-control-center-green: #37bd78;
+  --phone-control-center-slider: #f4f5f7;
+  --phone-control-center-track: rgb(255 255 255 / 27%);
+  --phone-control-center-sun: #f3cb47;
+  --phone-control-center-volume: #42cbe7;
+  color-scheme: light;
+}
+
+.phone-theme :focus-visible {
+  outline: 2px solid var(--phone-focus);
+  outline-offset: 2px;
+}
+
+/* The shell supplies model-scaled insets; full-bleed backgrounds may extend behind them. */
+.phone-app-safe-area {
+  position: absolute;
+  inset: var(--phone-safe-area-top) 0 var(--phone-safe-area-bottom);
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Scroll screens reserve safe areas inside their content, so it can pass behind
+   the transparent system bars. The shell owns this single scrolling viewport. */
+.phone-app-safe-area[data-layout="scroll"] {
+  inset: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  scroll-padding-top: var(--phone-safe-area-top);
+  scroll-padding-bottom: var(--phone-safe-area-bottom);
+}
+
+.phone-app-safe-area[data-layout="scroll"]::-webkit-scrollbar {
+  display: none;
+}
+
+.phone-app-safe-area[data-layout="scroll"] > * {
+  min-height: 100%;
+  height: auto;
+  padding-top: calc(var(--phone-safe-area-top) + 12px);
+  padding-bottom: calc(var(--phone-safe-area-bottom) + 16px);
+}
+
+.phone-theme .phone-border {
+  border-color: var(--phone-border) !important;
+}
+
 @layer base {
   * {
-    @apply border-border scroll-smooth !important;
+    @apply border-border scroll-smooth;
+    border-color: hsl(var(--border)) !important;
   }
 
   ::-webkit-scrollbar {
@@ -100,15 +289,15 @@ body {
 
 @layer utilities {
   .heading {
-    @apply text-gray-300 font-bold text-4xl md:text-5xl max-w-lg font-serif;
+    @apply max-w-lg font-serif text-4xl font-bold text-gray-300 md:text-5xl;
   }
 
   .shimmer-btn {
-    @apply flex items-center gap-2 animate-shimmer border border-slate-800 bg-[linear-gradient(110deg,#000103,45%,#1e2631,55%,#000103)] bg-[length:200%_100%] font-medium transition-colors
+    @apply animate-shimmer flex items-center gap-2 border border-slate-800 bg-[linear-gradient(110deg,#000103,45%,#1e2631,55%,#000103)] bg-[length:200%_100%] font-medium transition-colors;
   }
 
   .top-gradient {
-    @apply absolute inset-x-0 h-px w-1/2 mx-auto -top-px shadow-2xl  bg-gradient-to-r from-transparent via-teal-500 to-transparent
+    @apply absolute inset-x-0 -top-px mx-auto h-px w-1/2 bg-gradient-to-r from-transparent via-teal-500 to-transparent shadow-2xl;
   }
 }
 

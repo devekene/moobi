@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef } from "react";
-import { useMusicStore, usePhoneStore } from "@/stores";
+import { useMusicStore } from "@/stores";
+import { usePhoneSettingsStore } from "@/stores/usePhoneSettingsStore";
 import type { Song } from "@/types";
 
 export function useMusicPlayer() {
@@ -30,7 +31,9 @@ export function useMusicPlayer() {
     toggleRepeat,
   } = useMusicStore();
 
-  const { volume, setVolume } = usePhoneStore();
+  const volume = usePhoneSettingsStore((state) => state.volume);
+  const silentMode = usePhoneSettingsStore((state) => state.silentMode);
+  const setVolume = usePhoneSettingsStore((state) => state.setVolume);
 
   // Initialize audio element
   useEffect(() => {
@@ -174,8 +177,9 @@ export function useMusicPlayer() {
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = volume / 100;
+      audioRef.current.muted = silentMode;
     }
-  }, [volume]);
+  }, [silentMode, volume]);
 
   // Handle progress changes
   const handleProgressChange = useCallback(

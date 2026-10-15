@@ -6,6 +6,7 @@ import { LuPause, LuPlay } from "react-icons/lu";
 import { useSwipeable } from "react-swipeable";
 import { GalleryMedia } from "@/types";
 import { FaRedo } from "react-icons/fa";
+import { usePhoneSettingsStore } from "@/stores/usePhoneSettingsStore";
 
 const VideoPlayer = ({
   media,
@@ -22,6 +23,15 @@ const VideoPlayer = ({
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [showControls, setShowControls] = useState(true);
+  const volume = usePhoneSettingsStore((state) => state.volume);
+  const silentMode = usePhoneSettingsStore((state) => state.silentMode);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.volume = volume / 100;
+    video.muted = silentMode;
+  }, [silentMode, volume]);
 
   useEffect(() => {
     const video = videoRef.current;

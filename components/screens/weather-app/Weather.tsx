@@ -27,10 +27,6 @@ const Weather = () => {
     "hourly",
   );
 
-  useEffect(() => {
-    handleRefresh();
-  }, []);
-
   const handleSearch = async () => {
     if (!searchLocation.trim()) return;
 
@@ -58,6 +54,10 @@ const Weather = () => {
       fetchWeather("New York");
     }
   };
+
+  useEffect(() => {
+    handleRefresh();
+  }, []);
 
   const formatTime = (timeString: string) => {
     const date = new Date(timeString);

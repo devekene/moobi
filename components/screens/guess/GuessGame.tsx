@@ -105,7 +105,7 @@ const GuessGame = () => {
     }
 
     return (
-        <div className={cn("relative w-full h-full overflow-hidden px-3 bg-white", gameState !== "playing" && "flex-center")}>
+        <div className={cn("relative w-full px-3 bg-white", gameState !== "playing" && "flex-center")}>
             {/* Setup Screen */}
             {gameState === "loading" && (
                 <div className="flex-1 flex-center">

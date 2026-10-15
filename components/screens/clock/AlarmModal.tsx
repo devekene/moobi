@@ -1,195 +1,346 @@
-import { Dispatch, SetStateAction, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { LuCheck, LuX } from "react-icons/lu";
+"use client";
+
+import {
+  type Dispatch,
+  type SetStateAction,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import * as Dialog from "@radix-ui/react-dialog";
+import { LuCheck, LuChevronRight, LuX } from "react-icons/lu";
 import Picker from "react-mobile-picker";
 import { useClock } from "@/context/ClockContext";
+import {
+  getAlarmRepeatDays,
+  getAlarmRepeatLabel,
+  getRepeatMode,
+} from "@/lib/alarms";
 import { type Alarm } from "@/types";
+import styles from "./AlarmModal.module.css";
 
-type AlarmRepeatMode = "once" | "daily" | "weekday";
+const weekdays = [
+  { day: 1, label: "Monday", initial: "M" },
+  { day: 2, label: "Tuesday", initial: "T" },
+  { day: 3, label: "Wednesday", initial: "W" },
+  { day: 4, label: "Thursday", initial: "T" },
+  { day: 5, label: "Friday", initial: "F" },
+  { day: 6, label: "Saturday", initial: "S" },
+  { day: 0, label: "Sunday", initial: "S" },
+];
+const hours = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, "0"));
+const minutes = Array.from({ length: 60 }, (_, i) =>
+  String(i).padStart(2, "0"),
+);
 
 const AlarmModal = ({
   setIsAdding,
   alarmToEdit: data,
   setAlarmToEdit,
+  isWakeUpAlarm = false,
+  container,
 }: {
   setIsAdding: Dispatch<SetStateAction<boolean>>;
   alarmToEdit?: Alarm;
   setAlarmToEdit: Dispatch<SetStateAction<Alarm | null>>;
+  isWakeUpAlarm?: boolean;
+  container?: HTMLDivElement | null;
 }) => {
   const { setAlarms } = useClock();
-
-  const [title, setTitle] = useState(data?.label ?? "");
-  const [repeatMode, setRepeatMode] = useState<AlarmRepeatMode>(
-    data?.repeatMode ?? "once",
+  const soundPreview = useRef<HTMLAudioElement | null>(null);
+  const returnFocus = useRef<HTMLElement | null>(null);
+  const [title, setTitle] = useState(
+    data?.label ?? (isWakeUpAlarm ? "Wake Up" : ""),
   );
-  const [time, setTime] = useState(
-    data
-      ? { hour: data.time.split(":")[0], minute: data.time.split(":")[1] }
-      : { hour: "16", minute: "32" },
+  const [repeatDays, setRepeatDays] = useState(() =>
+    getAlarmRepeatDays(
+      data ?? { repeatMode: isWakeUpAlarm ? "daily" : "once" },
+    ),
   );
-
-  const hours = Array.from({ length: 25 }, (_, i) =>
-    String(i).padStart(2, "0"),
+  const [snoozeEnabled, setSnoozeEnabled] = useState(
+    data?.snoozeEnabled ?? true,
   );
-  const minutes = Array.from({ length: 61 }, (_, i) =>
-    String(i).padStart(2, "0"),
+  const [snoozeDuration, setSnoozeDuration] = useState(
+    data?.snoozeDuration ?? 9,
   );
-
-  const getTimeInterval = (hour: number, minute: number) => {
+  const [soundMessage, setSoundMessage] = useState("");
+  const [time, setTime] = useState(() => {
     const now = new Date();
-
-    let target = new Date();
-    target.setHours(hour, minute, 0, 0);
-
-    if (target <= now) {
-      target.setDate(target.getDate() + 1);
-    }
-
-    const diffMs = target.getTime() - now.getTime();
-    const diffMinutes = Math.floor(diffMs / (1000 * 60));
-    const diffHours = Math.floor(diffMinutes / 60);
-    const remainingMinutes = diffMinutes % 60;
-
-    return { hours: diffHours, minutes: remainingMinutes };
-  };
-
-  const addAlarm = () => {
-    setAlarms((prev) => {
-      if (data) {
-        return prev.map((alarm) =>
-          alarm.id === data.id
-            ? {
-                ...alarm,
-                time: `${time.hour}:${time.minute}`,
-                label: title,
-                repeatMode,
-              }
-            : alarm,
-        );
-      } else {
-        return [
-          ...prev,
-          {
-            id: prev.length === 0 ? 1 : prev[prev.length - 1].id + 1,
-            time: `${time.hour}:${time.minute}`,
-            label: title,
-            enabled: true,
-            repeatMode,
-          },
-        ];
-      }
-    });
-
-    setTitle("");
-    setTime({ hour: "16", minute: "32" });
-    setRepeatMode("once");
-
-    closeModal();
-  };
-
-  const { hours: hourInterval, minutes: minuteInterval } = getTimeInterval(
-    parseInt(time.hour),
-    parseInt(time.minute),
-  );
+    return data
+      ? { hour: data.time.split(":")[0], minute: data.time.split(":")[1] }
+      : isWakeUpAlarm
+        ? { hour: "07", minute: "00" }
+        : {
+            hour: String(now.getHours()).padStart(2, "0"),
+            minute: String(now.getMinutes()).padStart(2, "0"),
+          };
+  });
 
   const closeModal = () => {
+    if (soundPreview.current) {
+      soundPreview.current.pause();
+      soundPreview.current.currentTime = 0;
+    }
     setAlarmToEdit(null);
     setIsAdding(false);
   };
 
+  const saveAlarm = () => {
+    const settings = {
+      time: `${time.hour}:${time.minute}`,
+      label: title.trim(),
+      repeatMode: getRepeatMode(repeatDays),
+      repeatDays,
+      snoozeEnabled,
+      snoozeDuration,
+    };
+    setAlarms((prev) =>
+      data
+        ? prev.map((alarm) =>
+            alarm.id === data.id ? { ...alarm, ...settings } : alarm,
+          )
+        : [
+            ...prev,
+            {
+              ...settings,
+              id: Math.max(0, ...prev.map((alarm) => alarm.id)) + 1,
+              enabled: true,
+              isWakeUp: isWakeUpAlarm,
+            },
+          ],
+    );
+    closeModal();
+  };
+
+  const previewSound = async () => {
+    const audio = soundPreview.current ?? new Audio("/sounds/alarm.wav");
+    soundPreview.current = audio;
+    if (!audio.paused) {
+      audio.pause();
+      audio.currentTime = 0;
+      setSoundMessage("");
+      return;
+    }
+    audio.loop = false;
+    audio.currentTime = 0;
+    try {
+      await audio.play();
+      setSoundMessage("Playing the built-in alarm sound. Tap Sound to stop.");
+    } catch {
+      setSoundMessage("Sound preview is unavailable in this browser.");
+    }
+  };
+
+  useEffect(
+    () => () => {
+      soundPreview.current?.pause();
+    },
+    [],
+  );
+
   return (
-    <div className="absolute left-0 top-16 flex h-[26rem] w-full flex-col items-center rounded-t-xl bg-neutral-900 px-3">
-      <div className="flex-center my-1.5 h-1 w-10 rounded-full bg-neutral-700" />
-
-      <div className="flex w-full items-center justify-between">
-        <Button
-          className="bg-transparent p-0 text-white hover:bg-transparent"
-          onClick={closeModal}
+    <Dialog.Root
+      open
+      onOpenChange={(open) => {
+        if (!open) closeModal();
+      }}
+    >
+      <Dialog.Portal container={container}>
+        <Dialog.Content
+          className={styles.sheet}
+          aria-describedby={undefined}
+          onOpenAutoFocus={() => {
+            if (document.activeElement instanceof HTMLElement)
+              returnFocus.current = document.activeElement;
+          }}
+          onCloseAutoFocus={(event) => {
+            event.preventDefault();
+            returnFocus.current?.focus();
+          }}
+          onInteractOutside={(event) => event.preventDefault()}
         >
-          <LuX />
-        </Button>
+          <header className={styles.header}>
+            <button
+              type="button"
+              className={styles.circle}
+              aria-label="Cancel alarm editing"
+              onClick={closeModal}
+            >
+              <LuX aria-hidden="true" />
+            </button>
+            <Dialog.Title className={styles.title}>
+              {data
+                ? "Edit Alarm"
+                : isWakeUpAlarm
+                  ? "Set Wake Up"
+                  : "Add Alarm"}
+            </Dialog.Title>
+            <button
+              type="button"
+              className={`${styles.circle} ${styles.save}`}
+              aria-label="Save alarm"
+              onClick={saveAlarm}
+            >
+              <LuCheck aria-hidden="true" />
+            </button>
+          </header>
 
-        <div className="text-center">
-          <h2 className="text-lg text-gray-200">Add Alarm</h2>
-          <p className="text-xs text-gray-400">
-            Alarm in {hourInterval} hours {minuteInterval} minutes
-          </p>
-        </div>
+          <div className={styles.body}>
+            <div className={styles.wheel}>
+              <div className={styles.selection} aria-hidden="true" />
+              <Picker
+                value={time}
+                onChange={setTime}
+                height={156}
+                itemHeight={26}
+                wheelMode="natural"
+                className={styles.picker}
+              >
+                {(["hour", "minute"] as const).map((part) => (
+                  <Picker.Column
+                    key={part}
+                    name={part}
+                    role="spinbutton"
+                    tabIndex={0}
+                    aria-label={part === "hour" ? "Hours" : "Minutes"}
+                    aria-valuemin={0}
+                    aria-valuemax={part === "hour" ? 23 : 59}
+                    aria-valuenow={Number(time[part])}
+                    onKeyDown={(event) => {
+                      const values = part === "hour" ? hours : minutes;
+                      if (
+                        !["ArrowUp", "ArrowDown", "Home", "End"].includes(
+                          event.key,
+                        )
+                      )
+                        return;
+                      event.preventDefault();
+                      const next =
+                        event.key === "Home"
+                          ? 0
+                          : event.key === "End"
+                            ? values.length - 1
+                            : (Number(time[part]) +
+                                (event.key === "ArrowUp" ? -1 : 1) +
+                                values.length) %
+                              values.length;
+                      setTime((prev) => ({ ...prev, [part]: values[next] }));
+                    }}
+                  >
+                    {(part === "hour" ? hours : minutes).map((value) => (
+                      <Picker.Item key={value} value={value} aria-hidden="true">
+                        {({ selected }) => (
+                          <span
+                            className={
+                              selected ? styles.selectedTime : styles.time
+                            }
+                          >
+                            {value}
+                          </span>
+                        )}
+                      </Picker.Item>
+                    ))}
+                  </Picker.Column>
+                ))}
+              </Picker>
+            </div>
 
-        <Button
-          className="bg-transparent p-0 text-white hover:bg-transparent"
-          onClick={addAlarm}
-        >
-          <LuCheck />
-        </Button>
-      </div>
+            <section className={styles.group} aria-label="Repeat days">
+              <div className={styles.row}>
+                <span>Repeat</span>
+                <span className={styles.value}>
+                  {getAlarmRepeatLabel({
+                    repeatMode: getRepeatMode(repeatDays),
+                    repeatDays,
+                  })}
+                </span>
+              </div>
+              <div className={styles.days}>
+                {weekdays.map(({ day, label, initial }) => (
+                  <button
+                    key={day}
+                    type="button"
+                    className={styles.day}
+                    aria-label={label}
+                    aria-pressed={repeatDays.includes(day)}
+                    onClick={() =>
+                      setRepeatDays((prev) =>
+                        prev.includes(day)
+                          ? prev.filter((value) => value !== day)
+                          : [...prev, day],
+                      )
+                    }
+                  >
+                    {initial}
+                  </button>
+                ))}
+              </div>
+            </section>
 
-      <div className="mt-4 w-full">
-        <div className="flex-center mx-auto w-full max-w-36 flex-col text-white">
-          <div className="flex items-center gap-12 text-white/40">
-            <div>H</div>
-            <div>M</div>
+            <section
+              className={`${styles.group} ${styles.settings}`}
+              aria-label="Alarm settings"
+            >
+              <label className={styles.row}>
+                <span>Label</span>
+                <input
+                  aria-label="Alarm label"
+                  value={title}
+                  onChange={(event) => setTitle(event.target.value)}
+                  placeholder="Alarm"
+                  maxLength={80}
+                />
+              </label>
+              <button
+                type="button"
+                className={styles.row}
+                onClick={previewSound}
+                aria-label="Preview alarm sound"
+              >
+                <span>Sound</span>
+                <span className={styles.value}>
+                  Alarm <LuChevronRight aria-hidden="true" />
+                </span>
+              </button>
+              <div className={styles.row}>
+                <span id="alarm-snooze-label">Snooze</span>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-labelledby="alarm-snooze-label"
+                  aria-checked={snoozeEnabled}
+                  className={styles.switch}
+                  onClick={() => setSnoozeEnabled((value) => !value)}
+                >
+                  <span aria-hidden="true" />
+                </button>
+              </div>
+              {snoozeEnabled && (
+                <label className={styles.row}>
+                  <span>Snooze Duration</span>
+                  <select
+                    aria-label="Snooze duration"
+                    value={snoozeDuration}
+                    onChange={(event) =>
+                      setSnoozeDuration(Number(event.target.value))
+                    }
+                  >
+                    {[1, 5, 9, 10, 15, 30].map((duration) => (
+                      <option key={duration} value={duration}>
+                        {duration} min
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
+            </section>
+            <p className={styles.soundMessage} role="status">
+              {soundMessage}
+            </p>
           </div>
-          <Picker
-            value={time}
-            onChange={setTime}
-            height={180}
-            itemHeight={36}
-            className="flex-center relative w-full gap-12"
-            wheelMode="natural"
-          >
-            <Picker.Column name="hour">
-              {hours.slice(1).map((h) => (
-                <Picker.Item key={h} value={h} className="text-lg">
-                  {({ selected }) => (
-                    <div style={{ color: selected ? "red" : "white" }}>{h}</div>
-                  )}
-                </Picker.Item>
-              ))}
-            </Picker.Column>
-            <Picker.Column name="minute">
-              {minutes.slice(1).map((m) => (
-                <Picker.Item key={m} value={m} className="text-lg">
-                  {({ selected }) => (
-                    <div style={{ color: selected ? "red" : "white" }}>{m}</div>
-                  )}
-                </Picker.Item>
-              ))}
-            </Picker.Column>
-          </Picker>
-        </div>
-
-        <div className="relative flex w-full items-center justify-between rounded-xl bg-neutral-700 p-2">
-          <label className="text-base text-white">Repeat</label>
-          <select
-            className="ml-2 w-full max-w-24 appearance-none rounded-lg bg-neutral-700 text-right text-white/70 focus:outline-none"
-            value={repeatMode}
-            onChange={(e) => setRepeatMode(e.target.value as AlarmRepeatMode)}
-          >
-            <option value="once" className="text-white">
-              Once
-            </option>
-            <option value="daily" className="text-white">
-              Daily
-            </option>
-            <option value="weekday" className="text-white">
-              Mon - Fri
-            </option>
-          </select>
-        </div>
-
-        <div className="relative mt-4 flex w-full items-center justify-between rounded-xl bg-neutral-700 p-2">
-          <label className="text-base text-white">Label</label>
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Enter label"
-            className="ml-2 w-full rounded-lg bg-transparent text-right text-white placeholder:text-white/40 focus:outline-none"
-          />
-        </div>
-      </div>
-    </div>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 };
 export default AlarmModal;

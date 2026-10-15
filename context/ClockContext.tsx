@@ -7,11 +7,22 @@ import {
   RefObject,
   SetStateAction,
   useContext,
+  useCallback,
   useEffect,
   useRef,
+  useReducer,
   useState,
 } from "react";
 import { type Alarm, type ClockScreen, type Timezone } from "@/types";
+import { isAlarmScheduledForDate } from "@/lib/alarms";
+import { silenceClockRingingAudio } from "@/lib/clock-audio";
+import {
+  INITIAL_TIMER_STATE,
+  getNextTimerTransition,
+  timerReducer,
+  type TimerAction,
+  type TimerState,
+} from "@/lib/timers";
 
 interface ContextType {
   currentClockScreen: ClockScreen;
@@ -25,6 +36,7 @@ interface ContextType {
   ringingAlarmId: number | null;
   setRingingAlarmId: Dispatch<SetStateAction<number | null>>;
   alarmAudioRef: RefObject<HTMLAudioElement | null>;
+  silenceRingingAudio: () => boolean;
 
   // STOPWATCH
   elapsedSwTime: number;
@@ -33,15 +45,14 @@ interface ContextType {
   setStopwatchIsRunning: Dispatch<SetStateAction<boolean>>;
 
   // TIMER
-  timerIsRunning: boolean;
-  setTimerIsRunning: Dispatch<SetStateAction<boolean>>;
-  timerIsPaused: boolean;
-  setTimerIsPaused: Dispatch<SetStateAction<boolean>>;
-  timerTotal: number;
-  setTimerTotal: Dispatch<SetStateAction<number>>;
+  timer: TimerState;
+  dispatchTimer: Dispatch<TimerAction>;
 }
 
 const ClockContext = createContext<ContextType | undefined>(undefined);
+
+const formatAlarmKey = (date: Date, time: string) =>
+  `${date.toISOString().slice(0, 10)}T${time}`;
 
 const ClockProvider = ({ children }: { children: ReactNode }) => {
   const [currentClockScreen, setCurrentClockScreen] =
@@ -54,24 +65,35 @@ const ClockProvider = ({ children }: { children: ReactNode }) => {
   const [stopwatchIsRunning, setStopwatchIsRunning] = useState(false);
 
   // TIMER
-  const [timerTotal, setTimerTotal] = useState(0);
-  const [timerIsRunning, setTimerIsRunning] = useState(false);
-  const [timerIsPaused, setTimerIsPaused] = useState(false);
+  const [timer, dispatchTimer] = useReducer(timerReducer, INITIAL_TIMER_STATE);
 
   const alarmAudioRef = useRef<HTMLAudioElement | null>(null);
   const stopwatchRef = useRef<NodeJS.Timeout | null>(null);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerAudioRef = useRef<HTMLAudioElement | null>(null);
 
   // ALARM
   useEffect(() => {
     let timeout: NodeJS.Timeout;
+
+    const tryPlayAlarm = async () => {
+      const audio = alarmAudioRef.current;
+      if (!audio) return;
+
+      audio.loop = true;
+      audio.currentTime = 0;
+      try {
+        await audio.play();
+      } catch (err) {
+        console.warn("Autoplay blocked; user interaction required", err);
+      }
+    };
 
     const checkAlarms = () => {
       const d = new Date();
       const hh = d.getHours().toString().padStart(2, "0");
       const mm = d.getMinutes().toString().padStart(2, "0");
       const hhmm = `${hh}:${mm}`;
-      const key = fmtTodayKey(d, hhmm);
+      const key = formatAlarmKey(d, hhmm);
 
       setAlarms((prev) => {
         let updated = prev;
@@ -92,7 +114,7 @@ const ClockProvider = ({ children }: { children: ReactNode }) => {
             }
           }
 
-          if (a.time === hhmm) {
+          if (a.time === hhmm && isAlarmScheduledForDate(a, d)) {
             if (a.lastTriggerKey !== key) {
               setRingingAlarmId(a.id);
               tryPlayAlarm();
@@ -131,43 +153,61 @@ const ClockProvider = ({ children }: { children: ReactNode }) => {
     };
   }, [stopwatchIsRunning]);
 
-  // TIMER
+  const hasRunningTimer = timer.items.some((item) => item.status === "running");
+  const hasRingingTimer = timer.items.some((item) => item.status === "ringing");
+  const nextTimerTransition = getNextTimerTransition(timer.items);
+  const silenceRingingAudio = useCallback(
+    () =>
+      silenceClockRingingAudio(
+        { ringing: ringingAlarmId !== null, audio: alarmAudioRef.current },
+        { ringing: hasRingingTimer, audio: timerAudioRef.current },
+      ),
+    [ringingAlarmId, hasRingingTimer],
+  );
+
   useEffect(() => {
-    if (timerIsRunning && !timerIsPaused) {
-      timerRef.current = setInterval(() => {
-        setTimerTotal((prev) => {
-          if (prev <= 1) {
-            setTimerIsRunning(false);
-            setTimerIsPaused(false);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    } else {
-      if (timerRef.current) clearInterval(timerRef.current);
-    }
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [timerIsRunning, timerIsPaused]);
-
-  const fmtTodayKey = (date: Date, hhmm: string) => {
-    const iso = date.toISOString().slice(0, 10);
-    return `${iso}T${hhmm}`;
-  };
-
-  const tryPlayAlarm = async () => {
-    if (alarmAudioRef.current) {
-      alarmAudioRef.current.loop = true;
-      alarmAudioRef.current.currentTime = 0;
-      try {
-        await alarmAudioRef.current.play();
-      } catch (err: any) {
-        console.warn("Autoplay blocked; user interaction required", err);
+    if (!hasRunningTimer) return;
+    let interval: number | undefined;
+    const tick = () => dispatchTimer({ type: "tick", now: Date.now() });
+    const syncVisibility = () => {
+      window.clearInterval(interval);
+      if (document.visibilityState === "visible") {
+        tick();
+        interval = window.setInterval(tick, 1000);
       }
-    }
-  };
+    };
+    syncVisibility();
+    document.addEventListener("visibilitychange", syncVisibility);
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", syncVisibility);
+    };
+  }, [hasRunningTimer]);
+
+  useEffect(() => {
+    if (nextTimerTransition === null) return;
+    const tick = () => dispatchTimer({ type: "tick", now: Date.now() });
+    const timeout = window.setTimeout(
+      tick,
+      Math.max(0, nextTimerTransition - Date.now()),
+    );
+    document.addEventListener("visibilitychange", tick);
+    return () => {
+      window.clearTimeout(timeout);
+      document.removeEventListener("visibilitychange", tick);
+    };
+  }, [nextTimerTransition]);
+
+  useEffect(() => {
+    const audio = timerAudioRef.current;
+    if (!audio || !hasRingingTimer) return;
+    audio.currentTime = 0;
+    audio.loop = true;
+    void audio.play().catch(() => {
+      /* The nonmodal ringing banner remains available if autoplay is blocked. */
+    });
+    return () => audio.pause();
+  }, [hasRingingTimer]);
 
   return (
     <ClockContext.Provider
@@ -183,18 +223,21 @@ const ClockProvider = ({ children }: { children: ReactNode }) => {
         ringingAlarmId,
         setRingingAlarmId,
         alarmAudioRef,
+        silenceRingingAudio,
         elapsedSwTime,
         setElapsedSwTime,
         stopwatchIsRunning,
         setStopwatchIsRunning,
-        timerIsRunning,
-        setTimerIsRunning,
-        timerIsPaused,
-        setTimerIsPaused,
-        timerTotal,
-        setTimerTotal,
+        timer,
+        dispatchTimer,
       }}
     >
+      <audio
+        ref={timerAudioRef}
+        src="/sounds/alarm.wav"
+        preload="none"
+        className="hidden"
+      />
       <audio
         ref={alarmAudioRef}
         src="/sounds/alarm.wav"

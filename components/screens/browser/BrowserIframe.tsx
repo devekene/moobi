@@ -10,29 +10,35 @@ const BrowserIframe = () => {
   const [isEmbeddable, setIsEmbeddable] = useState(true);
 
   useEffect(() => {
-    checkIfEmbeddable();
-  }, []);
+    if (!selectedUrl) return;
+
+    let active = true;
+
+    const checkIfEmbeddable = async () => {
+      try {
+        const res = await fetch(
+          `/api/browser/ping?url=${encodeURIComponent(selectedUrl.link)}`,
+        );
+        const data = await res.json();
+        if (active) setIsEmbeddable(data.status === "ok");
+      } catch (err) {
+        console.log(err);
+        if (active) setIsEmbeddable(false);
+      } finally {
+        if (active) setIsLoading(false);
+      }
+    };
+
+    void checkIfEmbeddable();
+    return () => {
+      active = false;
+    };
+  }, [selectedUrl]);
 
   if (!selectedUrl) {
     changeBrowserScreen("browser-search-results");
     return;
   }
-
-  const checkIfEmbeddable = async () => {
-    try {
-      const res = await fetch(
-        `/api/browser/ping?url=${encodeURIComponent(selectedUrl?.link)}`,
-      );
-      const data = await res.json();
-
-      setIsEmbeddable(data.status === "ok");
-    } catch (err) {
-      console.log(err);
-      setIsEmbeddable(false);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   return (
     <div className="relative h-full w-full">

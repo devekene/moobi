@@ -1,157 +1,433 @@
-import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { LuPause, LuPlay, LuSquare } from "react-icons/lu";
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import {
+  LuChevronRight,
+  LuChevronLeft,
+  LuBell,
+  LuPlus,
+  LuRotateCw,
+  LuCircleMinus,
+  LuPause,
+  LuPlay,
+  LuX,
+} from "react-icons/lu";
 import Picker from "react-mobile-picker";
-import { CgMoreVertical } from "react-icons/cg";
 import { useClock } from "@/context/ClockContext";
+import {
+  describeTimer,
+  formatTimer,
+  getTimerSeconds,
+  type ActiveTimer,
+} from "@/lib/timers";
+import styles from "./Timer.module.css";
+
+const columns = [
+  { name: "hours", label: "Hours", unit: "hours", count: 24 },
+  { name: "minutes", label: "Minutes", unit: "min", count: 60 },
+  { name: "seconds", label: "Seconds", unit: "sec", count: 60 },
+] as const;
 
 const Timer = () => {
-  const {
-    timerTotal,
-    setTimerTotal,
-    timerIsRunning,
-    setTimerIsRunning,
-    timerIsPaused,
-    setTimerIsPaused,
-  } = useClock();
-  const [timer, setTimer] = useState({
-    hour: "00",
-    minute: "10",
-    seconds: "10",
-  });
+  const { timer, dispatchTimer } = useClock();
+  const [editing, setEditing] = useState(false);
+  const [soundMessage, setSoundMessage] = useState("");
+  const previewRef = useRef<HTMLAudioElement | null>(null);
+  const backRef = useRef<HTMLButtonElement | null>(null);
+  const selected = timer.items.find((item) => item.id === timer.selectedId);
+  const detail = timer.view === "detail" && selected !== undefined;
+  const setup = timer.view === "setup";
+  useEffect(() => {
+    if (detail) backRef.current?.focus();
+  }, [detail]);
+  const actionFor = (item: ActiveTimer) =>
+    item.status === "running"
+      ? "pause"
+      : item.status === "paused"
+        ? "resume"
+        : "restart";
+  const controlLabel = (item: ActiveTimer) =>
+    item.status === "running"
+      ? "Pause timer"
+      : item.status === "paused"
+        ? "Resume timer"
+        : "Restart timer";
+  const progressRing = (item: ActiveTimer) => (
+    <svg viewBox="0 0 180 180" aria-hidden="true" className={styles.progress}>
+      <circle cx="90" cy="90" r="84" className={styles.track} />
+      <circle
+        cx="90"
+        cy="90"
+        r="84"
+        pathLength="1"
+        strokeDasharray="1"
+        strokeDashoffset={1 - item.remaining / item.duration}
+        className={styles.remaining}
+      />
+    </svg>
+  );
+  const value = {
+    hours: timer.draft.hours,
+    minutes: timer.draft.minutes,
+    seconds: timer.draft.seconds,
+  };
 
-  const startTimer = () => {
-    if (timerTotal === 0) {
-      const hoursToSeconds = parseInt(timer.hour) * 60 * 60;
-      const minutesToSeconds = parseInt(timer.minute) * 60;
-      const seconds = parseInt(timer.seconds);
-      setTimerTotal(hoursToSeconds + minutesToSeconds + seconds);
+  const previewSound = async () => {
+    const audio = previewRef.current ?? new Audio("/sounds/alarm.wav");
+    previewRef.current = audio;
+    if (!audio.paused) {
+      audio.pause();
+      setSoundMessage("");
+      return;
     }
-    setTimerIsRunning(true);
-    setTimerIsPaused(false);
-  };
-  const pauseTimer = () => setTimerIsPaused(true);
-  const resetTimer = () => {
-    setTimerIsRunning(false);
-    setTimerIsPaused(false);
-    setTimerTotal(0);
-  };
-  const formatTimer = (total: number) => {
-    const h = Math.floor(total / 3600);
-    const m = Math.floor((total % 3600) / 60);
-    const s = total % 60;
-    return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+    audio.currentTime = 0;
+    audio.onended = () => setSoundMessage("");
+    try {
+      await audio.play();
+      setSoundMessage("Playing the built-in alarm sound. Tap Sound to stop.");
+    } catch {
+      setSoundMessage("Sound preview is unavailable in this browser.");
+    }
   };
 
-  const hours = Array.from({ length: 24 }, (_, i) =>
-    String(i).padStart(2, "0"),
-  );
-  const minutes = Array.from({ length: 60 }, (_, i) =>
-    String(i).padStart(2, "0"),
-  );
-  const seconds = Array.from({ length: 60 }, (_, i) =>
-    String(i).padStart(2, "0"),
+  useEffect(
+    () => () => {
+      if (previewRef.current) {
+        previewRef.current.onended = null;
+        previewRef.current.pause();
+      }
+    },
+    [],
   );
 
   return (
-    <div className="flex h-[30rem] w-full flex-col gap-2 px-3 text-white">
-      <div className="flex items-end justify-end text-white">
-        <Button size="icon" variant="ghost" className="p-0">
-          <CgMoreVertical />
-        </Button>
-      </div>
+    <div className={`${styles.screen} ${detail ? styles.detailScreen : ""}`}>
+      {detail ? (
+        <button
+          ref={backRef}
+          type="button"
+          className={styles.back}
+          aria-label="Back to timers"
+          onClick={() => dispatchTimer({ type: "navigate", view: "list" })}
+        >
+          <LuChevronLeft aria-hidden="true" />
+        </button>
+      ) : (
+        <header className={styles.header}>
+          <div className={styles.toolbar}>
+            <button
+              type="button"
+              className={styles.edit}
+              disabled={!timer.recents.length && !editing}
+              aria-label={
+                editing ? "Done editing recent timers" : "Edit recent timers"
+              }
+              aria-pressed={editing}
+              onClick={() => setEditing((previous) => !previous)}
+            >
+              {editing ? "Done" : "Edit"}
+            </button>
+            {timer.items.length > 0 && (
+              <button
+                type="button"
+                className={styles.back}
+                aria-label={setup ? "Back to active timers" : "Add timer"}
+                onClick={() =>
+                  dispatchTimer({
+                    type: "navigate",
+                    view: setup ? "list" : "setup",
+                  })
+                }
+              >
+                {setup ? (
+                  <LuChevronLeft aria-hidden="true" />
+                ) : (
+                  <LuPlus aria-hidden="true" />
+                )}
+              </button>
+            )}
+          </div>
+          <h1>Timers</h1>
+        </header>
+      )}
 
-      <h1 className="text-2xl">Timer</h1>
-      <div className="my-4 text-center font-mono text-6xl text-white">
-        {(timerIsRunning || timerIsPaused) && formatTimer(timerTotal)}
-      </div>
+      {detail && (
+        <div className={`${styles.countdown} ${styles.detailCountdown}`}>
+          {progressRing(selected)}
+          <div className={styles.readout}>
+            <span className={styles.finishTime}>
+              {selected.status === "running" && selected.deadline !== null ? (
+                <>
+                  <LuBell aria-hidden="true" />{" "}
+                  {new Date(selected.deadline).toLocaleTimeString("en-GB", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </>
+              ) : selected.status === "paused" ? (
+                "Paused"
+              ) : (
+                "Timer finished"
+              )}
+            </span>
+            <span
+              className={`${styles.remainingTime} ${selected.duration >= 3600 ? styles.longTime : ""}`}
+              role="timer"
+              aria-label={`${describeTimer(selected.remaining)} remaining`}
+            >
+              {formatTimer(selected.remaining, true)}
+            </span>
+            <span className={styles.timerLabel}>
+              {describeTimer(selected.duration)}
+            </span>
+          </div>
+        </div>
+      )}
 
-      {!timerIsRunning && !timerIsPaused && (
-        <div className="flex-center w-full flex-col text-white">
+      {!setup && !detail && (
+        <section className={styles.activeTimers} aria-label="Active timers">
+          {timer.items.map((item) => (
+            <div className={styles.activeRow} key={item.id}>
+              <button
+                type="button"
+                className={styles.openTimer}
+                aria-label={`Open ${item.label || describeTimer(item.duration)} timer`}
+                onClick={() =>
+                  dispatchTimer({
+                    type: "navigate",
+                    view: "detail",
+                    id: item.id,
+                  })
+                }
+              >
+                <span
+                  className={styles.activeTime}
+                  role="timer"
+                  aria-label={`${describeTimer(item.remaining)} remaining`}
+                >
+                  {formatTimer(item.remaining, true)}
+                </span>
+                <span className={styles.activeLabel}>
+                  {item.label ? `${item.label} · ` : ""}
+                  {item.status === "ringing"
+                    ? "Timer finished"
+                    : describeTimer(item.duration)}
+                </span>
+              </button>
+              <button
+                type="button"
+                className={`${styles.rowControl} ${item.status !== "paused" ? styles.pause : styles.start}`}
+                aria-label={`${controlLabel(item)}, ${item.label || describeTimer(item.duration)}`}
+                onClick={() =>
+                  dispatchTimer({
+                    type: actionFor(item),
+                    id: item.id,
+                    now: Date.now(),
+                  })
+                }
+              >
+                {progressRing(item)}
+                {item.status === "running" ? (
+                  <LuPause aria-hidden="true" />
+                ) : item.status === "paused" ? (
+                  <LuPlay aria-hidden="true" />
+                ) : (
+                  <LuRotateCw aria-hidden="true" />
+                )}
+              </button>
+            </div>
+          ))}
+        </section>
+      )}
+
+      {setup && (
+        <div className={styles.wheel}>
+          <div className={styles.selection} aria-hidden="true" />
           <Picker
-            value={timer}
-            onChange={setTimer}
-            height={220}
-            itemHeight={39}
-            className="flex-center relative w-full text-3xl"
+            value={value}
+            onChange={(draft) => dispatchTimer({ type: "configure", draft })}
+            height={130}
+            itemHeight={26}
             wheelMode="natural"
+            className={styles.picker}
           >
-            <Picker.Column name="hour">
-              {hours.map((h) => (
-                <Picker.Item key={h} value={h}>
-                  {({ selected }) => (
-                    <div style={{ color: selected ? "blueviolet" : "white" }}>
-                      {h}
-                    </div>
-                  )}
-                </Picker.Item>
-              ))}
-            </Picker.Column>
-
-            <div className="text-white">:</div>
-            <Picker.Column name="minute">
-              {minutes.map((m) => (
-                <Picker.Item key={m} value={m}>
-                  {({ selected }) => (
-                    <div style={{ color: selected ? "blueviolet" : "white" }}>
-                      {m}
-                    </div>
-                  )}
-                </Picker.Item>
-              ))}
-            </Picker.Column>
-
-            <div className="text-white">:</div>
-            <Picker.Column name="seconds">
-              {seconds.map((s) => (
-                <Picker.Item key={s} value={s}>
-                  {({ selected }) => (
-                    <div style={{ color: selected ? "blueviolet" : "white" }}>
-                      {s}
-                    </div>
-                  )}
-                </Picker.Item>
-              ))}
-            </Picker.Column>
+            {columns.map(({ name, label, unit, count }) => (
+              <Picker.Column
+                key={name}
+                name={name}
+                role="spinbutton"
+                tabIndex={0}
+                aria-label={label}
+                aria-valuemin={0}
+                aria-valuemax={count - 1}
+                aria-valuenow={value[name]}
+                onKeyDown={(event) => {
+                  if (
+                    !["ArrowUp", "ArrowDown", "Home", "End"].includes(event.key)
+                  )
+                    return;
+                  event.preventDefault();
+                  const next =
+                    event.key === "Home"
+                      ? 0
+                      : event.key === "End"
+                        ? count - 1
+                        : (value[name] +
+                            (event.key === "ArrowUp" ? -1 : 1) +
+                            count) %
+                          count;
+                  dispatchTimer({ type: "configure", draft: { [name]: next } });
+                }}
+              >
+                {Array.from({ length: count }, (_, number) => (
+                  <Picker.Item key={number} value={number} aria-hidden="true">
+                    {({ selected }) => (
+                      <span
+                        className={
+                          selected ? styles.selectedTime : styles.wheelTime
+                        }
+                      >
+                        {number}
+                        {selected && (
+                          <span className={styles.unit}> {unit}</span>
+                        )}
+                      </span>
+                    )}
+                  </Picker.Item>
+                ))}
+              </Picker.Column>
+            ))}
           </Picker>
         </div>
       )}
 
-      {/* Controls */}
-      <div className="flex-center gap-4">
-        {!timerIsRunning && !timerIsPaused && (
-          <Button
-            onClick={startTimer}
-            className="h-16 w-16 rounded-full border-0 bg-green-500 hover:bg-green-600"
+      {(setup || detail) && (
+        <div className={styles.controls}>
+          <button
+            type="button"
+            aria-label="Cancel timer"
+            className={styles.control}
+            disabled={!detail}
+            onClick={() => {
+              if (selected) dispatchTimer({ type: "cancel", id: selected.id });
+            }}
           >
-            <LuPlay className="h-8 w-8 text-white" />
-          </Button>
-        )}
-        {timerIsRunning && !timerIsPaused && (
-          <Button
-            onClick={pauseTimer}
-            className="h-16 w-16 rounded-full border-0 bg-orange-500 hover:bg-orange-600"
+            <LuX aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            aria-label={detail ? controlLabel(selected) : "Start timer"}
+            className={`${styles.control} ${detail && selected.status !== "paused" ? styles.pause : styles.start}`}
+            disabled={setup && getTimerSeconds(timer.draft) === 0}
+            onClick={() =>
+              dispatchTimer(
+                detail
+                  ? {
+                      type: actionFor(selected),
+                      id: selected.id,
+                      now: Date.now(),
+                    }
+                  : { type: "start", now: Date.now() },
+              )
+            }
           >
-            <LuPause className="h-8 w-8 text-white" />
-          </Button>
-        )}
-        {timerIsPaused && (
-          <Button
-            onClick={startTimer}
-            className="h-16 w-16 rounded-full border-0 bg-green-500 hover:bg-green-600"
-          >
-            <LuPlay className="h-8 w-8 text-white" />
-          </Button>
-        )}
-        {(timerIsRunning || timerIsPaused) && (
-          <Button
-            onClick={resetTimer}
-            className="h-16 w-16 rounded-full border-0 bg-red-500 hover:bg-red-600"
-          >
-            <LuSquare className="h-8 w-8 text-white" />
-          </Button>
-        )}
-      </div>
+            {detail && selected.status === "running" ? (
+              <LuPause aria-hidden="true" />
+            ) : detail && selected.status === "ringing" ? (
+              <LuRotateCw aria-hidden="true" />
+            ) : (
+              <LuPlay aria-hidden="true" />
+            )}
+          </button>
+        </div>
+      )}
+
+      {(setup || detail) && (
+        <>
+          <section className={styles.settings} aria-label="Timer settings">
+            <label className={styles.setting}>
+              <span>Label</span>
+              <input
+                aria-label="Timer label"
+                placeholder="Timer"
+                maxLength={80}
+                value={detail ? selected.label : timer.draft.label}
+                disabled={detail}
+                onChange={(event) =>
+                  dispatchTimer({
+                    type: "configure",
+                    draft: { label: event.target.value },
+                  })
+                }
+              />
+            </label>
+            <button
+              type="button"
+              className={styles.setting}
+              aria-label="Preview timer sound"
+              onClick={previewSound}
+            >
+              <span>Sound</span>
+              <span className={styles.settingValue}>
+                Alarm <LuChevronRight aria-hidden="true" />
+              </span>
+            </button>
+          </section>
+          <p className={styles.soundMessage} role="status">
+            {soundMessage}
+          </p>
+        </>
+      )}
+
+      {!detail && (
+        <section
+          className={styles.recents}
+          aria-labelledby="recent-timers-title"
+        >
+          <h2 id="recent-timers-title">Recents</h2>
+          {timer.recents.length === 0 ? (
+            <p className={styles.empty}>
+              Your recently started timers will appear here.
+            </p>
+          ) : (
+            timer.recents.map((recent) => (
+              <div className={styles.recent} key={recent.id}>
+                {editing && (
+                  <button
+                    type="button"
+                    className={styles.delete}
+                    aria-label={`Delete recent ${describeTimer(recent.seconds)} timer${recent.label ? `, ${recent.label}` : ""}`}
+                    onClick={() =>
+                      dispatchTimer({ type: "delete-recent", id: recent.id })
+                    }
+                  >
+                    <LuCircleMinus aria-hidden="true" />
+                  </button>
+                )}
+                <div className={styles.recentDetails}>
+                  <span className={styles.recentTime}>
+                    {formatTimer(recent.seconds)}
+                  </span>
+                  <span className={styles.recentLabel}>
+                    {recent.label ? `${recent.label} · ` : ""}
+                    {describeTimer(recent.seconds)}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  className={`${styles.recentPlay} ${styles.start}`}
+                  aria-label={`Start recent ${describeTimer(recent.seconds)} timer${recent.label ? `, ${recent.label}` : ""}`}
+                  onClick={() =>
+                    dispatchTimer({ type: "start", recent, now: Date.now() })
+                  }
+                >
+                  <LuPlay aria-hidden="true" />
+                </button>
+              </div>
+            ))
+          )}
+        </section>
+      )}
     </div>
   );
 };

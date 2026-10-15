@@ -1,131 +1,107 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { LuGamepad2, LuSearch, LuSmartphone } from "react-icons/lu";
-import { BiBell } from "react-icons/bi";
-import { mockApps } from "@/constants";
-import { type App, type AppCategory, type StoreScreen } from "@/types";
-import AppSections from "@/components/screens/app-store/AppSections";
-import { IoLogoAppleAppstore } from "react-icons/io5";
-import { cn } from "@/lib/utils";
-import AppSearch from "@/components/screens/app-store/AppSearch";
+"use client";
+
+import { useMemo, useState } from "react";
 import AppDetails from "@/components/screens/app-store/AppDetails";
+import AppSearch from "@/components/screens/app-store/AppSearch";
+import AppSections from "@/components/screens/app-store/AppSections";
+import { Button } from "@/components/ui/button";
+import {
+  isMiniAppId,
+  getMiniApp,
+  MINI_APPS,
+  searchMiniApps,
+  type MiniAppCategory,
+  type RegisteredMiniApp,
+} from "@/lib/app-registry";
+import { usePhoneStore } from "@/stores/usePhoneStore";
+
+const categories: Array<MiniAppCategory | "all"> = [
+  "all",
+  ...Array.from(new Set(MINI_APPS.map((app) => app.category))),
+];
 
 const MiStore = () => {
-  const [screen, setScreen] = useState<StoreScreen>("apps");
-  const [selectedCategory, setSelectedCategory] = useState<AppCategory | "all">(
-    "all",
-  );
-  const [installedApps, setInstalledApps] = useState<Set<string>>(new Set());
-  const [selectedApp, setSelectedApp] = useState<App | null>(null);
+  const [query, setQuery] = useState("");
+  const [category, setCategory] = useState<MiniAppCategory | "all">("all");
+  const [selectedApp, setSelectedApp] = useState<RegisteredMiniApp | null>(null);
+  const { history, setCurrentScreen } = usePhoneStore();
 
-  const featuredApps = mockApps.filter((app) => app.isFeatured);
-  const editorChoiceApps = mockApps.filter((app) => app.isEditorChoice);
+  const matchingApps = useMemo(
+    () => searchMiniApps(query, category),
+    [query, category],
+  );
+  const recentApps = useMemo(() => {
+    const recentIds = [...history].reverse().filter(isMiniAppId);
+    return recentIds
+      .filter((id, index) => recentIds.indexOf(id) === index)
+      .filter((id) => id !== "app-store")
+      .map(getMiniApp);
+  }, [history]);
+
+  const openApp = (app: RegisteredMiniApp) => {
+    setSelectedApp(null);
+    setCurrentScreen(app.launchTarget.screen);
+  };
 
   return (
-    <div className="no-visible-scrollbar relative mt-12 flex h-full w-full flex-col overflow-y-scroll bg-white text-black dark:bg-black dark:text-white">
-      <div className="px-4 pb-28">
-        {(screen === "apps" || screen === "games") && (
-          <div className="space-y-6">
-            <div className="flex w-full items-center justify-between">
-              <IoLogoAppleAppstore className="h-8 w-8 text-white" />
+    <main className="relative w-full bg-[var(--phone-canvas)] px-4 text-[var(--phone-text)]">
+      {selectedApp ? (
+        <AppDetails
+          app={selectedApp}
+          onBack={() => setSelectedApp(null)}
+          onOpen={() => openApp(selectedApp)}
+        />
+      ) : (
+        <div className="space-y-5 pb-6">
+          <header>
+            <h1 className="text-2xl font-bold">Mini apps</h1>
+            <p className="mt-1 text-sm text-[var(--phone-text-muted)]">
+              Discover bundled apps and preview them in the virtual phone.
+            </p>
+          </header>
 
-              <BiBell className="h-5 w-5 text-white/70" />
-            </div>
+          <AppSearch query={query} onQueryChange={setQuery} />
 
-            <div className="sticky left-0 top-0 z-20 flex w-full items-center justify-around border-b pt-4 dark:border-white/10 dark:bg-black">
-              {["For you", "Categories"].map((tab) => (
-                <div
-                  key={tab}
-                  // onClick={() => setScreen(tab.name.toLowerCase() as StoreScreen)}
-                  className="flex flex-col items-center gap-2 border-0 bg-transparent text-white/60 hover:bg-transparent"
-                >
-                  <span className="text-xs">{tab}</span>
+          <nav aria-label="Filter mini apps" className="flex gap-2 overflow-x-auto pb-1">
+            {categories.map((option) => (
+              <Button
+                key={option}
+                type="button"
+                size="sm"
+                onClick={() => setCategory(option)}
+                aria-pressed={category === option}
+                className={`shrink-0 capitalize ${category === option ? "bg-[var(--phone-accent)] text-white" : "bg-[var(--phone-surface)] text-[var(--phone-text-secondary)] hover:bg-[var(--phone-surface-elevated)]"}`}
+              >
+                {option === "all" ? "All apps" : option}
+              </Button>
+            ))}
+          </nav>
 
-                  <span
-                    className={cn("h-0.5 w-8 rounded-t-full bg-blue-600")}
-                  />
-                </div>
-              ))}
-            </div>
-
+          {query.trim() || category !== "all" ? (
             <AppSections
-              title="Featured"
-              apps={featuredApps}
-              setSelectedApp={setSelectedApp}
-              setScreen={setScreen}
+              title={`Results (${matchingApps.length})`}
+              apps={matchingApps}
+              onSelect={setSelectedApp}
             />
+          ) : (
+            <>
+              <AppSections
+                title="Recently opened"
+                apps={recentApps}
+                onSelect={setSelectedApp}
+              />
+              <AppSections
+                title="All mini apps"
+                apps={MINI_APPS}
+                onSelect={setSelectedApp}
+              />
+            </>
+          )}
 
-            <AppSections
-              title="Editor's Choice"
-              apps={editorChoiceApps}
-              setSelectedApp={setSelectedApp}
-              setScreen={setScreen}
-            />
-
-            <AppSections
-              title="Suggested for you"
-              apps={mockApps}
-              setSelectedApp={setSelectedApp}
-              setScreen={setScreen}
-            />
-          </div>
-        )}
-
-        {screen === "search" && (
-          <AppSearch
-            selectedCategory={selectedCategory}
-            setSelectedCategory={setSelectedCategory}
-            setSelectedApp={setSelectedApp}
-            setScreen={setScreen}
-          />
-        )}
-
-        {selectedApp && (
-          <AppDetails
-            selectedApp={selectedApp}
-            setSelectedApp={setSelectedApp}
-            setInstalledApps={setInstalledApps}
-            installedApps={installedApps}
-            setScreen={setScreen}
-          />
-        )}
-      </div>
-
-      {/* BOTTOM */}
-      <div className="fixed bottom-0 left-0 flex w-full items-center justify-around border-t p-4 dark:border-white/10 dark:bg-black">
-        {[
-          {
-            name: "Games",
-            icon: <LuGamepad2 className="h-4 w-4" />,
-          },
-          {
-            name: "Apps",
-            icon: <LuSmartphone className="h-4 w-4" />,
-          },
-          {
-            name: "Search",
-            icon: <LuSearch className="h-4 w-4" />,
-          },
-        ].map((tab) => (
-          <Button
-            key={tab.name}
-            onClick={() => setScreen(tab.name.toLowerCase() as StoreScreen)}
-            className="flex flex-col items-center gap-1 border-0 bg-transparent p-2 text-white/60 hover:bg-transparent"
-          >
-            <span
-              className={cn("", {
-                "rounded-xl bg-blue-200 p-1 text-blue-800":
-                  screen === (tab.name.toLowerCase() as StoreScreen),
-              })}
-            >
-              {tab.icon}
-            </span>
-
-            <span className="text-xs">{tab.name}</span>
-          </Button>
-        ))}
-      </div>
-    </div>
+        </div>
+      )}
+    </main>
   );
 };
+
 export default MiStore;

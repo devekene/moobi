@@ -17,11 +17,12 @@ import { FiMoreHorizontal } from "react-icons/fi";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { AiFillExclamationCircle } from "react-icons/ai";
-import { usePhoneStore } from "@/stores/usePhoneStore";
+import { usePhoneSettingsStore } from "@/stores/usePhoneSettingsStore";
 import { useMusicPlayer } from "@/hooks/useMusicPlayer";
 
 const NowPlaying = () => {
-  const { volume, setVolume } = usePhoneStore();
+  const volume = usePhoneSettingsStore((state) => state.volume);
+  const setVolume = usePhoneSettingsStore((state) => state.setVolume);
 
   const {
     audioRef,
@@ -43,17 +44,19 @@ const NowPlaying = () => {
   } = useMusicPlayer();
 
   const [isLiked, setIsLiked] = useState(false);
-  const [showError, setShowError] = useState(true);
+  const [duration, setDuration] = useState(0);
 
   useEffect(() => {
-    if (!audioError) setShowError(false);
+    const audio = audioRef.current;
+    if (!audio) return;
 
-    const timeoutId = setTimeout(() => {
-      setShowError(false);
-    }, 500);
+    const updateDuration = () => {
+      if (Number.isFinite(audio.duration)) setDuration(audio.duration);
+    };
 
-    return () => clearTimeout(timeoutId);
-  }, [audioError]);
+    audio.addEventListener("durationchange", updateDuration);
+    return () => audio.removeEventListener("durationchange", updateDuration);
+  }, [audioRef, currentSong?.id]);
 
   if (!currentSong) {
     setCurrentPlayerScreen("library");
@@ -115,7 +118,7 @@ const NowPlaying = () => {
       </div>
 
       {/*Error Message */}
-      {audioError && showError && (
+      {audioError && (
         <div className="absolute right-0 top-12 flex w-fit max-w-52 items-center gap-2 rounded border border-red-400 bg-red-200 p-2 px-6 py-2">
           <AiFillExclamationCircle />
 
@@ -128,14 +131,14 @@ const NowPlaying = () => {
         <Slider
           value={progress}
           onValueChange={handleProgressChange}
-          max={audioRef.current?.duration || currentSong.duration}
+          max={duration || currentSong.duration}
           step={1}
           className="w-full"
         />
         <div className="mt-1 flex justify-between text-xs text-gray-500">
           <span>{formatTime(progress[0])}</span>
           <span>
-            {formatTime(audioRef.current?.duration || currentSong.duration)}
+            {formatTime(duration || currentSong.duration)}
           </span>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { ScreenOptions } from "@/types";
-import { mobileApps } from "@/constants";
+import { PHONE_LAUNCHER_PAGE_COUNT } from "@/lib/app-library";
 
 type PhoneState = {
   currentScreen: ScreenOptions;
@@ -8,19 +8,18 @@ type PhoneState = {
   lastScreen: ScreenOptions;
   history: ScreenOptions[];
   showControlCenter: boolean;
-  brightness: number;
-  volume: number;
   setCurrentScreen: (screen: ScreenOptions) => void;
   setLastScreen: (screen: ScreenOptions) => void;
   toggleControlCenter: () => void;
-  setBrightness: (value: number) => void;
-  setVolume: (value: number) => void;
   addToHistory: (screen: ScreenOptions) => void;
   removeFromHistory: (screen: ScreenOptions) => void;
   clearHistory: () => void;
 
   showAppSwitcher: boolean;
+  passcodeEntryOpen: boolean;
+  setPasscodeEntryOpen: (value: boolean) => void;
   setShowAppSwitcher: (value: boolean) => void;
+  setPhonePage: (page: number) => void;
   fetchPhonePage: (dir: "left" | "right") => void;
 };
 
@@ -29,10 +28,9 @@ export const usePhoneStore = create<PhoneState>((set, get) => ({
   lastScreen: "home",
   phonePage: 0,
   showControlCenter: false,
-  brightness: 75,
-  volume: 62,
   history: [],
   showAppSwitcher: false,
+  passcodeEntryOpen: false,
 
   setCurrentScreen: (screen) => {
     const { currentScreen, history } = get();
@@ -57,6 +55,7 @@ export const usePhoneStore = create<PhoneState>((set, get) => ({
       }),
       currentScreen: screen,
       history: updatedHistory,
+      passcodeEntryOpen: false,
     });
   },
 
@@ -64,8 +63,6 @@ export const usePhoneStore = create<PhoneState>((set, get) => ({
 
   toggleControlCenter: () =>
     set((state) => ({ showControlCenter: !state.showControlCenter })),
-  setBrightness: (value) => set({ brightness: value }),
-  setVolume: (value) => set({ volume: value }),
   addToHistory: (screen) =>
     set((state) => ({ history: [...state.history, screen] })),
   removeFromHistory: (screen) => {
@@ -76,10 +73,13 @@ export const usePhoneStore = create<PhoneState>((set, get) => ({
   clearHistory: () => set({ history: [] }),
 
   setShowAppSwitcher: (value) => set({ showAppSwitcher: value }),
+  setPasscodeEntryOpen: (value) => set({ passcodeEntryOpen: value }),
+  setPhonePage: (page) =>
+    set({ phonePage: Math.min(PHONE_LAUNCHER_PAGE_COUNT - 1, Math.max(0, page)) }),
   fetchPhonePage: (direction) => {
     const { phonePage } = get();
 
-    if (direction === "left" && phonePage < mobileApps.length - 1) {
+    if (direction === "left" && phonePage < PHONE_LAUNCHER_PAGE_COUNT - 1) {
       set({ phonePage: phonePage + 1 });
     }
 

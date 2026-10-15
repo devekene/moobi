@@ -1,66 +1,54 @@
-import type { App, StoreScreen } from "@/types";
-import React, { Dispatch, SetStateAction } from "react";
-import { LuChevronRight, LuStar } from "react-icons/lu";
-import Image from "next/image";
-import { Button } from "@/components/ui/button";
+import type { RegisteredMiniApp } from "@/lib/app-registry";
 
 const AppSections = ({
   title,
   apps,
-  setSelectedApp,
-  setScreen,
+  onSelect,
 }: {
   title: string;
-  apps: App[];
-  setSelectedApp: Dispatch<SetStateAction<App | null>>;
-  setScreen: Dispatch<SetStateAction<StoreScreen>>;
-}) => {
-  const handleAppSelect = (app: App) => {
-    setSelectedApp(app);
-    setScreen("app-details");
-  };
-
-  return (
-    <div>
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-base font-bold text-white">{title}</h2>
-        <Button className="border-0 bg-transparent p-0 text-sm text-blue-400">
-          <LuChevronRight className="ml-1 h-4 w-4" />
-        </Button>
-      </div>
-      <div className="space-y-3">
-        {apps.map((app) => (
-          <div
-            key={app.id}
-            onClick={() => handleAppSelect(app)}
-            className="cursor-pointer p-2"
-          >
-            <div className="flex items-start gap-3">
-              <Image
-                src={app.icon}
-                alt={app.name}
-                width={50}
-                height={50}
-                className="h-12 w-12 rounded-xl"
-              />
-              <div className="min-w-0 flex-1">
-                <h3 className="truncate text-sm font-medium text-white">
-                  {app.name}
-                </h3>
-                <p className="truncate text-xs text-white/70">{app.category}</p>
-                <div className="mt-1 flex items-center gap-2">
-                  <span className="text-xs text-white/60">
-                    {app.rating.toFixed(1)}
+  apps: readonly RegisteredMiniApp[];
+  onSelect: (app: RegisteredMiniApp) => void;
+}) => (
+  <section aria-label={title} className="space-y-2">
+    <h2 className="text-base font-semibold text-[var(--phone-text)]">{title}</h2>
+    {apps.length === 0 ? (
+      <p className="rounded-xl bg-[var(--phone-surface)] p-4 text-sm text-[var(--phone-text-muted)]">
+        No mini apps to show here yet.
+      </p>
+    ) : (
+      <ul className="space-y-2">
+        {apps.map((app) => {
+          const Icon = app.icon;
+          return (
+            <li key={app.id}>
+              <button
+                type="button"
+                onClick={() => onSelect(app)}
+                className="flex w-full items-center gap-3 rounded-xl bg-[var(--phone-surface)] p-3 text-left transition-colors hover:bg-[var(--phone-surface-elevated)]"
+              >
+                <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${app.color}`}>
+                  <Icon aria-hidden="true" className="h-6 w-6" />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate font-medium text-[var(--phone-text)]">
+                    {app.name}
                   </span>
-                  <LuStar className="h-3 w-3 text-yellow-400" />
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
+                  <span className="block truncate text-xs capitalize text-[var(--phone-text-muted)]">
+                    {app.category} · {app.version}
+                  </span>
+                </span>
+                {app.availability === "preview" && (
+                  <span className="shrink-0 rounded-full bg-[var(--phone-surface-elevated)] px-2 py-1 text-[10px] text-[var(--phone-text-secondary)]">
+                    Preview
+                  </span>
+                )}
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    )}
+  </section>
+);
 
 export default AppSections;

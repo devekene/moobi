@@ -1,173 +1,184 @@
-import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { FaArrowLeft } from "react-icons/fa6";
-import { Button } from "@/components/ui/button";
-import Loader from "@/components/Loader";
-import { useClock } from "@/context/ClockContext";
-import { Timezone } from "@/types";
-import { IoRefresh } from "react-icons/io5";
+"use client";
 
-interface TimezoneWithUtc extends Timezone {
-  currentUtcOffset: any;
-}
+import { useMemo, useRef, useState } from "react";
+import * as Dialog from "@radix-ui/react-dialog";
+import { LuCheck, LuSearch, LuX } from "react-icons/lu";
+import { useClock } from "@/context/ClockContext";
+import {
+  addClockCity,
+  getClockCityCatalog,
+  getClockCityKey,
+  getClockCountryName,
+  groupClockCities,
+  type ClockCity,
+} from "@/lib/world-clock";
+import styles from "./SearchTimezone.module.css";
 
 const SearchTimezone = ({
-  setScreen,
+  container,
+  onClose,
 }: {
-  setScreen: Dispatch<SetStateAction<"search" | "clock">>;
+  container?: HTMLDivElement | null;
+  onClose: () => void;
 }) => {
-  const { timezones, setTimezones, setSelectedTimezones } = useClock();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
-
-  useEffect(() => {
-    if (timezones.length === 0) {
-      fetchTimezones();
-    }
-  }, [timezones]);
-
-  const fetchTimezones = async () => {
-    setIsLoading(true);
-    try {
-      const res = await fetch("/api/clock/timezones");
-
-      const responseData: {
-        success: boolean;
-        error?: string;
-        data?: TimezoneWithUtc[];
-      } = await res.json();
-
-      if (responseData.success && responseData.data) {
-        const data: Timezone[] = responseData.data
-          .filter((tz) => {
-            const parts = tz.timezone.split("/");
-            const region = parts[parts.length - 1];
-
-            return (
-              region !== "Eastern" &&
-              region !== "Pacific" &&
-              region !== "Mountain" &&
-              region !== "Samoa" &&
-              region !== "Central"
-            );
-          })
-          .map((tz) => {
-            const utcOffset = formatUtcOffset(tz.currentUtcOffset.seconds);
-            return {
-              timezone: tz.timezone,
-              localTime: tz.localTime,
-              utcOffset,
-            };
-          });
-
-        setTimezones(data);
-        return;
-      }
-
-      setError(responseData.error!);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleTimezoneSelect = (zone: Timezone) => {
-    setSelectedTimezones((prev) => {
-      if (prev.length === 0) {
-        return [zone];
-      }
-
-      const exists = prev.findIndex((tz) => tz.timezone === zone.timezone);
-
-      if (exists === -1) {
-        return [zone, ...prev];
-      } else {
-        return [...prev];
-      }
-    });
-    setScreen("clock");
-  };
-
-  const formatUtcOffset = (offsetSeconds: number) => {
-    const sign = offsetSeconds >= 0 ? "+" : "-";
-    const absOffset = Math.abs(offsetSeconds);
-    const hours = Math.floor(absOffset / 3600);
-    const minutes = Math.floor((absOffset % 3600) / 60);
-
-    return `GMT${sign}${hours}${minutes > 0 ? ":" + String(minutes).padStart(2, "0") : ""}`;
-  };
-
-  const filteredTimezones = timezones?.filter((tz) =>
-    tz.timezone.toLowerCase().includes(searchTerm.toLowerCase()),
+  const { selectedTimezones, setSelectedTimezones } = useClock();
+  const [cities] = useState(getClockCityCatalog);
+  const [search, setSearch] = useState("");
+  const [letterIndex, setLetterIndex] = useState(0);
+  const headings = useRef(new Map<string, HTMLHeadingElement>());
+  const scroller = useRef<HTMLDivElement | null>(null);
+  const searchInput = useRef<HTMLInputElement | null>(null);
+  const returnFocus = useRef<HTMLElement | null>(null);
+  const groups = useMemo(
+    () => groupClockCities(cities, search),
+    [cities, search],
   );
+  const selected = new Set(selectedTimezones.map(getClockCityKey));
+
+  const choose = (city: ClockCity) => {
+    setSelectedTimezones((previous) => addClockCity(previous, city));
+    onClose();
+  };
+  const jumpTo = (index: number) => {
+    setLetterIndex(index);
+    const letter = groups[index]?.letter;
+    if (letter)
+      headings.current
+        .get(letter)
+        ?.scrollIntoView({ block: "start", behavior: "instant" });
+  };
 
   return (
-    <div className="relative flex h-[30rem] flex-col gap-1 overflow-x-hidden overflow-y-scroll px-3">
-      <div className="flex w-full items-center justify-between">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="bg-transparent text-white"
-          onClick={() => setScreen("clock")}
+    <Dialog.Root
+      open
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+    >
+      <Dialog.Portal container={container}>
+        <Dialog.Content
+          className={styles.sheet}
+          aria-describedby={undefined}
+          onOpenAutoFocus={() => {
+            if (document.activeElement instanceof HTMLElement)
+              returnFocus.current = document.activeElement;
+          }}
+          onCloseAutoFocus={(event) => {
+            event.preventDefault();
+            returnFocus.current?.focus();
+          }}
+          onInteractOutside={(event) => event.preventDefault()}
         >
-          <FaArrowLeft />
-        </Button>
-
-        {/*{error && (*/}
-        <Button
-          variant="ghost"
-          className="bg-transparent p-0 text-white"
-          onClick={fetchTimezones}
-        >
-          <IoRefresh className="h-16 w-16" />
-        </Button>
-        {/*)}*/}
-      </div>
-
-      <div>
-        <h1 className="text-xl text-white">Select City</h1>
-        <p className="text-sm text-gray-500">Time zones</p>
-      </div>
-
-      <input
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        placeholder="Search for country or city"
-        className="sticky top-0 mt-3 h-10 w-full rounded-3xl border-0 bg-gray-500 px-4 py-2 text-base text-white placeholder:text-gray-300 focus:outline-none focus-visible:ring-0"
-      />
-
-      {isLoading ? (
-        <Loader />
-      ) : error ? (
-        <div className="flex-center h-48 text-center text-lg text-gray-300">
-          {error}
-        </div>
-      ) : (
-        <ul className="mb-8 mt-4 flex flex-col gap-1">
-          {filteredTimezones.length > 0 ? (
-            filteredTimezones.map((tz) => (
-              <li
-                key={tz.timezone}
-                className="flex cursor-default flex-col rounded-xl px-2 py-1 text-base text-white transition-colors hover:bg-gray-700"
-                onClick={() => handleTimezoneSelect(tz)}
-              >
-                <div className="text-base font-medium text-gray-100">
-                  {tz.timezone.split("/")[1]}
-                </div>
-                <div className="text-sm font-light text-gray-500">
-                  {tz.timezone.split("/")[0]} {tz.utcOffset}
-                </div>
-              </li>
-            ))
-          ) : (
-            <div className="flex-center flex-1 text-center">
-              No cities found
+          <header className={styles.header}>
+            <button
+              type="button"
+              className={styles.close}
+              aria-label="Close city picker"
+              onClick={onClose}
+            >
+              <LuX aria-hidden="true" />
+            </button>
+            <Dialog.Title className={styles.title}>Choose a City</Dialog.Title>
+            <span aria-hidden="true" />
+          </header>
+          <div className={styles.scroller} ref={scroller}>
+            {groups.length === 0 ? (
+              <p className={styles.empty} role="status">
+                No cities found. Try a city or country name.
+              </p>
+            ) : (
+              groups.map(({ letter, cities: group }) => (
+                <section
+                  key={letter}
+                  aria-label={`Cities starting with ${letter}`}
+                >
+                  <h2
+                    className={styles.letter}
+                    ref={(node) => {
+                      if (node) headings.current.set(letter, node);
+                      else headings.current.delete(letter);
+                    }}
+                  >
+                    {letter}
+                  </h2>
+                  <ul>
+                    {group.map((city) => (
+                      <li key={getClockCityKey(city)}>
+                        <button
+                          type="button"
+                          className={styles.city}
+                          aria-label={`${city.city}, ${getClockCountryName(city.countryCode)}${selected.has(getClockCityKey(city)) ? ", already added" : ""}`}
+                          onClick={() => choose(city)}
+                        >
+                          <span>
+                            {city.city}, {getClockCountryName(city.countryCode)}
+                          </span>
+                          {selected.has(getClockCityKey(city)) && (
+                            <LuCheck aria-hidden="true" />
+                          )}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              ))
+            )}
+          </div>
+          {!search && groups.length > 1 && (
+            <div className={styles.index}>
+              <div className={styles.indexLetters} aria-hidden="true">
+                {groups.map(({ letter }) => (
+                  <span key={letter}>{letter}</span>
+                ))}
+              </div>
+              <input
+                type="range"
+                className={styles.indexInput}
+                min={0}
+                max={groups.length - 1}
+                step={1}
+                value={Math.min(letterIndex, groups.length - 1)}
+                aria-label="Jump to city letter"
+                aria-orientation="vertical"
+                aria-valuetext={
+                  groups[Math.min(letterIndex, groups.length - 1)]?.letter
+                }
+                onChange={(event) => jumpTo(Number(event.target.value))}
+              />
             </div>
           )}
-        </ul>
-      )}
-    </div>
+          <div className={styles.searchBar}>
+            <LuSearch aria-hidden="true" />
+            <input
+              ref={searchInput}
+              type="search"
+              aria-label="Search cities or countries"
+              placeholder="Search"
+              value={search}
+              onChange={(event) => {
+                setSearch(event.target.value);
+                setLetterIndex(0);
+                scroller.current?.scrollTo({ top: 0 });
+              }}
+            />
+            {search && (
+              <button
+                type="button"
+                aria-label="Clear city search"
+                onClick={() => {
+                  setSearch("");
+                  setLetterIndex(0);
+                  scroller.current?.scrollTo({ top: 0 });
+                  searchInput.current?.focus();
+                }}
+              >
+                <LuX aria-hidden="true" />
+              </button>
+            )}
+          </div>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 };
 export default SearchTimezone;

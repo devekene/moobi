@@ -1,0 +1,120 @@
+.banner {
+  position: absolute;
+  top: var(--phone-safe-area-top, 0px);
+  inset-inline: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 88px;
+  padding: 14px 16px;
+  border-radius: 0 0 20px 20px;
+  background: color-mix(in srgb, var(--phone-canvas) 96%, transparent);
+  color: var(--phone-alarm-accent);
+  box-shadow: 0 10px 20px
+    color-mix(in srgb, var(--phone-canvas) 24%, transparent);
+  backdrop-filter: blur(16px);
+  /* Only this compact banner receives events; there is no full-screen layer. */
+  pointer-events: auto;
+  animation: appear 180ms ease-out;
+}
+.alarmIcon {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+}
+.details {
+  min-width: 0;
+  flex: 1;
+}
+.time {
+  display: block;
+  color: color-mix(in srgb, var(--phone-alarm-accent) 80%, var(--phone-text));
+  font-size: 13px;
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+}
+.label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 18px;
+  line-height: 1.25;
+  font-weight: 700;
+  letter-spacing: -0.35px;
+}
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.action {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--phone-surface);
+  color: var(--phone-text);
+}
+.action svg {
+  width: 26px;
+  height: 26px;
+  stroke-width: 3;
+}
+.action:active {
+  opacity: 0.7;
+}
+.snooze {
+  color: var(--phone-alarm-accent);
+  background: color-mix(
+    in srgb,
+    var(--phone-alarm-accent) 18%,
+    var(--phone-canvas)
+  );
+}
+.sleepIcon {
+  position: relative;
+  width: 24px;
+  height: 28px;
+  font-weight: 800;
+  line-height: 1;
+}
+.sleepIcon span:first-child {
+  position: absolute;
+  top: 0;
+  left: 1px;
+  font-size: 21px;
+}
+.sleepIcon span:last-child {
+  position: absolute;
+  bottom: 0;
+  right: 1px;
+  font-size: 17px;
+}
+.announcement {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+@keyframes appear {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .banner {
+    animation: none;
+  }
+}

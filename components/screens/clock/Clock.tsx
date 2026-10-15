@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { LuAlarmClock, LuGlobe, LuHourglass, LuTimer } from "react-icons/lu";
 import { useClock } from "@/context/ClockContext";
 import {
@@ -9,50 +9,62 @@ import {
   Timer,
   WorldClock,
 } from "@/components/screens/clock";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, type TabItem } from "@/components/ui/tabs";
 import { type ClockScreen } from "@/types";
 
-const Clock = () => {
-  const { currentClockScreen: tab, setCurrentClockScreen: setTab } = useClock();
+const clockTabs: readonly TabItem<ClockScreen>[] = [
+  { value: "alarm", label: "Alarm", icon: <LuAlarmClock /> },
+  { value: "world", label: "World Clock", icon: <LuGlobe /> },
+  { value: "timer", label: "Timer", icon: <LuHourglass /> },
+  { value: "stopwatch", label: "Stopwatch", icon: <LuTimer /> },
+];
 
-  const tabTriggerStyle =
-    "flex flex-col items-center gap-1 border-0 bg-transparent text-sm font-medium hover:bg-transparent hover:text-white/80";
+const Clock = () => {
+  const [editorContainer, setEditorContainer] = useState<HTMLDivElement | null>(
+    null,
+  );
+  const {
+    currentClockScreen: tab,
+    setCurrentClockScreen: setTab,
+    timer,
+  } = useClock();
 
   return (
-    <div className="relative mt-10 h-full w-full">
+    <div ref={setEditorContainer} className="relative mt-10 h-full w-full">
       <Tabs
-        defaultValue={tab}
-        onValueChange={(value) => setTab(value as ClockScreen)}
+        items={clockTabs}
+        value={tab}
+        onValueChange={setTab}
+        label="Clock tabs"
+        className="relative h-full"
+        listClassName={
+          tab === "timer" && timer.view === "detail"
+            ? "hidden"
+            : "absolute inset-x-2 bottom-0 z-20"
+        }
       >
-        <TabsList className="absolute bottom-12 left-0 flex h-14 w-full items-center justify-between rounded-t-2xl border-t border-white/10 bg-black py-3">
-          <TabsTrigger className={tabTriggerStyle} value="alarm">
-            <LuAlarmClock />
-            <span className="text-xs">Alarm</span>
-          </TabsTrigger>
-          <TabsTrigger className={tabTriggerStyle} value="world">
-            <LuGlobe />
-            <span className="text-xs">World Clock</span>
-          </TabsTrigger>
-          <TabsTrigger className={tabTriggerStyle} value="timer">
-            <LuHourglass />
-            <span className="text-xs">Timer</span>
-          </TabsTrigger>
-          <TabsTrigger className={tabTriggerStyle} value="stopwatch">
-            <LuTimer />
-            <span className="text-xs">Stopwatch</span>
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="alarm">
-          <ClockAlarm />
+        <TabsContent
+          value="alarm"
+          className="absolute inset-x-0 top-0 bottom-[72px]"
+        >
+          <ClockAlarm editorContainer={editorContainer} />
         </TabsContent>
-        <TabsContent value="world">
-          <WorldClock />
+        <TabsContent
+          value="world"
+          className="absolute inset-x-0 top-0 bottom-[72px]"
+        >
+          <WorldClock editorContainer={editorContainer} />
         </TabsContent>
-        <TabsContent value="timer">
+        <TabsContent
+          value="timer"
+          className="absolute inset-x-0 top-0 bottom-0"
+        >
           <Timer />
         </TabsContent>
-        <TabsContent value="stopwatch">
+        <TabsContent
+          value="stopwatch"
+          className="absolute inset-x-0 top-0 bottom-[72px]"
+        >
           <Stopwatch />
         </TabsContent>
       </Tabs>

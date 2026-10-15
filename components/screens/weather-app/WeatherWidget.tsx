@@ -1,6 +1,12 @@
 "use client";
 
-import { LuDroplets, LuLoader, LuMapPin, LuWind } from "react-icons/lu";
+import {
+  LuDroplets,
+  LuLoader,
+  LuMapPin,
+  LuTriangleAlert,
+  LuWind,
+} from "react-icons/lu";
 import { getTemperature, getWeatherBackground } from "@/lib/utils";
 import { usePhoneStore } from "@/stores/usePhoneStore";
 import { useWeatherStore } from "@/stores/useWeatherStore";
@@ -32,7 +38,7 @@ export default function WeatherWidget({
   if (isLoading) {
     return (
       <div
-        className={` ${size === "small" ? "h-40 w-40" : size === "medium" ? "h-40 w-80" : "h-80 w-80"} flex-center rounded-3xl bg-gradient-to-br from-blue-400 to-blue-600 p-4 shadow-lg`}
+        className={`${size === "small" ? "h-full w-full rounded-[18px] p-2" : size === "medium" ? "h-40 w-80 rounded-3xl p-4" : "h-80 w-80 rounded-3xl p-4"} flex-center bg-gradient-to-br from-blue-400 to-blue-600 shadow-lg`}
       >
         <div className="text-center text-white">
           <LuLoader className="mx-auto mb-2 h-8 w-8 animate-spin" />
@@ -45,10 +51,22 @@ export default function WeatherWidget({
   if (error || !weatherData) {
     return (
       <div
-        className={` ${size === "small" ? "col-span-2 row-span-2" : size === "medium" ? "col-span-3 row-span-2" : "col-span-3 row-span-4"} flex items-center justify-center rounded-3xl bg-gradient-to-br from-red-400 to-red-600 p-4 shadow-lg`}
+        className={`${size === "small" ? "h-full w-full rounded-[18px] border border-[var(--phone-border)] bg-[var(--phone-surface-elevated)]/90 p-2" : size === "medium" ? "col-span-3 row-span-2 rounded-3xl bg-gradient-to-br from-red-400 to-red-600 p-4" : "col-span-3 row-span-4 rounded-3xl bg-gradient-to-br from-red-400 to-red-600 p-4"} flex items-center justify-center shadow-lg`}
       >
-        <div className="text-center text-white">
-          <div className="mb-2 text-2xl">⚠️</div>
+        <div
+          className={
+            size === "small"
+              ? "text-center text-[var(--phone-text-secondary)]"
+              : "text-center text-white"
+          }
+        >
+          <div className="mb-2 text-2xl">
+            {size === "small" ? (
+              <LuTriangleAlert className="mx-auto h-6 w-6 text-amber-400" />
+            ) : (
+              "⚠️"
+            )}
+          </div>
           <p className="text-xs">Weather Unavailable</p>
         </div>
       </div>
@@ -59,7 +77,7 @@ export default function WeatherWidget({
   if (size === "small") {
     return (
       <div
-        className="relative col-span-2 row-span-2 flex flex-col justify-between overflow-hidden rounded-3xl p-4 shadow-lg"
+        className="relative flex h-full w-full cursor-pointer flex-col justify-between overflow-hidden rounded-[18px] p-2 shadow-lg"
         style={{
           background: getWeatherBackground(weatherData.current.condition.text),
         }}
@@ -67,7 +85,7 @@ export default function WeatherWidget({
       >
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-10">
-          <div className="absolute right-2 top-2 h-16 w-16 rounded-full bg-white"></div>
+          <div className="absolute top-2 right-2 h-16 w-16 rounded-full bg-white"></div>
           <div className="absolute bottom-4 left-2 h-8 w-8 rounded-full bg-white"></div>
         </div>
 
@@ -129,7 +147,7 @@ export default function WeatherWidget({
       >
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-10">
-          <div className="absolute right-4 top-4 h-20 w-20 rounded-full bg-white"></div>
+          <div className="absolute top-4 right-4 h-20 w-20 rounded-full bg-white"></div>
           <div className="absolute bottom-6 left-6 h-12 w-12 rounded-full bg-white"></div>
         </div>
 
@@ -206,9 +224,9 @@ export default function WeatherWidget({
     >
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10">
-        <div className="absolute right-6 top-6 h-24 w-24 rounded-full bg-white"></div>
+        <div className="absolute top-6 right-6 h-24 w-24 rounded-full bg-white"></div>
         <div className="absolute bottom-12 left-8 h-16 w-16 rounded-full bg-white"></div>
-        <div className="absolute left-4 top-1/2 h-8 w-8 rounded-full bg-white"></div>
+        <div className="absolute top-1/2 left-4 h-8 w-8 rounded-full bg-white"></div>
       </div>
 
       <div className="relative z-10 flex-1">

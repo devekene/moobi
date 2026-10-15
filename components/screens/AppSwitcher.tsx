@@ -46,7 +46,7 @@ const AppSwitcher = () => {
   };
 
   return (
-    <div className="via-purple-900 relative min-h-screen bg-gradient-to-br from-gray-900 to-gray-900">
+    <div className="relative min-h-screen bg-[var(--phone-canvas)] text-[var(--phone-text)]">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -58,7 +58,7 @@ const AppSwitcher = () => {
         }}
       >
         {/*Background Overlay*/}
-        <div className="absolute inset-0 bg-black/60 backdrop-blur-xl" />
+        <div className="absolute inset-0 bg-[var(--phone-overlay)] backdrop-blur-xl" />
 
         {/* Opened Apps */}
         <div className="relative flex h-full w-full items-center justify-center px-4 py-20">
@@ -92,6 +92,16 @@ const AppSwitcher = () => {
                         dragConstraints={{ top: 0, bottom: 0 }}
                         dragElastic={0.2}
                         onDragEnd={(_, info) => handleDragEnd(screen, info)}
+                        role="button"
+                        tabIndex={0}
+                        aria-label={`${app.name}${app.availability === "preview" ? ", preview only" : ""}`}
+                        onKeyDown={(event) => {
+                          if (event.target !== event.currentTarget) return;
+                          if (event.key === "Enter" || event.key === " ") {
+                            event.preventDefault();
+                            handleAppClick(screen);
+                          }
+                        }}
                         onClick={(e) => {
                           e.stopPropagation();
                           handleAppClick(screen);
@@ -105,7 +115,7 @@ const AppSwitcher = () => {
                         }}
                       >
                         {/* App Card */}
-                        <div className="relative h-full w-full overflow-hidden rounded-3xl bg-white shadow-2xl">
+                        <div className="relative h-full w-full overflow-hidden rounded-3xl bg-[var(--phone-surface)] shadow-2xl">
                           <div
                             className="flex h-full w-full flex-col items-center justify-center"
                             style={{ backgroundColor: app.color }}
@@ -116,6 +126,11 @@ const AppSwitcher = () => {
                             <h3 className="mt-6 text-xl font-semibold text-white drop-shadow-md">
                               {app.name}
                             </h3>
+                            {app.availability === "preview" && (
+                              <span className="mt-2 rounded-full bg-black/55 px-3 py-1 text-xs font-medium text-white">
+                                Preview only
+                              </span>
+                            )}
                           </div>
 
                           {/* Close Button (appears on hover) */}

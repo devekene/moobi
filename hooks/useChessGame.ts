@@ -11,6 +11,8 @@ type GameStatus = {
 
 type Screen = "menu" | "playing";
 
+const initialFen = new Chess().fen();
+
 export function useChessGame() {
   const engineRef = useRef<Engine | null>(null);
 
@@ -27,7 +29,7 @@ export function useChessGame() {
   const chessRef = useRef(new Chess());
   const chess = chessRef.current;
 
-  const [position, setPosition] = useState(chess.fen());
+  const [position, setPosition] = useState(initialFen);
   const [moveFrom, setMoveFrom] = useState("");
   const [optionSquares, setOptionSquares] = useState({});
 
@@ -41,7 +43,7 @@ export function useChessGame() {
   const [capturedBlack, setCapturedBlack] = useState<string[]>([]);
 
   const [moveHistory, setMoveHistory] = useState<Move[]>([]);
-  const [fenHistory, setFenHistory] = useState<string[]>([chess.fen()]);
+  const [fenHistory, setFenHistory] = useState<string[]>([initialFen]);
   const [replayIndex, setReplayIndex] = useState<number>(0);
   const [isReplaying, setIsReplaying] = useState(false);
 

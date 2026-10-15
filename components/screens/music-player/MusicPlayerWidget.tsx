@@ -15,10 +15,13 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
 import { usePhoneStore } from "@/stores";
+import { usePhoneSettingsStore } from "@/stores/usePhoneSettingsStore";
 import { useMusicPlayer } from "@/hooks/useMusicPlayer";
 
 const MusicPlayerWidget = ({ className }: { className?: string }) => {
-  const { volume, setVolume, setCurrentScreen } = usePhoneStore();
+  const { setCurrentScreen } = usePhoneStore();
+  const volume = usePhoneSettingsStore((state) => state.volume);
+  const setVolume = usePhoneSettingsStore((state) => state.setVolume);
   const {
     isPlaying,
     currentSong,

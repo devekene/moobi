@@ -1,0 +1,424 @@
+.screen {
+  height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 16px 92px;
+  color: var(--phone-text);
+  scrollbar-width: none;
+}
+.screen::-webkit-scrollbar {
+  display: none;
+}
+.toolbar {
+  display: flex;
+  justify-content: flex-end;
+  min-height: 44px;
+}
+.edit {
+  min-height: 44px;
+  min-width: 58px;
+  padding-inline: 14px;
+  border-radius: 30px;
+  background: var(--phone-surface);
+  font-size: 15px;
+  font-weight: 600;
+  box-shadow: inset 0 1px 1px
+    color-mix(in srgb, var(--phone-text) 10%, transparent);
+}
+.edit:disabled {
+  color: var(--phone-text-muted);
+}
+.header h1 {
+  margin-top: 12px;
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -1.2px;
+}
+.wheel {
+  position: relative;
+  margin: 20px 0 8px;
+}
+.selection {
+  position: absolute;
+  top: 52px;
+  inset-inline: 6px;
+  height: 26px;
+  border-radius: 20px;
+  background: var(--phone-surface);
+}
+.picker {
+  width: 100%;
+  font-variant-numeric: tabular-nums;
+}
+.picker > div:last-child {
+  display: none;
+}
+.selectedTime,
+.wheelTime {
+  display: block;
+  font-size: 21px;
+  line-height: 26px;
+  letter-spacing: -0.6px;
+  white-space: nowrap;
+}
+.selectedTime {
+  font-weight: 600;
+  color: var(--phone-text);
+}
+.wheelTime {
+  color: var(--phone-text-muted);
+  opacity: 0.7;
+}
+.unit {
+  font-size: 15px;
+  letter-spacing: -0.5px;
+}
+.controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-block: 8px 14px;
+}
+.control {
+  display: grid;
+  width: 60px;
+  height: 60px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--phone-surface);
+  color: var(--phone-text-secondary);
+}
+.control svg {
+  width: 30px;
+  height: 30px;
+  stroke-width: 2.5;
+}
+.start {
+  color: var(--phone-positive);
+  background: color-mix(
+    in srgb,
+    var(--phone-positive) 18%,
+    var(--phone-canvas)
+  );
+}
+.start svg {
+  fill: currentColor;
+  stroke-width: 1.5;
+}
+.pause {
+  color: var(--phone-alarm-accent);
+  background: color-mix(
+    in srgb,
+    var(--phone-alarm-accent) 18%,
+    var(--phone-canvas)
+  );
+}
+.control:disabled,
+.recentPlay:disabled {
+  opacity: 0.4;
+}
+.control:active,
+.recentPlay:active {
+  transform: scale(0.96);
+}
+.settings {
+  padding-inline: 16px;
+  border-radius: 24px;
+  background: var(--phone-surface);
+}
+.setting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 12px;
+  min-height: 44px;
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--phone-text) 14%, transparent);
+  font-size: 15px;
+  text-align: left;
+}
+.setting:last-child {
+  border-bottom: 0;
+}
+.setting input {
+  min-width: 0;
+  width: 68%;
+  text-align: right;
+  background: transparent;
+  color: var(--phone-text-secondary);
+}
+.setting input::placeholder {
+  color: var(--phone-text-muted);
+}
+.settingValue {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--phone-text-muted);
+}
+.settingValue svg {
+  width: 16px;
+  height: 16px;
+}
+.soundMessage {
+  font-size: 12px;
+  color: var(--phone-text-muted);
+}
+.soundMessage:not(:empty) {
+  margin-top: 8px;
+}
+.recents {
+  margin-top: 26px;
+  padding-inline: 8px;
+}
+.recents h2 {
+  padding-bottom: 10px;
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--phone-text) 16%, transparent);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+.recent {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-block: 10px;
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--phone-text) 16%, transparent);
+}
+.recentDetails {
+  min-width: 0;
+  flex: 1;
+}
+.recentTime {
+  display: block;
+  font-size: 42px;
+  line-height: 1.1;
+  font-weight: 300;
+  letter-spacing: -1.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--phone-text-secondary);
+}
+.recentLabel {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 12px;
+  color: var(--phone-text-muted);
+}
+.recentPlay {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: 50%;
+}
+.recentPlay svg {
+  width: 24px;
+  height: 24px;
+}
+.delete {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  color: var(--phone-alarm-accent);
+}
+.delete svg {
+  width: 24px;
+  height: 24px;
+}
+.empty {
+  padding-top: 12px;
+  color: var(--phone-text-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.countdown {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 184px;
+  margin: 12px 0 4px;
+}
+.progress {
+  position: absolute;
+  height: 180px;
+  width: 180px;
+  transform: rotate(-90deg);
+  fill: none;
+  stroke-width: 3;
+}
+.track {
+  stroke: var(--phone-surface-elevated);
+}
+.remaining {
+  stroke: var(--phone-alarm-accent);
+  stroke-linecap: round;
+}
+.readout {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  max-width: 160px;
+}
+.remainingTime {
+  font-size: 36px;
+  line-height: 1.2;
+  font-weight: 300;
+  letter-spacing: -1px;
+  font-variant-numeric: tabular-nums;
+}
+.timerLabel {
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--phone-text-muted);
+  font-size: 13px;
+}
+.countdownStatus {
+  color: var(--phone-alarm-accent);
+  min-height: 18px;
+  font-size: 12px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .control:active,
+  .recentPlay:active {
+    transform: none;
+  }
+}
+
+.toolbar {
+  gap: 10px;
+}
+.back {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--phone-surface);
+  color: var(--phone-text);
+}
+.back svg {
+  width: 26px;
+  height: 26px;
+  stroke-width: 3;
+}
+.activeTimers {
+  margin: 28px 8px 0;
+  border-top: 1px solid color-mix(in srgb, var(--phone-text) 16%, transparent);
+}
+.activeRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-block: 10px;
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--phone-text) 16%, transparent);
+}
+.openTimer {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  border-radius: 8px;
+}
+.activeTime {
+  font-size: 44px;
+  line-height: 1.15;
+  font-weight: 300;
+  letter-spacing: -1.7px;
+  font-variant-numeric: tabular-nums;
+}
+.activeLabel {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+}
+.rowControl {
+  position: relative;
+  display: grid;
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+  place-items: center;
+  border-radius: 50%;
+  background: transparent;
+}
+.rowControl .progress {
+  width: 52px;
+  height: 52px;
+  stroke-width: 8px;
+}
+.rowControl > svg:not(.progress) {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+  stroke-width: 1.5;
+}
+.detailScreen {
+  container-type: inline-size;
+  padding-bottom: 24px;
+}
+.detailCountdown {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  margin: 28px 0 24px;
+}
+.detailCountdown .progress {
+  width: 100%;
+  height: 100%;
+}
+.detailCountdown .readout {
+  max-width: none;
+  width: 100%;
+  gap: 24px;
+}
+.detailCountdown .remainingTime {
+  font-size: clamp(36px, 26cqw, 96px);
+  letter-spacing: -3px;
+}
+.detailCountdown .remainingTime.longTime {
+  font-size: clamp(30px, 15cqw, 68px);
+  letter-spacing: -2px;
+}
+.detailCountdown .timerLabel {
+  max-width: 85%;
+  color: var(--phone-text);
+  font-size: 14px;
+}
+.finishTime {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: var(--phone-text-muted);
+  font-size: 13px;
+  min-height: 18px;
+}
+.finishTime svg {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+}
+.detailScreen .control {
+  width: 56px;
+  height: 56px;
+}
+.detailScreen .settings {
+  margin-top: 12px;
+}

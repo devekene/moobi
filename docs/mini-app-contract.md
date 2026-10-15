@@ -1,0 +1,69 @@
+# Bundled mini-app contract
+
+`lib/app-registry.ts` is the single source for bundled mini-app identity,
+display metadata, discovery category, home placement, availability, and lazy
+screen loader. `Phone.tsx`, Home, Mi Store, and App Switcher consume this
+catalog. Add a mini app there and add focused registry coverage; do not add a
+second route map in the phone shell.
+
+Each entry has a stable `id`, a matching `launchTarget.screen`, name, icon,
+category, description, version, availability, preview capability metadata,
+home page, and `loadScreen` callback. Optional screenshots belong on
+`previewCapabilities.screenshotUrls`. Keep IDs stable after release because
+phone history and app launch targets refer to them.
+
+## Lifecycle and navigation
+
+- Phone system navigation owns the Home gesture and app switcher. Mini apps
+  may implement their own inner navigation, but should not replace system
+  navigation or change the active app behind the user's back.
+- A screen unmounts when another app opens. Persist app data in that app's
+  store when it should survive switching; transient form/animation state can
+  remain local.
+- The phone shell places every launched mini app inside one shared safe-area
+  viewport. It reserves the top for the status bar and Dynamic Island, the
+  bottom for the home indicator, and leaves the full screen width available.
+  Apps own horizontal content spacing for headers, grouped controls, and cards.
+  Keep touch targets and keyboard controls usable.
+- Set `viewport: "scroll"` in the registry for screens made of vertically
+  flowing content. The shell then scrolls the full display and puts top/bottom
+  safe-area spacing inside the screen, allowing content to pass behind the
+  transparent top bar. Do not add a nested page scroller or fixed page height.
+  Settings (including About), Calendar, Mi Store, and Guess use this mode. The default `contained`
+  viewport keeps fixed layouts and apps with internal scrolling inside the safe
+  area.
+- About is an internal Settings page, not a registered mini app. It has no
+  separate Home/App Library/Mi Store icon or recent-app entry.
+- Treat the virtual display like a mobile screen: `--phone-safe-area-top` and
+  `--phone-safe-area-bottom` come from the selected model and preview size, not
+  the visitor's hardware or browser `env()` insets. The top protects the status
+  row and Dynamic Island; the bottom protects the home gesture region. The shell
+  applies these once to mini apps. Full-bleed system surfaces keep backgrounds
+  edge to edge, but place interactive content inside these boundaries. Home is
+  exempt from the bottom safe area: its dock uses its own 12px bottom spacing,
+  and the App Library extends to the bottom. Home still respects the top inset.
+- Use the phone semantic properties documented in
+  [phone-theme.md](./phone-theme.md), such as `--phone-canvas`,
+  `--phone-surface`, `--phone-text`, `--phone-border`, and `--phone-focus`.
+- The shell shows a loader while a screen chunk loads and catches render or
+  chunk errors with a recovery action. Apps own loading, empty, and error states
+  for their own asynchronous data.
+
+## Availability and untrusted extensions
+
+`available` entries open a bundled screen. Use `preview` for unfinished routes
+and provide an honest description. Camera and File Manager currently open a
+preview explanation; they do not access real device hardware or files.
+
+Only trusted bundled screens execute in this app origin. Moobi does not accept
+or execute user-submitted mini-app JavaScript. A future extension preview needs
+an isolated origin and a reviewed sandboxed iframe boundary, restrictive CSP,
+and a schema-validated `postMessage` protocol. Do not enable `allow-same-origin`
+for untrusted content or bridge arbitrary host APIs into a preview.
+
+## Store behavior
+
+Mi Store lists this same catalog. Search and category filters only return
+registered entries, details show their actual availability, and Open records a
+recent app through the shared phone store. A preview entry opens its explanatory
+screen rather than simulating installation of an app that is not present.

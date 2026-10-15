@@ -203,7 +203,7 @@ const CalculatorBoard = ({
   };
 
   return (
-    <>
+    <div className="px-8">
       <div
         className={cn(
           "flex h-[21%] w-full flex-col duration-500 ease-in-out",
@@ -278,7 +278,7 @@ const CalculatorBoard = ({
           </div>
         ))}
       </div>
-    </>
+    </div>
   );
 };
 export default CalculatorBoard;

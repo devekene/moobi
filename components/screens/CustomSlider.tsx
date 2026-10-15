@@ -1,37 +1,74 @@
 import { Slider } from "@/components/ui/slider";
+import type { IconType } from "react-icons";
 import { cn } from "@/lib/utils";
-import { IconType } from "react-icons";
 
-const CustomSlider = (props: {
+type CustomSliderProps = {
   icon: IconType;
   value: number;
   onChange: (value: number) => void;
-}) => (
-  <div className="relative flex h-40 w-12 items-center justify-center">
-    <div className="absolute inset-0 overflow-hidden rounded-full bg-black/40">
+  label: string;
+  iconColor: string;
+  className?: string;
+  onInteractionStart?: () => void;
+  onInteractionEnd?: () => void;
+};
+
+const CustomSlider = ({
+  icon: Icon,
+  value,
+  onChange,
+  label,
+  iconColor,
+  className,
+  onInteractionStart,
+  onInteractionEnd,
+}: CustomSliderProps) => {
+  return (
+    <div
+      className={cn(
+        `shadow-[ inset_0_1px_0_rgba(255,255,255,0.12), inset_0_-1px_0_rgba(0,0,0,0.06), 0_2px_6px_rgba(0,0,0,0.10) ] relative h-[125px] w-[56px] shrink-0 overflow-hidden rounded-[28px] border border-white/[0.08] bg-white/[0.16] backdrop-blur-[24px] backdrop-saturate-[145%]`,
+        className,
+      )}
+      onPointerDown={onInteractionStart}
+      onPointerUp={onInteractionEnd}
+      onPointerCancel={onInteractionEnd}
+      onKeyDown={onInteractionStart}
+      onKeyUp={onInteractionEnd}
+    >
+      {/* Filled portion */}
       <div
-        className="absolute bottom-0 left-0 w-full bg-white transition-all duration-200"
-        style={{ height: `${props.value}%` }}
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 bottom-0 bg-[var(--phone-control-center-slider)] transition-[height] duration-150 motion-reduce:transition-none"
+        style={{
+          height: `${Math.max(0, Math.min(100, value))}%`,
+        }}
+      />
+
+      {/* Icon */}
+      <Icon
+        aria-hidden="true"
+        className="pointer-events-none absolute bottom-[13px] left-1/2 z-10 size-[18px] -translate-x-1/2"
+        style={{
+          color: iconColor,
+        }}
+      />
+
+      <Slider
+        aria-label={label}
+        value={[value]}
+        onValueChange={(nextValue) => {
+          onChange(nextValue[0]);
+        }}
+        max={100}
+        step={1}
+        orientation="vertical"
+        className="absolute inset-0 z-20 h-full w-full rounded-full focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:outline-none"
+        showThumb={false}
+        showTrack={false}
+        showRange={false}
       />
     </div>
-
-    <div className="pointer-events-none absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 text-center text-white/80">
-      <props.icon
-        className={cn("mx-auto h-6 w-6", props.value > 50 && "text-black/70")}
-      />
-    </div>
-
-    <Slider
-      value={[props.value]}
-      onValueChange={(value) => props.onChange(value[0])}
-      max={100}
-      step={1}
-      orientation="vertical"
-      className="absolute h-full w-full"
-      showThumb={false}
-      showTrack={false}
-    />
-  </div>
-);
+  );
+};
 
 export default CustomSlider;

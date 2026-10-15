@@ -12,12 +12,6 @@ const Library = () => {
 
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    if (tracks.length === 0) {
-      fetchTrendingTracks();
-    }
-  }, []);
-
   const fetchTrendingTracks = async () => {
     setIsLoading(true);
     try {
@@ -35,6 +29,13 @@ const Library = () => {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (tracks.length === 0) {
+      const timeoutId = setTimeout(() => void fetchTrendingTracks(), 0);
+      return () => clearTimeout(timeoutId);
+    }
+  }, []);
 
   const handlePlaySong = async (song: Song) => {
     const trackIndex = tracks.findIndex((track) => track.id === song.id);

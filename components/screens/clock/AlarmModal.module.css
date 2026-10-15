@@ -1,0 +1,245 @@
+.sheet {
+  /* Local Clock materials; shared phone text and focus tokens still apply. */
+  --alarm-canvas: #1c1c1e;
+  --alarm-group: #2c2c2e;
+  --alarm-control: #414143;
+  --alarm-accent: #ff9f0a;
+  --alarm-enabled: #30d158;
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 32px 32px 0 0;
+  background: var(--alarm-canvas);
+  color: var(--phone-text);
+  outline: none;
+}
+:global([data-phone-theme="light"]) .sheet {
+  --alarm-canvas: var(--phone-canvas);
+  --alarm-group: var(--phone-surface);
+  --alarm-control: var(--phone-surface-elevated);
+  --alarm-accent: #a85c00;
+  --alarm-enabled: #24843b;
+}
+.header {
+  display: grid;
+  grid-template-columns: 44px 1fr 44px;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 8px;
+  padding: 14px 18px 4px;
+}
+.title {
+  text-align: center;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+.circle {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--alarm-control);
+  color: var(--phone-text);
+  box-shadow:
+    inset 0 1px 1px color-mix(in srgb, var(--phone-text) 12%, transparent),
+    0 2px 4px #0001;
+}
+.circle svg {
+  width: 26px;
+  height: 26px;
+  stroke-width: 3.5;
+}
+.save {
+  background: var(--alarm-accent);
+  color: var(--phone-on-accent);
+}
+.circle:active,
+.day:active {
+  opacity: 0.7;
+}
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 18px 24px;
+  scrollbar-width: none;
+}
+.body::-webkit-scrollbar {
+  display: none;
+}
+.wheel {
+  position: relative;
+  margin: 0 0 20px;
+}
+.selection {
+  position: absolute;
+  top: 65px;
+  right: 0;
+  left: 0;
+  height: 26px;
+  border-radius: 20px;
+  background: var(--alarm-group);
+}
+.picker {
+  width: 142px;
+  margin-inline: auto;
+  gap: 10px;
+  font-variant-numeric: tabular-nums;
+  mask-image: linear-gradient(transparent, #000 35%, #000 65%, transparent);
+}
+/* Replace the picker's default separator lines with one full-width selection. */
+.picker > div:last-child {
+  display: none;
+}
+.time,
+.selectedTime {
+  font-size: 23px;
+  font-weight: 400;
+  line-height: 26px;
+  letter-spacing: 0.5px;
+}
+.time {
+  color: var(--phone-text-muted);
+  opacity: 0.65;
+}
+.selectedTime {
+  color: var(--phone-text);
+}
+.group {
+  padding-inline: 18px;
+  border-radius: 25px;
+  background: var(--alarm-group);
+}
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 44px;
+  gap: 12px;
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--phone-text) 12%, transparent);
+  text-align: left;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.25px;
+}
+.row:last-child {
+  border-bottom: 0;
+}
+.value {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  color: var(--phone-text-muted);
+  font-weight: 400;
+  text-align: right;
+  font-size: 14px;
+}
+.value svg {
+  width: 15px;
+  height: 15px;
+}
+.days {
+  display: flex;
+  justify-content: space-between;
+  gap: 2px;
+  padding-block: 6px;
+}
+.day {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  height: 44px;
+  place-items: center;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    var(--alarm-control) 0 60%,
+    transparent 63%
+  );
+  font-size: 15px;
+  font-weight: 700;
+}
+.day[aria-pressed="true"] {
+  color: var(--phone-on-accent);
+  background: radial-gradient(
+    circle,
+    var(--alarm-accent) 0 60%,
+    transparent 63%
+  );
+}
+.settings {
+  margin-top: 26px;
+}
+.row input {
+  min-width: 0;
+  width: 65%;
+  background: transparent;
+  text-align: right;
+  color: var(--phone-text);
+  font-size: 15px;
+  font-weight: 400;
+}
+.row input::placeholder {
+  color: var(--phone-text-muted);
+}
+.row select {
+  max-width: 96px;
+  appearance: none;
+  background: transparent;
+  color: var(--alarm-accent);
+  text-align: right;
+  font-size: 15px;
+}
+.row option {
+  background: var(--alarm-group);
+  color: var(--phone-text);
+}
+.switch {
+  position: relative;
+  width: 51px;
+  min-width: 51px;
+  height: 44px;
+}
+.switch::before {
+  content: "";
+  position: absolute;
+  inset: 9px 0;
+  border-radius: 20px;
+  background: var(--alarm-control);
+}
+.switch[aria-checked="true"]::before {
+  background: var(--alarm-enabled);
+}
+.switch span {
+  position: absolute;
+  top: 11px;
+  left: 2px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--phone-on-accent);
+  box-shadow: 0 1px 3px #0002;
+  transition: transform 160ms ease;
+}
+.switch[aria-checked="true"] span {
+  transform: translateX(25px);
+}
+.soundMessage {
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--phone-text-muted);
+}
+@media (prefers-reduced-motion: reduce) {
+  .switch span {
+    transition: none;
+  }
+}

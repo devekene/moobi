@@ -1,130 +1,197 @@
+"use client";
+
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { LuBellOff, LuPlus } from "react-icons/lu";
-import { CgMoreVertical } from "react-icons/cg";
+import { LuBedDouble, LuCircleMinus, LuPlus } from "react-icons/lu";
 import { useClock } from "@/context/ClockContext";
 import AlarmModal from "@/components/screens/clock/AlarmModal";
+import {
+  getAlarmDescription,
+  getAlarmGroups,
+  getAlarmTimeParts,
+} from "@/lib/alarms";
 import { cn } from "@/lib/utils";
-import { type Alarm } from "@/types";
+import type { Alarm } from "@/types";
 
-const ClockAlarm = () => {
+const ClockAlarm = ({
+  editorContainer,
+}: {
+  editorContainer?: HTMLDivElement | null;
+}) => {
   const { alarms, setAlarms } = useClock();
   const [alarmToEdit, setAlarmToEdit] = useState<Alarm | null>(null);
   const [isAdding, setIsAdding] = useState(false);
-
-  let pressTimer: NodeJS.Timeout;
+  const [isAddingWakeUp, setIsAddingWakeUp] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const { wakeUp, regular } = getAlarmGroups(alarms);
+  const wakeUpTime = wakeUp ? getAlarmTimeParts(wakeUp.time) : null;
 
   const toggleAlarm = (id: number) => {
     setAlarms((prev) =>
-      prev.map((a) => (a.id === id ? { ...a, enabled: !a.enabled } : a)),
+      prev.map((alarm) =>
+        alarm.id === id ? { ...alarm, enabled: !alarm.enabled } : alarm,
+      ),
     );
   };
 
   const deleteAlarm = (id: number) => {
-    setAlarms((prev) => prev.filter((a) => a.id !== id));
-  };
-
-  const handlePressStart = (id: number) => {
-    pressTimer = setTimeout(() => {
-      deleteAlarm(id);
-    }, 500);
-  };
-
-  const handlePressEnd = () => {
-    clearTimeout(pressTimer);
-  };
-
-  const handleClick = (alarm: Alarm) => {
-    clearTimeout(pressTimer);
-    setAlarmToEdit(alarm);
+    setAlarms((prev) => prev.filter((alarm) => alarm.id !== id));
   };
 
   return (
-    <div className="relative h-[29rem] w-full overflow-hidden px-3">
-      <div onClick={() => setIsAdding(false)} className="space-y-4">
-        <div className="flex flex-col gap-4">
-          <div className="flex items-end justify-end">
-            <Button className="bg-transparent p-0 text-white">
-              <CgMoreVertical />
-            </Button>
+    <div className="relative h-full w-full text-[var(--phone-text)]">
+      <div
+        className="h-full [scrollbar-width:none] overflow-y-auto overscroll-contain [&::-webkit-scrollbar]:hidden"
+        style={{ paddingInline: 16, paddingBottom: 16 }}
+      >
+        <header className="flex flex-col gap-4">
+          <div className="flex min-h-11 items-center justify-between">
+            {regular.length > 0 ? (
+              <button
+                type="button"
+                onClick={() => setIsEditing((value) => !value)}
+                aria-pressed={isEditing}
+                className="min-h-11 text-sm font-medium text-[var(--phone-accent)] focus-visible:rounded-lg"
+              >
+                {isEditing ? "Done" : "Edit"}
+              </button>
+            ) : (
+              <span />
+            )}
+            <button
+              type="button"
+              aria-label="Add alarm"
+              onClick={() => {
+                setIsAddingWakeUp(false);
+                setIsAdding(true);
+              }}
+              className="flex size-11 items-center justify-center rounded-full border border-[var(--phone-border)] bg-[var(--phone-surface-elevated)]/85 shadow-[inset_0_1px_0_color-mix(in_srgb,var(--phone-text)_12%,transparent)] backdrop-blur-md transition-transform active:scale-95 motion-reduce:transform-none motion-reduce:transition-none"
+            >
+              <LuPlus className="size-6" aria-hidden="true" />
+            </button>
           </div>
+          <h1 className="text-[34px] leading-tight font-bold tracking-[-0.04em]">
+            Alarms
+          </h1>
+        </header>
 
-          <h1 className="text-2xl text-white">Alarm</h1>
-
-          <Button
-            size="lg"
-            className="absolute bottom-0 right-2 h-10 w-10 rounded-full bg-neutral-900 p-0 text-white"
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsAdding(true);
-            }}
+        <section aria-labelledby="wake-up-heading" style={{ marginTop: 32 }}>
+          <h2
+            id="wake-up-heading"
+            className="flex items-center gap-1.5 text-[18px] leading-tight font-semibold tracking-[-0.02em]"
+            style={{ marginBottom: 12 }}
           >
-            <LuPlus />
-          </Button>
-        </div>
-
-        {/* ClockAlarm list */}
-        {alarms.length === 0 ? (
-          <div className="py-12 text-center text-white/60">
-            <LuBellOff className="mx-auto mb-3 h-10 w-10" />
-            No alarms yet
+            <LuBedDouble className="size-5 shrink-0" aria-hidden="true" />
+            Sleep | Wake Up
+          </h2>
+          <div className="flex min-h-[56px] items-center justify-between gap-3 border-y border-[var(--phone-border)]">
+            <span className="min-w-0 text-[15px] text-[var(--phone-text-muted)]">
+              {wakeUpTime
+                ? `${wakeUpTime.time} ${wakeUpTime.period}${wakeUp?.enabled ? "" : " · Off"}`
+                : "No Alarm"}
+            </span>
+            <button
+              type="button"
+              aria-label={
+                wakeUp ? "Change wake-up alarm" : "Set up wake-up alarm"
+              }
+              onClick={() => {
+                setIsAddingWakeUp(true);
+                if (wakeUp) setAlarmToEdit(wakeUp);
+                else setIsAdding(true);
+              }}
+              className="flex min-h-9 shrink-0 items-center justify-center rounded-full bg-[var(--phone-surface-elevated)] text-[11px] font-bold text-[var(--phone-accent)] uppercase transition-opacity active:opacity-70 motion-reduce:transition-none"
+              style={{ paddingInline: 12 }}
+            >
+              {wakeUp ? "Change" : "Set Up"}
+            </button>
           </div>
-        ) : (
-          <div className="space-y-3">
-            {alarms
-              .slice()
-              .sort((a, b) => a.time.localeCompare(b.time))
-              .map((a) => (
+        </section>
+
+        {regular.length > 0 && (
+          <section aria-label="Other alarms" style={{ marginTop: 28 }}>
+            {regular.map((alarm) => {
+              const display = getAlarmTimeParts(alarm.time);
+              const description = getAlarmDescription(alarm);
+              return (
                 <div
-                  key={a.id}
-                  className="rounded-xl border border-white/20 bg-white/10 p-4"
-                  onMouseDown={() => handlePressStart(a.id)}
-                  onTouchStart={() => handlePressStart(a.id)}
-                  onMouseUp={handlePressEnd}
-                  onMouseLeave={handlePressEnd}
-                  onTouchEnd={handlePressEnd}
-                  onClick={() => handleClick(a)}
+                  key={alarm.id}
+                  className="flex items-center gap-2 border-b border-[var(--phone-border)]"
+                  style={{ paddingBlock: 12 }}
                 >
-                  <div className="flex min-w-0 flex-1 items-center justify-between">
-                    <div className="space-y-1">
-                      <div className="text-lg text-white">{a.time}</div>
-                      <div className="text-sm capitalize text-gray-400">
-                        {a.repeatMode} {a.label && `| ${a.label}`}
-                      </div>
-                    </div>
-
-                    <div
-                      className="flex h-2 w-8 transform items-center rounded-full bg-neutral-700 transition-opacity ease-in-out"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleAlarm(a.id);
-                      }}
+                  {isEditing && (
+                    <button
+                      type="button"
+                      onClick={() => deleteAlarm(alarm.id)}
+                      aria-label={`Delete ${display.time} ${display.period} alarm`}
+                      className="flex size-11 shrink-0 items-center justify-center rounded-full text-[var(--phone-accent)]"
                     >
-                      <div
+                      <LuCircleMinus className="size-6" aria-hidden="true" />
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setAlarmToEdit(alarm)}
+                    aria-label={`Edit ${display.time} ${display.period} alarm, ${description}`}
+                    className={cn(
+                      "flex min-w-0 flex-1 flex-col items-start rounded-lg text-left",
+                      alarm.enabled
+                        ? "text-[var(--phone-text)]"
+                        : "text-[var(--phone-text-muted)]",
+                    )}
+                  >
+                    <span className="flex items-baseline gap-1.5 tabular-nums">
+                      <span className="text-[40px] leading-none font-light tracking-[-0.04em]">
+                        {display.time}
+                      </span>
+                      <span className="text-[18px] leading-none font-light">
+                        {display.period}
+                      </span>
+                    </span>
+                    <span className="max-w-full truncate text-[12px] leading-relaxed">
+                      {description}
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={alarm.enabled}
+                    aria-label={`${display.time} ${display.period} alarm, ${description}`}
+                    onClick={() => toggleAlarm(alarm.id)}
+                    className="flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-full"
+                  >
+                    <span
+                      aria-hidden="true"
+                      className={cn(
+                        "relative block h-[28px] w-[46px] rounded-full transition-colors motion-reduce:transition-none",
+                        alarm.enabled
+                          ? "bg-[var(--phone-accent)]"
+                          : "bg-[var(--phone-border)]",
+                      )}
+                    >
+                      <span
                         className={cn(
-                          "h-4 w-1/2 rounded-full bg-blue-500",
-                          a.enabled && "opacity-0",
+                          "absolute top-[2px] left-[2px] size-6 rounded-full bg-[var(--phone-on-accent)] shadow-sm transition-transform duration-200 motion-reduce:transition-none",
+                          alarm.enabled && "translate-x-[18px]",
                         )}
                       />
-                      <div
-                        className={cn(
-                          "h-4 w-1/2 rounded-full bg-blue-500",
-                          !a.enabled && "opacity-0",
-                        )}
-                      />
-                    </div>
-                  </div>
+                    </span>
+                  </button>
                 </div>
-              ))}
-          </div>
+              );
+            })}
+          </section>
         )}
       </div>
 
       {(isAdding || alarmToEdit) && (
         <AlarmModal
+          container={editorContainer}
           setIsAdding={setIsAdding}
-          alarmToEdit={alarmToEdit!}
+          alarmToEdit={alarmToEdit ?? undefined}
           setAlarmToEdit={setAlarmToEdit}
+          isWakeUpAlarm={
+            alarmToEdit ? alarmToEdit.isWakeUp === true : isAddingWakeUp
+          }
         />
       )}
     </div>
