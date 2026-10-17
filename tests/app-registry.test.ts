@@ -14,14 +14,13 @@ describe("mini-app registry", () => {
     for (const id of ["settings", "calendar", "app-store", "guess"] as const) {
       expect(getMiniApp(id).viewport).toBe("scroll");
     }
-    for (const id of [
-      "calculator",
-      "snake",
-      "chrome-browser",
-      "notes",
-    ] as const) {
+    for (const id of ["snake", "chrome-browser", "notes"] as const) {
       expect(getMiniApp(id).viewport ?? "contained").toBe("contained");
     }
+  });
+
+  it("lets Calculator extend its history sheet to the display edge", () => {
+    expect(getMiniApp("calculator").viewport).toBe("full-bleed");
   });
 
   it("lets Weather draw beneath both system bars", () => {

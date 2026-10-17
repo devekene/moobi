@@ -1,0 +1,290 @@
+.screen {
+  position: relative;
+  height: 100%;
+  min-height: 0;
+  container-type: size;
+  background: var(--phone-calculator-canvas);
+  color: var(--phone-text);
+  font-family: Arial, Helvetica, sans-serif;
+}
+.boardContainer {
+  position: absolute;
+  inset: var(--phone-safe-area-top) 0 var(--phone-safe-area-bottom);
+  container-type: size;
+}
+.board {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 4px 3.8cqw 2cqh;
+  gap: 2cqh;
+}
+.toolbar,
+.sheetToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.toolbar {
+  padding: 0 1cqw;
+}
+.tool,
+.edit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: clamp(40px, 10.5cqw, 46px);
+  border-radius: 50%;
+  background: var(--phone-calculator-tool);
+  box-shadow: inset 0 1px 2px
+    color-mix(in srgb, var(--phone-text) 15%, transparent);
+  font-size: clamp(20px, 5.6cqw, 26px);
+}
+.tool {
+  width: clamp(40px, 10.5cqw, 46px);
+}
+.tool[aria-pressed="true"] {
+  color: var(--phone-calculator-accent);
+}
+.display {
+  flex: 1;
+  min-height: 55px;
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  align-items: stretch;
+  text-align: right;
+  padding: 0 0.5cqw;
+}
+.expression {
+  min-height: 1.4em;
+  font-size: 7cqw;
+  color: var(--phone-text-muted);
+  overflow: auto;
+  white-space: nowrap;
+  scrollbar-width: none;
+}
+.result {
+  display: block;
+  font-size: min(16.5cqw, 13cqh);
+  line-height: 1.1;
+  font-weight: 300;
+  letter-spacing: -0.045em;
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: none;
+}
+.longResult {
+  font-size: min(10.5cqw, 10cqh);
+}
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.9cqw;
+  flex-shrink: 0;
+}
+.key {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: min(21.5cqw, 13.5cqh);
+  border-radius: 50%;
+  background: var(--phone-calculator-key);
+  box-shadow: inset 0 1px 2px
+    color-mix(in srgb, var(--phone-text) 14%, transparent);
+  font-size: min(9.3cqw, 7cqh);
+  font-weight: 400;
+  line-height: 1;
+  transition:
+    filter 100ms,
+    transform 100ms;
+}
+.utility {
+  background: var(--phone-calculator-utility);
+}
+.operator {
+  background: var(--phone-calculator-accent);
+  color: var(--phone-calculator-on-accent);
+  font-size: min(12cqw, 9cqh);
+}
+.sign {
+  font-size: 0.95em;
+}
+.key svg {
+  width: 0.95em;
+  height: 0.95em;
+}
+.key:active,
+.tool:active,
+.edit:active {
+  filter: brightness(1.3);
+  transform: scale(0.96);
+}
+.scientific {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 1cqw;
+}
+.scientific button {
+  min-height: 28px;
+  height: 4.8cqh;
+  border-radius: 24px;
+  background: var(--phone-calculator-tool);
+  font-size: clamp(12px, 3.4cqw, 16px);
+}
+.scientific button[aria-pressed="true"] {
+  color: var(--phone-calculator-accent);
+}
+.board:has(.scientific) .key {
+  height: min(16cqw, 8.7cqh);
+  font-size: min(7cqw, 5.5cqh);
+}
+.sheet {
+  position: absolute;
+  /* The sheet reaches the display edge; the board keeps its own safe viewport. */
+  inset: var(--phone-safe-area-top) 0 0;
+  container-type: size;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  border-radius: 9cqw 9cqw 0 0;
+  background: var(--phone-calculator-sheet);
+  padding: 0 4.8cqw;
+  outline: none;
+}
+.handle {
+  height: 4px;
+  width: 14cqw;
+  flex-shrink: 0;
+  margin: 6px auto 10px;
+  border-radius: 8px;
+  background: var(--phone-text-muted);
+  opacity: 0.5;
+}
+.sheetToolbar {
+  flex-shrink: 0;
+  padding-bottom: 5cqh;
+}
+.edit {
+  border-radius: 20px;
+  padding: 0 16px;
+  font-size: 16px;
+}
+.historyList {
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+.historyList h2 {
+  padding: 2cqh 0 1.4cqh;
+  font-size: 4cqw;
+  font-weight: 600;
+  color: var(--phone-text-muted);
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--phone-border) 65%, transparent);
+}
+.historyList section + section {
+  margin-top: 2cqh;
+}
+.historyList ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.historyEntry {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 2.5cqh 0;
+  text-align: left;
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--phone-border) 65%, transparent);
+}
+.historyEntry > span:last-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.historyExpression {
+  display: block;
+  font-size: 3.4cqw;
+  color: var(--phone-text-muted);
+  margin-bottom: 5px;
+}
+.historyResult {
+  display: block;
+  font-size: 4.2cqw;
+  font-weight: 500;
+}
+.selection {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border: 1px solid var(--phone-border);
+  border-radius: 50%;
+}
+.historyEntry[aria-pressed="true"] .selection {
+  background: var(--phone-calculator-accent);
+  color: var(--phone-calculator-on-accent);
+}
+.historyActions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+}
+.historyActions button {
+  min-height: 44px;
+  color: var(--phone-calculator-accent);
+}
+.historyActions button:last-child {
+  color: var(--phone-negative);
+}
+.screen button {
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.screen button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.empty {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  text-align: center;
+  color: var(--phone-text-muted);
+}
+.empty > svg {
+  width: 40px;
+  height: 40px;
+}
+.empty h2 {
+  border: 0;
+  padding: 0;
+  color: var(--phone-text);
+}
+.empty p {
+  font-size: 14px;
+  max-width: 24ch;
+}
+@media (prefers-reduced-motion: reduce) {
+  .key {
+    transition: none;
+  }
+  .key:active,
+  .tool:active,
+  .edit:active {
+    transform: none;
+  }
+}

@@ -16,3 +16,22 @@ describe("simulated phone PIN", () => {
     expect(matchesPhonePin("0427", null)).toBe(false);
   });
 });
+
+describe("passcode setup shared by Settings and Phone options", () => {
+  it("accepts matching four-digit PINs including a leading zero", async () => {
+    const { validatePhonePinSetup } = await import("@/lib/pin-lock");
+    expect(validatePhonePinSetup("0427", "0427")).toBeNull();
+  });
+
+  it("rejects incomplete, nonnumeric and mismatched PINs", async () => {
+    const { validatePhonePinSetup } = await import("@/lib/pin-lock");
+    for (const pin of ["", "123", "12345", "12ab", " 123"]) {
+      expect(validatePhonePinSetup(pin, pin)).toBe(
+        "Enter a four-digit passcode.",
+      );
+    }
+    expect(validatePhonePinSetup("0427", "0428")).toBe(
+      "The passcodes do not match.",
+    );
+  });
+});

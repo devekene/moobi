@@ -91,6 +91,7 @@ export const MINI_APPS = [
     previewCapabilities: { bundled: true, executesUserCode: false },
     availability: "available",
     homePage: 0,
+    viewport: "full-bleed",
     loadScreen: () => import("@/components/screens/calculator"),
   },
   {

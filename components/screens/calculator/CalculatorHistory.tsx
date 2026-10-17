@@ -1,75 +1,166 @@
-import { Dispatch, SetStateAction } from "react";
-import { FaArrowLeft, FaTrash } from "react-icons/fa6";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { BsClock } from "react-icons/bs";
+import { useEffect, useRef, useState } from "react";
+import { LuCheck, LuHistory, LuX } from "react-icons/lu";
+import { useCalculatorStore } from "@/stores/useCalculatorStore";
+import { formatCalculation, groupCalculations } from "@/lib/calculator";
+import styles from "./calculator.module.css";
 
-const CalculatorHistory = ({
-  history,
-  setHistory,
-  setCalcScreen,
+export default function CalculatorHistory({
+  onClose,
 }: {
-  history:
-    | {
-        date: string;
-        calculations: string[];
-      }[]
-    | null;
-  setHistory: Dispatch<
-    SetStateAction<
-      | {
-          date: string;
-          calculations: string[];
-        }[]
-      | null
-    >
-  >;
-  setCalcScreen: Dispatch<SetStateAction<"board" | "history">>;
-}) => {
+  onClose: () => void;
+}) {
+  const { history, recall, remove } = useCalculatorStore();
+  const [editing, setEditing] = useState(false);
+  const [selected, setSelected] = useState<string[]>([]);
+  const panel = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    panel.current?.focus();
+  }, []);
   return (
-    <>
-      <div className="sticky left-0 top-0 flex h-10 w-full items-center justify-between bg-black text-lg text-white">
-        <Button variant="ghost" onClick={() => setCalcScreen("board")}>
-          <FaArrowLeft />
-        </Button>
-
-        <h1>History</h1>
-
-        <Button variant="ghost" onClick={() => setHistory([])}>
-          <FaTrash />
-        </Button>
-      </div>
-
-      <ul className="no-visible-scrollbar flex h-[90%] flex-1 flex-col gap-3 overflow-y-scroll pb-16 pr-2">
-        {history &&
-          history.map((item, index) => (
-            <li
-              key={index}
-              className={cn(
-                "w-full space-y-1.5 border-b border-gray-600 py-3 text-right text-lg text-white",
-                index === history.length - 1 && "border-none",
-              )}
-            >
-              <div className="text-sm text-gray-500">{item.date}</div>
-              <div className="flex flex-col gap-1">
-                {item.calculations.map((calculation, index) => (
-                  <div key={index} className="text-base text-gray-300">
-                    {calculation}
-                  </div>
+    <div
+      className={styles.sheet}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Calculation history"
+      ref={panel}
+      tabIndex={-1}
+      onKeyDown={(event) => {
+        if (event.key === "Escape") {
+          event.stopPropagation();
+          onClose();
+        }
+        if (event.key === "Tab") {
+          const buttons = panel.current?.querySelectorAll<HTMLButtonElement>(
+            "button:not(:disabled)",
+          );
+          const first = buttons?.[0],
+            last = buttons?.[buttons.length - 1];
+          if (
+            event.shiftKey &&
+            (document.activeElement === first ||
+              document.activeElement === panel.current)
+          ) {
+            event.preventDefault();
+            last?.focus();
+          } else if (
+            !event.shiftKey &&
+            (document.activeElement === last ||
+              document.activeElement === panel.current)
+          ) {
+            event.preventDefault();
+            first?.focus();
+          }
+        }
+      }}
+    >
+      <div className={styles.handle} aria-hidden="true" />
+      <header className={styles.sheetToolbar}>
+        <button
+          type="button"
+          className={styles.edit}
+          disabled={!history.length}
+          onClick={() => {
+            setEditing(!editing);
+            setSelected([]);
+          }}
+        >
+          {editing ? "Done" : "Edit"}
+        </button>
+        <button
+          type="button"
+          className={styles.tool}
+          aria-label="Close history"
+          onClick={onClose}
+        >
+          <LuX />
+        </button>
+      </header>
+      <div className={styles.historyList}>
+        {!history.length ? (
+          <div className={styles.empty}>
+            <LuHistory aria-hidden="true" />
+            <h2>No history yet</h2>
+            <p>Your completed calculations will appear here.</p>
+          </div>
+        ) : (
+          groupCalculations(history).map(({ label, entries }) => (
+            <section key={label} aria-label={label}>
+              <h2>{label}</h2>
+              <ul>
+                {entries.map((entry) => (
+                  <li key={entry.id}>
+                    <button
+                      type="button"
+                      className={styles.historyEntry}
+                      aria-label={
+                        editing
+                          ? `Select ${entry.expression} equals ${entry.result}`
+                          : `Use ${entry.expression} equals ${entry.result}`
+                      }
+                      aria-pressed={
+                        editing ? selected.includes(entry.id) : undefined
+                      }
+                      onClick={() => {
+                        if (editing)
+                          setSelected((ids) =>
+                            ids.includes(entry.id)
+                              ? ids.filter((id) => id !== entry.id)
+                              : [...ids, entry.id],
+                          );
+                        else {
+                          recall(entry);
+                          onClose();
+                        }
+                      }}
+                    >
+                      {editing && (
+                        <span className={styles.selection} aria-hidden="true">
+                          {selected.includes(entry.id) && <LuCheck />}
+                        </span>
+                      )}
+                      <span>
+                        <span className={styles.historyExpression}>
+                          {formatCalculation(entry.expression)}
+                        </span>
+                        <span className={styles.historyResult}>
+                          {formatCalculation(entry.result)}
+                        </span>
+                      </span>
+                    </button>
+                  </li>
                 ))}
-              </div>
-            </li>
-          ))}
-
-        {!history ||
-          (history.length === 0 && (
-            <div className="flex-center mt-28 h-full w-full flex-col gap-3">
-              <BsClock className="h-28 w-28 rounded-full text-gray-500" />
-              <span className="text-base text-gray-400">No history yet</span>
-            </div>
-          ))}
-      </ul>
-    </>
+              </ul>
+            </section>
+          ))
+        )}
+      </div>
+      {editing && (
+        <footer className={styles.historyActions}>
+          <button
+            type="button"
+            onClick={() =>
+              setSelected(
+                selected.length === history.length
+                  ? []
+                  : history.map((entry) => entry.id),
+              )
+            }
+          >
+            {selected.length === history.length ? "Deselect All" : "Select All"}
+          </button>
+          <button
+            type="button"
+            disabled={!selected.length}
+            onClick={() => {
+              remove(selected);
+              setSelected([]);
+              if (selected.length === history.length) setEditing(false);
+            }}
+          >
+            Delete{selected.length ? ` (${selected.length})` : ""}
+          </button>
+        </footer>
+      )}
+    </div>
   );
-};
-export default CalculatorHistory;
+}

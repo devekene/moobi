@@ -169,6 +169,16 @@ body {
 .phone-theme {
   --phone-shell: #14161b;
   --phone-canvas: #090a0c;
+  --phone-settings-canvas: #000;
+  --phone-settings-group: #1c1c1e;
+  --phone-settings-divider: #38383a;
+  --phone-settings-blue: #008cff;
+  --phone-settings-pink: #ed396b;
+  --phone-settings-gray: #8e8e93;
+  --phone-settings-preview-light: #f2f2f7;
+  --phone-settings-preview-light-surface: #fff;
+  --phone-settings-preview-dark: #101012;
+  --phone-settings-preview-dark-surface: #2c2c30;
   --phone-surface: #1b1d22;
   --phone-surface-elevated: #282b31;
   --phone-text: #f7f7f8;
@@ -177,8 +187,16 @@ body {
   --phone-border: #444851;
   --phone-island-surface: #292d35;
   --phone-focus: #9b8aff;
+  --phone-input-focus: var(--phone-text-muted);
   --phone-accent: #7660ed;
   --phone-alarm-accent: #ff9f0a;
+  --phone-calculator-canvas: #000;
+  --phone-calculator-key: #333;
+  --phone-calculator-utility: #5c5c5c;
+  --phone-calculator-tool: #242424;
+  --phone-calculator-sheet: #1c1c1e;
+  --phone-calculator-accent: #ff9f00;
+  --phone-calculator-on-accent: #fff;
   --phone-positive: #30d158;
   --phone-negative: #ff453a;
   --phone-on-accent: #fff;
@@ -200,6 +218,12 @@ body {
 .phone-theme[data-phone-theme="light"] {
   --phone-shell: #d9dce2;
   --phone-canvas: #f3f4f7;
+  --phone-settings-canvas: #f2f2f7;
+  --phone-settings-group: #fff;
+  --phone-settings-divider: #d8d8dc;
+  --phone-settings-blue: #007aff;
+  --phone-settings-pink: #d92a59;
+  --phone-settings-gray: #76767b;
   --phone-surface: #fff;
   --phone-surface-elevated: #e7e9ef;
   --phone-text: #171920;
@@ -210,6 +234,13 @@ body {
   --phone-focus: #5140c4;
   --phone-accent: #5b49d6;
   --phone-alarm-accent: #a85c00;
+  --phone-calculator-canvas: #f5f5f5;
+  --phone-calculator-key: #e3e3e5;
+  --phone-calculator-utility: #d0d0d3;
+  --phone-calculator-tool: #e5e5e7;
+  --phone-calculator-sheet: #f2f2f4;
+  --phone-calculator-accent: #a85c00;
+  --phone-calculator-on-accent: #fff;
   --phone-positive: #24843b;
   --phone-negative: #c62828;
   --phone-overlay: rgb(28 31 39 / 46%);
@@ -229,6 +260,17 @@ body {
 .phone-theme :focus-visible {
   outline: 2px solid var(--phone-focus);
   outline-offset: 2px;
+}
+
+/* Text-entry controls use a quiet neutral edge rather than the action ring.
+   Keep this low-specificity so app-owned editor/search focus styles still win. */
+.phone-theme :where(input, textarea, select, [contenteditable="true"]) {
+  --phone-focus: var(--phone-input-focus);
+}
+
+.phone-theme :where(input, textarea, select, [contenteditable="true"]):focus-visible {
+  outline: 1px solid var(--phone-input-focus);
+  outline-offset: 0;
 }
 
 /* The shell supplies model-scaled insets; full-bleed backgrounds may extend behind them. */

@@ -1,70 +1,126 @@
 "use client";
 
 import { useId, useRef } from "react";
+import {
+  LuImagePlus,
+  LuShieldCheck,
+  LuSettings,
+  LuCalendarDays,
+  LuCloudSun,
+  LuMusic2,
+  LuNotebookPen,
+  LuCalculator,
+  LuClock3,
+  LuCamera,
+  LuPhone,
+  LuGlobe,
+  LuMail,
+} from "react-icons/lu";
 import HomeWallpaper from "@/components/screens/home/HomeWallpaper";
 import { WALLPAPER_ACCEPT } from "@/lib/wallpaper";
 import { useWallpaperStore } from "@/stores/useWallpaperStore";
+import styles from "./settings.module.css";
 
 export default function WallpaperSettings() {
   const { url, status, error, choose, reset, initialize } = useWallpaperStore();
   const input = useRef<HTMLInputElement>(null);
   const hintId = useId();
   const busy = status !== "idle";
-  const buttonClass =
-    "min-h-11 rounded-xl px-4 py-2 text-sm font-medium disabled:opacity-50";
-
+  const previewIcons = [
+    LuSettings,
+    LuCalendarDays,
+    LuCloudSun,
+    LuMusic2,
+    LuNotebookPen,
+    LuCalculator,
+    LuClock3,
+    LuCamera,
+  ];
   return (
-    <div
-      className="space-y-4 rounded-2xl bg-[var(--phone-surface)] p-4"
-      aria-busy={busy}
-    >
-      <div
-        className="relative mx-auto aspect-[9/19] w-36 overflow-hidden rounded-3xl border border-[var(--phone-border)] bg-[var(--phone-canvas)]"
-        role="img"
-        aria-label="Current Home Screen wallpaper preview"
-      >
-        <HomeWallpaper />
+    <div className={styles.detailStack} aria-busy={busy}>
+      <div className={styles.wallpaperStage}>
+        <div
+          className={styles.wallpaperPhone}
+          role="img"
+          aria-label="Current Home Screen wallpaper preview"
+        >
+          <HomeWallpaper fullOpacity />
+          <div className={styles.wallpaperChrome} aria-hidden="true">
+            <span className={styles.previewIsland} />
+            <div className={styles.wallpaperWidgets}>
+              <span>
+                <LuCalendarDays />
+              </span>
+              <span>
+                <LuCloudSun />
+              </span>
+            </div>
+            <div className={styles.wallpaperApps}>
+              {previewIcons.map((Icon, index) => (
+                <i key={index}>
+                  <Icon />
+                </i>
+              ))}
+            </div>
+            <div className={styles.wallpaperDock}>
+              <i>
+                <LuPhone />
+              </i>
+              <i>
+                <LuGlobe />
+              </i>
+              <i>
+                <LuMail />
+              </i>
+            </div>
+            <span className={styles.previewHomeIndicator} />
+          </div>
+        </div>
+        <p className={styles.previewCaption}>
+          <span />
+          Home Screen
+        </p>
+        <span className={styles.previewDescription}>
+          {url ? "Your photo, your space." : "A fresh view, every time."}
+        </span>
       </div>
-      <p
-        id={hintId}
-        className="text-xs leading-relaxed text-[var(--phone-text-muted)]"
-      >
-        Choose a JPEG, PNG, WebP, or AVIF up to 15 MB. Your image fills the Home
-        Screen with a centered crop. Saved only in this browser; never uploaded.
-      </p>
-      <input
-        ref={input}
-        type="file"
-        accept={WALLPAPER_ACCEPT}
-        aria-label="Choose Home Screen wallpaper"
-        aria-describedby={hintId}
-        className="hidden"
-        disabled={busy}
-        onChange={(event) => {
-          const file = event.currentTarget.files?.[0];
-          event.currentTarget.value = "";
-          if (file) void choose(file);
-        }}
-      />
-      <div className="flex flex-col gap-2">
+      <div className={styles.wallpaperActions}>
+        <input
+          ref={input}
+          type="file"
+          accept={WALLPAPER_ACCEPT}
+          aria-label="Choose Home Screen wallpaper"
+          aria-describedby={hintId}
+          className="hidden"
+          disabled={busy}
+          onChange={(event) => {
+            const file = event.currentTarget.files?.[0];
+            event.currentTarget.value = "";
+            if (file) void choose(file);
+          }}
+        />
         <button
           type="button"
+          className={styles.primaryButton}
           disabled={busy}
           onClick={() => input.current?.click()}
-          className={`${buttonClass} bg-[var(--phone-accent)] text-[var(--phone-on-accent)]`}
         >
-          Choose photo
+          <LuImagePlus aria-hidden="true" />
+          Choose a photo
         </button>
         <button
           type="button"
+          className={styles.textButton}
           disabled={busy || (!url && !error)}
           onClick={() => void reset()}
-          className={`${buttonClass} bg-[var(--phone-surface-elevated)] text-[var(--phone-text)]`}
         >
-          Restore default
+          Restore default wallpaper
         </button>
+        <p id={hintId} className={styles.fileHint}>
+          JPEG, PNG, WebP or AVIF · Up to 15 MB
+        </p>
       </div>
-      <p role="status" className="text-xs text-[var(--phone-text-secondary)]">
+      <p role="status" className={styles.wallpaperStatus}>
         {status === "loading"
           ? "Loading wallpaper…"
           : status === "saving"
@@ -76,22 +132,28 @@ export default function WallpaperSettings() {
                 : "Using the default wallpaper."}
       </p>
       {error && (
-        <div className="text-sm text-[var(--phone-text)]">
-          <p role="alert">{error}</p>
+        <div className={styles.notice}>
+          <p role="alert" className={styles.error}>
+            {error}
+          </p>
           <button
             type="button"
             disabled={busy}
+            className={styles.textButton}
             onClick={() => void initialize()}
-            className={`${buttonClass} text-[var(--phone-accent)]`}
           >
             Retry loading
           </button>
         </div>
       )}
-      <p className="text-xs leading-relaxed text-[var(--phone-text-muted)]">
-        Clearing site data removes your wallpaper. Private browsing may keep it
-        only until the session ends.
-      </p>
+      <div className={styles.privacyNote}>
+        <LuShieldCheck aria-hidden="true" />
+        <p>
+          Saved only in this browser. Your photo is never uploaded. Clearing
+          site data removes it; private browsing may keep it only for this
+          session.
+        </p>
+      </div>
     </div>
   );
 }

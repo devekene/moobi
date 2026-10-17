@@ -367,7 +367,7 @@
   cursor: pointer;
 }
 .taskMeta label:focus-within {
-  outline: 2px solid var(--phone-focus);
+  outline: 1px solid var(--phone-input-focus);
   border-radius: 5px;
 }
 .taskMeta select[data-priority="high"],

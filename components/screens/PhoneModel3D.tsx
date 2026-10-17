@@ -34,6 +34,11 @@ import {
   type HardwareButtonId,
 } from "@/lib/phone-buttons";
 
+import {
+  createHardwareButtonHitArea,
+  getHardwareButtonOffset,
+} from "@/lib/phone-button-interaction";
+
 const FRONT_FACE_BEVEL_MM = 0.9;
 const FRONT_PANEL_RAISE_MM = 0.025;
 const DISPLAY_SURFACE_GAP_MM = 0.015;
@@ -241,7 +246,6 @@ const addSideButton = (
   mesh.name = `hardware-button-${buttonId}`;
   mesh.userData.hardwareButtonId = buttonId;
   mesh.userData.basePositionX = x;
-  mesh.userData.pressDirection = -side;
   parent.add(mesh);
   return mesh;
 };
@@ -695,6 +699,19 @@ const PhoneModel3D = ({
     const device = new THREE.Group();
     addDeviceGeometry(scene, model, device);
     scene.add(device);
+    const mmPerPixel = (height / size.height) * 1.025;
+    const buttonTargets = new Map<THREE.Object3D, THREE.Mesh>();
+    for (const child of [...device.children]) {
+      if (
+        !(child instanceof THREE.Mesh) ||
+        !isHardwareButtonId(child.userData.hardwareButtonId)
+      )
+        continue;
+      const target = createHardwareButtonHitArea(child, mmPerPixel);
+      device.add(target);
+      buttonTargets.set(target, child);
+    }
+    const hitAreas = [...buttonTargets.keys()];
 
     const screenWidth = width - PHONE_SCREEN_INSET_MM;
     const screenHeight = height - PHONE_SCREEN_INSET_MM;
@@ -750,20 +767,29 @@ const PhoneModel3D = ({
       css3d.render(scene, camera);
     };
 
+    let hoveredButton: THREE.Mesh | null = null;
     let activeButton: THREE.Mesh | null = null;
     let activeButtonId: HardwareButtonId | null = null;
     let activePointerId: number | null = null;
     let repeatDelay: number | null = null;
     let repeatInterval: number | null = null;
     const pressAnimations = new Map<THREE.Mesh, number>();
-    const setButtonPressed = (button: THREE.Mesh, pressed: boolean) => {
+    const updateButtonAppearance = (button: THREE.Mesh) => {
+      const pressed = button === activeButton;
       const previousFrame = pressAnimations.get(button);
       if (previousFrame !== undefined)
         window.cancelAnimationFrame(previousFrame);
       const startX = button.position.x;
-      const baseX = button.userData.basePositionX as number;
-      const direction = button.userData.pressDirection as number;
-      const endX = baseX + direction * (pressed ? 0.48 : 0);
+      const baseX: unknown = button.userData.basePositionX;
+      if (typeof baseX !== "number") return;
+      const endX =
+        baseX +
+        getHardwareButtonOffset(
+          baseX < 0 ? -1 : 1,
+          button === hoveredButton,
+          pressed,
+          mmPerPixel,
+        );
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
         button.position.x = endX;
         render();
@@ -784,6 +810,32 @@ const PhoneModel3D = ({
       };
       pressAnimations.set(button, window.requestAnimationFrame(animate));
     };
+    const setHoveredButton = (button: THREE.Mesh | null) => {
+      if (button === hoveredButton) return;
+      const previous = hoveredButton;
+      hoveredButton = button;
+      webgl.domElement.style.cursor = button ? "pointer" : "";
+      if (previous) updateButtonAppearance(previous);
+      if (button) updateButtonAppearance(button);
+    };
+    const pickButton = (event: PointerEvent): THREE.Mesh | null => {
+      const bounds = webgl.domElement.getBoundingClientRect();
+      if (!bounds.width || !bounds.height) return null;
+      const pointer = new THREE.Vector2(
+        ((event.clientX - bounds.left) / bounds.width) * 2 - 1,
+        -((event.clientY - bounds.top) / bounds.height) * 2 + 1,
+      );
+      device.updateWorldMatrix(true, true);
+      const raycaster = new THREE.Raycaster();
+      raycaster.setFromCamera(pointer, camera);
+      const hit = raycaster.intersectObjects(hitAreas, false)[0];
+      return hit ? (buttonTargets.get(hit.object) ?? null) : null;
+    };
+    const handleButtonPointerMove = (event: PointerEvent) => {
+      if (event.pointerType === "mouse" && activePointerId === null)
+        setHoveredButton(pickButton(event));
+    };
+    const handleButtonPointerLeave = () => setHoveredButton(null);
     const clearRepeat = () => {
       if (repeatDelay !== null) window.clearTimeout(repeatDelay);
       if (repeatInterval !== null) window.clearInterval(repeatInterval);
@@ -792,41 +844,31 @@ const PhoneModel3D = ({
     };
     const finishButtonPress = () => {
       clearRepeat();
-      if (activeButton) setButtonPressed(activeButton, false);
+      const releasedButton = activeButton;
+      activeButton = null;
+      if (releasedButton) updateButtonAppearance(releasedButton);
       if (activeButtonId) {
         hardwareButtonReleaseRef.current(activeButtonId);
       }
-      activeButton = null;
       activeButtonId = null;
       activePointerId = null;
     };
     const handleButtonPointerDown = (event: PointerEvent) => {
       if (event.pointerType === "mouse" && event.button !== 0) return;
-      const bounds = webgl.domElement.getBoundingClientRect();
-      const pointer = new THREE.Vector2(
-        ((event.clientX - bounds.left) / bounds.width) * 2 - 1,
-        -((event.clientY - bounds.top) / bounds.height) * 2 + 1,
-      );
-      const raycaster = new THREE.Raycaster();
-      raycaster.setFromCamera(pointer, camera);
-      const hit = raycaster
-        .intersectObject(device, true)
-        .find(
-          ({ object }) =>
-            object instanceof THREE.Mesh &&
-            isHardwareButtonId(object.userData.hardwareButtonId),
-        )?.object;
-      if (!(hit instanceof THREE.Mesh)) return;
+      if (activePointerId !== null) return;
+      const hit = pickButton(event);
+      if (!hit) return;
       const buttonId = hit.userData.hardwareButtonId;
       if (!isHardwareButtonId(buttonId)) return;
 
       event.preventDefault();
       event.stopPropagation();
+      setHoveredButton(event.pointerType === "mouse" ? hit : null);
       activeButton = hit;
       activeButtonId = buttonId;
       activePointerId = event.pointerId;
       webgl.domElement.setPointerCapture(event.pointerId);
-      setButtonPressed(hit, true);
+      updateButtonAppearance(hit);
       hardwareButtonActionRef.current(buttonId);
       if (buttonId === "volume-up" || buttonId === "volume-down") {
         repeatDelay = window.setTimeout(() => {
@@ -841,8 +883,24 @@ const PhoneModel3D = ({
       if (event.pointerId !== activePointerId) return;
       event.preventDefault();
       event.stopPropagation();
+      setHoveredButton(
+        event.type === "pointerup" && event.pointerType === "mouse"
+          ? pickButton(event)
+          : null,
+      );
       finishButtonPress();
     };
+    const cancelButtonInteraction = () => {
+      setHoveredButton(null);
+      finishButtonPress();
+    };
+    const handleVisibilityChange = () => {
+      if (document.hidden) cancelButtonInteraction();
+    };
+    window.addEventListener("blur", cancelButtonInteraction);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    webgl.domElement.addEventListener("pointermove", handleButtonPointerMove);
+    webgl.domElement.addEventListener("pointerleave", handleButtonPointerLeave);
     webgl.domElement.addEventListener("pointerdown", handleButtonPointerDown);
     webgl.domElement.addEventListener("pointerup", handleButtonPointerUp);
     webgl.domElement.addEventListener("pointercancel", handleButtonPointerUp);
@@ -871,7 +929,17 @@ const PhoneModel3D = ({
     return () => {
       observer.disconnect();
       window.cancelAnimationFrame(frame);
-      finishButtonPress();
+      cancelButtonInteraction();
+      window.removeEventListener("blur", cancelButtonInteraction);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      webgl.domElement.removeEventListener(
+        "pointermove",
+        handleButtonPointerMove,
+      );
+      webgl.domElement.removeEventListener(
+        "pointerleave",
+        handleButtonPointerLeave,
+      );
       webgl.domElement.removeEventListener(
         "pointerdown",
         handleButtonPointerDown,

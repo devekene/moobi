@@ -1,284 +1,161 @@
-import React, { Dispatch, SetStateAction, useState } from "react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { CgList } from "react-icons/cg";
-import { BiCalculator, BiLeftArrow } from "react-icons/bi";
-import { evaluate } from "mathjs";
+import { useState } from "react";
+import { LuCalculator, LuHistory, LuDelete } from "react-icons/lu";
+import { useCalculatorStore } from "@/stores/useCalculatorStore";
+import { formatCalculation } from "@/lib/calculator";
+import styles from "./calculator.module.css";
 
-const CalculatorBoard = ({
-  history,
-  setCalcScreen,
-  setHistory,
+const basicKeys = [
+  "backspace",
+  "AC",
+  "%",
+  "÷",
+  "7",
+  "8",
+  "9",
+  "×",
+  "4",
+  "5",
+  "6",
+  "−",
+  "1",
+  "2",
+  "3",
+  "+",
+  "±",
+  "0",
+  ".",
+  "=",
+];
+const names: Record<string, string> = {
+  backspace: "Delete last character",
+  AC: "All clear",
+  "%": "Percent",
+  "÷": "Divide",
+  "×": "Multiply",
+  "−": "Subtract",
+  "+": "Add",
+  "±": "Change sign",
+  ".": "Decimal point",
+  "=": "Equals",
+  "√(": "Square root",
+  "^": "Power",
+  "!": "Factorial",
+  "10^": "Ten to the power",
+  π: "Pi",
+  angle: "Toggle degrees and radians",
+  "(": "Open parenthesis",
+  ")": "Close parenthesis",
+};
+
+export default function CalculatorBoard({
+  onHistory,
 }: {
-  history:
-    | {
-        date: string;
-        calculations: string[];
-      }[]
-    | null;
-  setCalcScreen: Dispatch<SetStateAction<"board" | "history">>;
-  setHistory: Dispatch<
-    SetStateAction<
-      | {
-          date: string;
-          calculations: string[];
-        }[]
-      | null
-    >
-  >;
-}) => {
-  const [calcValue, setCalcValue] = useState<string[]>([]);
-  const [calcResult, setCalcResult] = useState("");
-  const [showScientificKeys, setShowScientificKeys] = useState(false);
-  const [showSecondScientificKeys, setShowSecondScientificKeys] =
-    useState(false);
-
-  const defaultCalcKeys = [
+  onHistory: () => void;
+}) {
+  const { expression, result, degrees, press } = useCalculatorStore();
+  const [scientific, setScientific] = useState(false);
+  const [second, setSecond] = useState(false);
+  const value = formatCalculation(result || expression || "0");
+  const scientificKeys = [
     "2nd",
-    "deg",
-    "xʸ",
-    "log",
-    "ln",
+    "angle",
+    ...(second ? ["asin(", "acos(", "atan("] : ["sin(", "cos(", "tan("]),
+    "^",
+    "log(",
+    "ln(",
     "(",
     ")",
-    "√",
-    "AC",
-    "undo",
-    "%",
-    "÷",
-    "x!",
-    "7",
-    "8",
-    "9",
-    "×",
-    "10ˣ",
-    "4",
-    "5",
-    "6",
-    "-",
+    "√(",
+    "!",
+    "10^",
     "π",
-    "1",
-    "2",
-    "3",
-    "+",
     "e",
-    "toggle",
-    "0",
-    ".",
-    "=",
   ];
-
-  const minorCalcKeys = [
-    ...defaultCalcKeys.slice(8, 12),
-    ...defaultCalcKeys.slice(13, 17),
-    ...defaultCalcKeys.slice(18, 22),
-    ...defaultCalcKeys.slice(23, 27),
-    ...defaultCalcKeys.slice(28),
-  ];
-
-  const scientificKeys = [
-    ...defaultCalcKeys.slice(0, 2),
-    ...(showSecondScientificKeys
-      ? ["sin⁻¹", "cos⁻¹", "tan⁻¹"]
-      : ["sin", "cos", "tan"]),
-    ...defaultCalcKeys.slice(2),
-  ];
-
-  const calculatorKeys = showScientificKeys ? scientificKeys : minorCalcKeys;
-
-  const handleKeyClick = (key: string) => {
-    switch (key) {
-      case "AC":
-        setCalcValue([]);
-        setCalcResult("");
-        break;
-      case "undo":
-        setCalcValue((prev) => prev.slice(0, prev.length - 1));
-        break;
-      case "toggle":
-        setShowScientificKeys(!showScientificKeys);
-        break;
-      case "2nd":
-        setShowSecondScientificKeys(!showSecondScientificKeys);
-        break;
-      case "=":
-        try {
-          let expression = calcValue.join("");
-          expression = expression.replace(/√\(/g, "sqrt(");
-          const result = evaluate(expression);
-          const roundedResult = Math.round(result * 1e6) / 1e6;
-          setCalcResult(roundedResult.toString());
-
-          const calcDate = new Date().toLocaleDateString();
-
-          setHistory((prev) => {
-            if (!prev) {
-              return [
-                {
-                  date: calcDate,
-                  calculations: [`${expression} = ${roundedResult}`],
-                },
-              ];
-            }
-
-            const dateIndex = prev.findIndex((item) => item.date === calcDate);
-
-            if (dateIndex === -1) {
-              return [
-                {
-                  date: calcDate,
-                  calculations: [`${expression} = ${roundedResult}`],
-                },
-                ...prev,
-              ];
-            }
-
-            const updated = [...prev];
-            updated[dateIndex] = {
-              ...updated[dateIndex],
-              calculations: [
-                ...updated[dateIndex].calculations,
-                `${expression} = ${roundedResult}`,
-              ],
-            };
-            return updated;
-          });
-        } catch {
-          setCalcResult("Error");
-        }
-        break;
-      case "√":
-        setCalcValue((prev) => [...prev, "√("]);
-        break;
-      case "π":
-        setCalcValue((prev) => [...prev, "3.14"]);
-        break;
-      case "x!":
-        setCalcValue((prev) => [...prev, "!"]);
-        break;
-      case "xʸ":
-        setCalcValue((prev) => [...prev, "^"]);
-        break;
-      case "10ˣ":
-        setCalcValue((prev) => [...prev, "10^"]);
-        break;
-      case "log":
-        setCalcValue((prev) => [...prev, "log("]);
-        break;
-      case "ln":
-        setCalcValue((prev) => [...prev, "ln("]);
-        break;
-      case "sin":
-      case "cos":
-      case "tan":
-        setCalcValue((prev) => [...prev, key, "("]);
-        break;
-      case "sin⁻¹":
-        setCalcValue((prev) => [...prev, " asin("]);
-        break;
-      case "cos⁻¹":
-        setCalcValue((prev) => [...prev, " acos("]);
-        break;
-      case "tan⁻¹":
-        setCalcValue((prev) => [...prev, " atan("]);
-        break;
-      case "%":
-        setCalcValue((prev) => [...prev, "%"]);
-        break;
-      case "÷":
-        setCalcValue((prev) => [...prev, " / "]);
-        break;
-      case "×":
-        setCalcValue((prev) => [...prev, " * "]);
-        break;
-      case "+":
-        setCalcValue((prev) => [...prev, " + "]);
-        break;
-      case "-":
-        setCalcValue((prev) => [...prev, " - "]);
-        break;
-      default:
-        setCalcValue((prev) => [...prev, key]);
-    }
-  };
-
   return (
-    <div className="px-8">
-      <div
-        className={cn(
-          "flex h-[21%] w-full flex-col duration-500 ease-in-out",
-          showScientificKeys && "h-[19%]",
-        )}
-      >
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-6 text-yellow-600"
-          onClick={() => setCalcScreen("history")}
+    <div className={styles.board}>
+      <header className={styles.toolbar}>
+        <button
+          type="button"
+          className={styles.tool}
+          aria-label="Open calculation history"
+          onClick={onHistory}
         >
-          <CgList />
-        </Button>
-
-        <div className="flex flex-1 flex-col items-end justify-end gap-1.5">
-          {calcResult && history && (
-            <div className="text-base text-gray-500">
-              {history[0].calculations[history[0].calculations.length - 1]}
-            </div>
-          )}
-
-          <textarea
-            value={calcValue.join("")}
-            readOnly
-            autoFocus
-            className="no-visible-scrollbar h-9 max-w-full resize-none bg-transparent text-right text-3xl text-gray-300 focus:outline-none"
-          />
-
-          <div
-            className={cn(
-              "h-16 text-4xl text-white",
-              showScientificKeys && "text-3xl",
-            )}
-          >
-            {calcResult}
-          </div>
+          <LuHistory />
+        </button>
+        <button
+          type="button"
+          className={styles.tool}
+          aria-label="Scientific calculator"
+          aria-pressed={scientific}
+          onClick={() => setScientific(!scientific)}
+        >
+          <LuCalculator />
+        </button>
+      </header>
+      <div className={styles.display}>
+        <div className={styles.expression} aria-label="Expression">
+          {result ? formatCalculation(expression) : "\u00a0"}
         </div>
+        <output
+          className={`${styles.result} ${value.length > 9 ? styles.longResult : ""}`}
+          aria-live="polite"
+          aria-label="Calculator display"
+        >
+          {value}
+        </output>
       </div>
-      <div
-        className={cn(
-          "grid w-full grid-cols-4 gap-3 py-4 delay-75 duration-500 ease-in-out",
-          showScientificKeys && "grid-cols-5 gap-2",
-        )}
-      >
-        {calculatorKeys.map((key) => (
-          <div
+      {scientific && (
+        <div className={styles.scientific} aria-label="Scientific functions">
+          {scientificKeys.map((key) => (
+            <button
+              type="button"
+              key={key}
+              aria-label={names[key] ?? key.replace("(", "")}
+              aria-pressed={key === "2nd" ? second : undefined}
+              onClick={() => (key === "2nd" ? setSecond(!second) : press(key))}
+            >
+              {key === "angle"
+                ? degrees
+                  ? "Deg"
+                  : "Rad"
+                : key === "^"
+                  ? "xʸ"
+                  : key === "!"
+                    ? "x!"
+                    : key.replace("(", "")}
+            </button>
+          ))}
+        </div>
+      )}
+      <div className={styles.keypad} aria-label="Calculator keypad">
+        {basicKeys.map((key, index) => (
+          <button
+            type="button"
             key={key}
-            onClick={() => handleKeyClick(key)}
-            className={cn(
-              "flex-center h-16 w-16 cursor-default rounded-full bg-neutral-600 text-base font-light text-white",
-              showScientificKeys && "h-12 w-12 text-sm",
-              (key === "-" ||
-                key === "÷" ||
-                key === "+" ||
-                key === "=" ||
-                key === "×") &&
-                "bg-yellow-600 font-bold",
-            )}
+            className={`${styles.key} ${index < 3 ? styles.utility : ""} ${index % 4 === 3 ? styles.operator : ""}`}
+            aria-label={names[key] ?? key}
+            onClick={() => press(key)}
           >
-            {key === "undo" ? (
-              <BiLeftArrow />
-            ) : key === "toggle" ? (
-              <BiCalculator />
-            ) : key !== "AC" ? (
-              key
+            {key === "backspace" ? (
+              <LuDelete aria-hidden="true" />
+            ) : key === "±" ? (
+              <svg
+                viewBox="0 0 40 40"
+                aria-hidden="true"
+                className={styles.sign}
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+              >
+                <path d="M8 8v12M2 14h12M29 7L11 33M26 28h12" />
+              </svg>
             ) : (
-              ""
+              key
             )}
-
-            {key === "AC" && (calcValue.length === 0 ? "AC" : "C")}
-          </div>
+          </button>
         ))}
       </div>
     </div>
   );
-};
-export default CalculatorBoard;
+}
