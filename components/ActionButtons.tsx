@@ -210,7 +210,12 @@ const ActionButtons = ({
           <LuSettings size={19} />
         </DropdownMenuTrigger>
 
-        <DropdownMenuContent align="start">
+        <DropdownMenuContent
+          align="start"
+          onCloseAutoFocus={(event) => {
+            if (usePhoneStore.getState().showAppSwitcher) event.preventDefault();
+          }}
+        >
           <DropdownMenuCheckboxItem
             checked={pinLockEnabled}
             onCheckedChange={(checked) => {

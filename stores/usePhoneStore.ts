@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { ScreenOptions } from "@/types";
 import { PHONE_LAUNCHER_PAGE_COUNT } from "@/lib/app-library";
+import { isMiniAppId } from "@/lib/app-registry";
 
 type PhoneState = {
   currentScreen: ScreenOptions;
@@ -14,6 +15,8 @@ type PhoneState = {
   addToHistory: (screen: ScreenOptions) => void;
   removeFromHistory: (screen: ScreenOptions) => void;
   clearHistory: () => void;
+  closeApp: (screen: ScreenOptions) => void;
+  closeAllApps: () => void;
 
   showAppSwitcher: boolean;
   passcodeEntryOpen: boolean;
@@ -54,6 +57,7 @@ export const usePhoneStore = create<PhoneState>((set, get) => ({
         lastScreen: currentScreen,
       }),
       currentScreen: screen,
+      showAppSwitcher: false,
       history: updatedHistory,
       passcodeEntryOpen: false,
     });
@@ -71,6 +75,17 @@ export const usePhoneStore = create<PhoneState>((set, get) => ({
     set({ history: filtered });
   },
   clearHistory: () => set({ history: [] }),
+  closeApp: (screen) => {
+    if (!isMiniAppId(screen)) return;
+    set((state) => ({
+      history: state.history.filter((entry) => entry !== screen),
+      ...(state.currentScreen === screen && {
+        currentScreen: "home",
+        lastScreen: "home",
+      }),
+    }));
+  },
+  closeAllApps: () => set({ history: [], currentScreen: "home", lastScreen: "home", showAppSwitcher: false }),
 
   setShowAppSwitcher: (value) => set({ showAppSwitcher: value }),
   setPasscodeEntryOpen: (value) => set({ passcodeEntryOpen: value }),

@@ -1,0 +1,449 @@
+.workspace,
+.composer {
+  position: relative;
+  height: 100%;
+  min-height: 0;
+  background: var(--phone-canvas);
+  color: var(--phone-text);
+}
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 18px 10px;
+  min-height: 58px;
+}
+.header > span {
+  font-size: 10px;
+  letter-spacing: 1.8px;
+  color: var(--phone-text-muted);
+  font-weight: 700;
+}
+.iconButton {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  background: var(--phone-surface);
+  border-radius: 50%;
+}
+.iconButton svg {
+  width: 22px;
+  height: 22px;
+}
+.save {
+  min-height: 44px;
+  font-weight: 700 !important;
+  color: var(--phone-alarm-accent) !important;
+  padding: 0 8px;
+}
+.workspaceScroll,
+.composerScroll {
+  position: absolute;
+  inset: 62px 0 82px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  padding: 12px 20px 24px;
+}
+.composerScroll {
+  bottom: 0;
+}
+.composer h1 {
+  font-size: 30px;
+  line-height: 1.1;
+  letter-spacing: -1px;
+  font-weight: 750;
+  white-space: pre-line;
+  margin: 4px 0 12px;
+}
+.intro {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--phone-text-muted);
+  max-width: 260px;
+  margin-bottom: 24px;
+}
+.listName {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  font-weight: 700;
+  color: var(--phone-text-muted);
+  margin-bottom: 24px;
+}
+.listName input {
+  display: block;
+  width: 100%;
+  font-size: 21px !important;
+  letter-spacing: -0.6px;
+  min-height: 44px;
+  border-bottom: 1px solid var(--phone-border) !important;
+  margin-top: 6px;
+  color: var(--phone-text);
+}
+.context {
+  font-weight: 700;
+  margin: 8px 0 20px;
+  color: var(--phone-text-secondary);
+}
+.drafts {
+  display: grid;
+  gap: 12px;
+}
+.draft {
+  background: var(--phone-surface);
+  border: 1px solid color-mix(in srgb, var(--phone-border) 45%, transparent);
+  border-radius: 20px;
+  padding: 8px 12px 12px;
+}
+.draftTitle {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.draftTitle > span {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--phone-text-muted);
+}
+.draftTitle input {
+  flex: 1;
+  width: 100%;
+  height: 44px;
+  font-size: 15px !important;
+}
+.remove {
+  min-width: 32px;
+  min-height: 44px;
+  display: grid;
+  place-items: center;
+  color: var(--phone-text-muted) !important;
+}
+.remove:hover {
+  color: var(--phone-negative) !important;
+}
+.remove svg {
+  width: 15px;
+  height: 15px;
+}
+.properties {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin-top: 4px;
+}
+.properties label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+.properties svg {
+  width: 14px;
+  height: 14px;
+  color: var(--phone-text-muted);
+}
+.properties input {
+  font-size: 12px !important;
+  min-height: 36px;
+  width: 127px;
+}
+.properties select,
+.taskMeta select {
+  font-size: 11px !important;
+  background: var(--phone-surface-elevated);
+  border: 1px solid color-mix(in srgb, var(--phone-border) 55%, transparent);
+  border-radius: 10px;
+  min-height: 34px;
+  padding: 4px 6px;
+  max-width: 100%;
+}
+.quickDates {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+.quickDates button {
+  font-size: 11px !important;
+  color: var(--phone-text-secondary) !important;
+  padding: 6px 8px;
+  min-height: 34px;
+  border-radius: 8px;
+  background: var(--phone-surface-elevated);
+}
+.addRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 48px;
+  border: 1px dashed var(--phone-border);
+  border-radius: 16px;
+  margin-top: 14px;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+}
+.hint {
+  margin: 12px 4px 0;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--phone-text-muted);
+}
+.listSymbol {
+  display: grid;
+  place-items: center;
+  width: 45px;
+  height: 45px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--phone-alarm-accent) 14%, transparent);
+  color: var(--phone-alarm-accent);
+  margin-bottom: 14px;
+}
+.listSymbol svg {
+  width: 25px;
+  height: 25px;
+}
+.workspaceTitle {
+  display: block;
+  width: 100%;
+  font-size: 29px !important;
+  font-weight: 750 !important;
+  line-height: 1.2 !important;
+  min-height: 44px;
+  letter-spacing: -0.9px;
+}
+.progressText {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--phone-text-muted);
+  font-size: 11px;
+  margin: 12px 0 8px;
+}
+.progressText strong {
+  color: var(--phone-text-secondary);
+}
+.progress {
+  display: block;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 4px;
+  border: 0;
+  background: var(--phone-surface-elevated);
+  overflow: hidden;
+}
+.progress::-webkit-progress-bar {
+  background: var(--phone-surface-elevated);
+}
+.progress::-webkit-progress-value {
+  background: var(--phone-alarm-accent);
+  border-radius: 4px;
+}
+.progress::-moz-progress-bar {
+  background: var(--phone-alarm-accent);
+  border-radius: 4px;
+}
+.filters {
+  display: flex;
+  gap: 5px;
+  margin: 20px 0 14px;
+  padding: 4px;
+  border-radius: 14px;
+  background: var(--phone-surface);
+}
+.filters button {
+  flex: 1;
+  min-height: 36px;
+  border-radius: 10px;
+  font-size: 12px !important;
+  color: var(--phone-text-muted) !important;
+}
+.filters button[aria-pressed="true"] {
+  color: var(--phone-text) !important;
+  background: var(--phone-surface-elevated);
+  box-shadow: 0 2px 6px #0001;
+}
+.taskList {
+  display: grid;
+  gap: 8px;
+}
+.task {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr) 28px;
+  align-items: start;
+  column-gap: 8px;
+  row-gap: 0;
+  background: var(--phone-surface);
+  border-radius: 18px;
+  padding: 10px 10px 10px 12px;
+}
+.check {
+  grid-column: 1;
+  grid-row: 1;
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 26px;
+  height: 44px;
+  cursor: pointer;
+}
+.check input {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+.check span {
+  width: 21px;
+  height: 21px;
+  border: 1.5px solid var(--phone-text-muted);
+  border-radius: 7px;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+}
+.check input:checked + span {
+  background: var(--phone-alarm-accent);
+  border-color: var(--phone-alarm-accent);
+  color: var(--phone-canvas);
+}
+.check:has(:focus-visible) span {
+  outline: 2px solid var(--phone-focus);
+  outline-offset: 3px;
+}
+.taskBody {
+  display: contents;
+}
+.taskText {
+  grid-column: 2;
+  grid-row: 1;
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  font-size: 15px !important;
+}
+.isComplete .taskText {
+  text-decoration: line-through;
+  color: var(--phone-text-muted) !important;
+}
+.taskMeta {
+  grid-column: 2 / 4;
+  grid-row: 2;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding-bottom: 2px;
+}
+.taskMeta > label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  position: relative;
+  min-height: 34px;
+  color: var(--phone-text-muted);
+  font-size: 11px;
+  cursor: pointer;
+}
+.taskMeta svg {
+  width: 12px;
+  height: 12px;
+}
+.taskMeta input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  width: 100%;
+  cursor: pointer;
+}
+.taskMeta label:focus-within {
+  outline: 2px solid var(--phone-focus);
+  border-radius: 5px;
+}
+.taskMeta select[data-priority="high"],
+.overdue {
+  color: var(--phone-negative) !important;
+}
+.clearDate {
+  display: grid;
+  place-items: center;
+  min-height: 34px;
+  min-width: 28px;
+  color: var(--phone-text-muted) !important;
+}
+.clearDate svg {
+  width: 12px;
+  height: 12px;
+}
+.sectionLabel {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--phone-text-muted);
+  margin: 14px 4px 3px;
+}
+.empty {
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: center;
+  padding: 30px 14px;
+  color: var(--phone-text-muted);
+}
+.bottom {
+  position: absolute;
+  inset: auto 20px 0;
+  background: var(--phone-canvas);
+  padding-top: 8px;
+}
+.primary {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 46px;
+  border-radius: 18px;
+  background: var(--phone-alarm-accent);
+  color: var(--phone-canvas) !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+}
+.bottom p {
+  min-height: 22px;
+  font-size: 11px;
+  text-align: center;
+  line-height: 22px;
+  color: var(--phone-text-muted);
+}
+.legacy {
+  margin-top: 12px;
+  color: var(--phone-text-secondary);
+  font-size: 12px;
+}
+.legacy summary {
+  min-height: 32px;
+  cursor: pointer;
+}
+.legacy p {
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
+
+.task > .remove {
+  grid-column: 3;
+  grid-row: 1;
+  min-width: 28px;
+}
+.taskMeta select {
+  width: 70px;
+}

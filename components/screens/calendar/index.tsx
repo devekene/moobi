@@ -1,5 +1,6 @@
 "use client";
 
+import { localDateKey } from "@/lib/todos";
 import type React from "react";
 import { useState } from "react";
 import { CalendarEvent, CalendarEventCategory, CalendarScreen } from "@/types";
@@ -17,9 +18,7 @@ export const CATEGORY_COLORS: Record<CalendarEventCategory, string> = {
 };
 
 const CalendarApp = () => {
-  const [selectedDate, setSelectedDate] = useState<string>(
-    new Date().toISOString().split("T")[0],
-  );
+  const [selectedDate, setSelectedDate] = useState<string>(localDateKey());
   const [allEvents, setAllEvents] = useState<CalendarEvent[]>(globalEvents);
   const [screen, setScreen] = useState<CalendarScreen>("home");
   const [eventToEdit, setEventToEdit] = useState<CalendarEvent | null>(null);

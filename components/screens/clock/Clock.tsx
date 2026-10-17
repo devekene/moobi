@@ -63,7 +63,7 @@ const Clock = () => {
         </TabsContent>
         <TabsContent
           value="stopwatch"
-          className="absolute inset-x-0 top-0 bottom-[72px]"
+          className="absolute inset-x-0 top-0 bottom-0"
         >
           <Stopwatch />
         </TabsContent>

@@ -1,0 +1,56 @@
+.section {
+  margin: 12px 0 20px;
+  color: var(--phone-text);
+}
+.section h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+.section h2 > span {
+  font-size: 12px;
+  color: var(--phone-text-muted);
+}
+.task {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 16px;
+  background: var(--phone-surface);
+  margin-top: 6px;
+}
+.task input {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--phone-alarm-accent);
+  flex-shrink: 0;
+}
+.task button {
+  text-align: left;
+  min-width: 0;
+  min-height: 44px;
+  flex: 1;
+}
+.task button > span {
+  display: block;
+  overflow-wrap: anywhere;
+  font-size: 14px;
+}
+.task small {
+  display: block;
+  color: var(--phone-text-muted);
+  font-size: 11px;
+  margin-top: 4px;
+}
+.task > svg {
+  width: 15px;
+  color: var(--phone-text-muted);
+}
+.completed {
+  text-decoration: line-through;
+  color: var(--phone-text-muted);
+}

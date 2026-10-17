@@ -180,6 +180,7 @@ body {
   --phone-accent: #7660ed;
   --phone-alarm-accent: #ff9f0a;
   --phone-positive: #30d158;
+  --phone-negative: #ff453a;
   --phone-on-accent: #fff;
   --phone-overlay: rgb(7 8 10 / 82%);
   --phone-wallpaper-opacity: 0.35;
@@ -210,6 +211,7 @@ body {
   --phone-accent: #5b49d6;
   --phone-alarm-accent: #a85c00;
   --phone-positive: #24843b;
+  --phone-negative: #c62828;
   --phone-overlay: rgb(28 31 39 / 46%);
   --phone-wallpaper-opacity: 0.12;
   --phone-control-center-backdrop: rgb(50 59 68 / 58%);
@@ -359,3 +361,6 @@ body {
     stroke-dashoffset: 0;
   }
 }
+
+/* Immersive apps own their scrolling and draw underneath both system bars. */
+.phone-app-safe-area[data-layout="full-bleed"] { inset: 0; }

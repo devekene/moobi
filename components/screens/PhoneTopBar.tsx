@@ -22,7 +22,8 @@ type PhoneTopBarProps = {
 const PhoneTopBar = ({ model, size }: PhoneTopBarProps) => {
   const currentScreen = usePhoneStore((state) => state.currentScreen);
   const hasScrollingContent =
-    isMiniAppId(currentScreen) && getMiniApp(currentScreen).viewport === "scroll";
+    isMiniAppId(currentScreen) &&
+    getMiniApp(currentScreen).viewport === "scroll";
   const showControlCenter = usePhoneStore((state) => state.showControlCenter);
   const toggleControlCenter = usePhoneStore(
     (state) => state.toggleControlCenter,
@@ -106,6 +107,7 @@ const PhoneTopBar = ({ model, size }: PhoneTopBarProps) => {
         "absolute inset-x-0 top-0 z-50 grid w-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-start bg-transparent text-[var(--phone-text)] backdrop-blur-[4px]",
         hasScrollingContent && "bg-[var(--phone-canvas)]/20",
         currentScreen === "guess" && "text-black",
+        currentScreen === "weather" && "text-[var(--phone-on-accent)]",
         showControlCenter && "hidden",
       )}
       style={{

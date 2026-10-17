@@ -1,5 +1,6 @@
+import { encryptedStorage } from "@/lib/encrypted-storage";
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { createJSONStorage, persist } from "zustand/middleware";
 import type { MusicPlayerScreen, Song } from "@/types";
 
 interface MusicState {
@@ -97,6 +98,8 @@ export const useMusicStore = create<MusicState>()(
     }),
     {
       name: "music-storage",
+      storage: createJSONStorage(() => encryptedStorage),
+      skipHydration: true,
       partialize: (state) => ({
         queue: state.queue,
         currentSong: state.currentSong,

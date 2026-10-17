@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { ReactNode } from "react";
 import { ThemeProvider } from "@/components/theme-provider";
+import { StorageBoundary } from "@/components/StorageBoundary";
 import { ClockProvider } from "@/context/ClockContext";
 import { ChessGameProvider } from "@/components/screens/chess/GameContext";
 
@@ -46,22 +47,19 @@ export default function RootLayout({
   children: ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className="dark" suppressHydrationWarning>
       <body className="bg-black antialiased">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <ClockProvider>
-            <ChessGameProvider>
-              {/*<Analytics />*/}
-              {/*<SpeedInsights />*/}
-              {children}
-            </ChessGameProvider>
-          </ClockProvider>
-        </ThemeProvider>
+        <StorageBoundary>
+          <ThemeProvider>
+            <ClockProvider>
+              <ChessGameProvider>
+                {/*<Analytics />*/}
+                {/*<SpeedInsights />*/}
+                {children}
+              </ChessGameProvider>
+            </ClockProvider>
+          </ThemeProvider>
+        </StorageBoundary>
       </body>
     </html>
   );

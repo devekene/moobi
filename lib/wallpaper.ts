@@ -1,3 +1,4 @@
+import { browserCipher, withStorageLock } from "@/lib/encrypted-storage";
 export const WALLPAPER_ACCEPT = "image/jpeg,image/png,image/webp,image/avif";
 export const MAX_WALLPAPER_BYTES = 15 * 1024 * 1024;
 
@@ -83,34 +84,41 @@ async function openDatabase(): Promise<IDBDatabase> {
   });
 }
 
+type EncryptedWallpaper = {
+  format: "moobi-wallpaper-v1";
+  type: string;
+  data: string;
+};
+const wallpaperContext = (type: string) =>
+  `indexedDB:moobi-wallpaper:images:home:${type}`;
+
 async function accessWallpaper(
-  write: boolean,
-  blob: Blob | null = null,
-): Promise<Blob | null> {
+  mode: "read" | "write" | "migrate",
+  value: EncryptedWallpaper | null = null,
+): Promise<unknown> {
   const database = await openDatabase();
   try {
-    return await new Promise<Blob | null>((resolve, reject) => {
+    return await new Promise<unknown>((resolve, reject) => {
       const transaction = database.transaction(
         "images",
-        write ? "readwrite" : "readonly",
+        mode === "read" ? "readonly" : "readwrite",
       );
       const store = transaction.objectStore("images");
-      let result: Blob | null = null;
-      if (write) {
-        if (blob) store.put(blob, "home");
+      let result: unknown = null;
+      if (mode === "write") {
+        if (value) store.put(value, "home");
         else store.delete("home");
       } else {
         const request = store.get("home");
         request.onsuccess = () => {
-          const value: unknown = request.result;
-          if (value instanceof Blob) result = value;
+          result = request.result;
+          // Do not replace a concurrently saved encrypted wallpaper or resurrect a deletion.
+          if (mode === "migrate" && result instanceof Blob && value)
+            store.put(value, "home");
         };
       }
-      // A request succeeding does not mean its transaction has committed.
       transaction.oncomplete = () => resolve(result);
-      transaction.onabort = () =>
-        reject(transaction.error ?? new Error("Wallpaper storage failed."));
-      transaction.onerror = () =>
+      transaction.onabort = transaction.onerror = () =>
         reject(transaction.error ?? new Error("Wallpaper storage failed."));
     });
   } finally {
@@ -118,9 +126,48 @@ async function accessWallpaper(
   }
 }
 
+async function encryptWallpaper(blob: Blob): Promise<EncryptedWallpaper> {
+  return {
+    format: "moobi-wallpaper-v1",
+    type: blob.type,
+    data: await browserCipher.encrypt(
+      await blob.arrayBuffer(),
+      wallpaperContext(blob.type),
+    ),
+  };
+}
+
 export const wallpaperStorage: WallpaperStorage = {
-  read: () => accessWallpaper(false),
-  write: async (blob) => {
-    await accessWallpaper(true, blob);
-  },
+  read: () =>
+    withStorageLock("wallpaper:home", async () => {
+      const value = await accessWallpaper("read");
+      if (value === null || value === undefined) return null;
+      if (value instanceof Blob) {
+        await accessWallpaper("migrate", await encryptWallpaper(value));
+        return value;
+      }
+      if (
+        typeof value !== "object" ||
+        !("format" in value) ||
+        value.format !== "moobi-wallpaper-v1" ||
+        !("type" in value) ||
+        typeof value.type !== "string" ||
+        !("data" in value) ||
+        typeof value.data !== "string"
+      )
+        throw new Error(
+          "Saved wallpaper could not be opened. Existing data was preserved.",
+        );
+      return new Blob(
+        [await browserCipher.decrypt(value.data, wallpaperContext(value.type))],
+        { type: value.type },
+      );
+    }),
+  write: (blob) =>
+    withStorageLock("wallpaper:home", async () => {
+      await accessWallpaper(
+        "write",
+        blob ? await encryptWallpaper(blob) : null,
+      );
+    }),
 };

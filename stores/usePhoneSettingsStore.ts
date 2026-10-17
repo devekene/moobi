@@ -1,3 +1,4 @@
+import { encryptedStorage } from "@/lib/encrypted-storage";
 import { create } from "zustand";
 import {
   createJSONStorage,
@@ -69,6 +70,7 @@ export const createPhoneSettingsStore = (storage: StateStorage) =>
       {
         name: "moobi-phone-settings",
         storage: createJSONStorage(() => storage),
+        skipHydration: storage === encryptedStorage,
         partialize: (state) => ({
           brightness: state.brightness,
           volume: state.volume,
@@ -84,15 +86,4 @@ export const createPhoneSettingsStore = (storage: StateStorage) =>
     ),
   );
 
-const browserStorage: StateStorage = {
-  getItem: (name) =>
-    typeof window === "undefined" ? null : window.localStorage.getItem(name),
-  setItem: (name, value) => {
-    if (typeof window !== "undefined") window.localStorage.setItem(name, value);
-  },
-  removeItem: (name) => {
-    if (typeof window !== "undefined") window.localStorage.removeItem(name);
-  },
-};
-
-export const usePhoneSettingsStore = createPhoneSettingsStore(browserStorage);
+export const usePhoneSettingsStore = createPhoneSettingsStore(encryptedStorage);

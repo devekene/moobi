@@ -21,7 +21,7 @@ phone history and app launch targets refer to them.
   store when it should survive switching; transient form/animation state can
   remain local.
 - The phone shell places every launched mini app inside one shared safe-area
-  viewport. It reserves the top for the status bar and Dynamic Island, the
+  viewport by default. It reserves the top for the status bar and Dynamic Island, the
   bottom for the home indicator, and leaves the full screen width available.
   Apps own horizontal content spacing for headers, grouped controls, and cards.
   Keep touch targets and keyboard controls usable.
@@ -32,13 +32,17 @@ phone history and app launch targets refer to them.
   Settings (including About), Calendar, Mi Store, and Guess use this mode. The default `contained`
   viewport keeps fixed layouts and apps with internal scrolling inside the safe
   area.
+- Weather explicitly uses `viewport: "full-bleed"`. This immersive mode removes
+  both shell insets and leaves scrolling with the app. Weather draws and scrolls
+  behind the status bar and home indicator, with its own header and floating
+  controls. It does not consume the top or bottom safe-area variables.
 - About is an internal Settings page, not a registered mini app. It has no
   separate Home/App Library/Mi Store icon or recent-app entry.
 - Treat the virtual display like a mobile screen: `--phone-safe-area-top` and
   `--phone-safe-area-bottom` come from the selected model and preview size, not
   the visitor's hardware or browser `env()` insets. The top protects the status
   row and Dynamic Island; the bottom protects the home gesture region. The shell
-  applies these once to mini apps. Full-bleed system surfaces keep backgrounds
+  applies these once to mini apps except those explicitly using `full-bleed`. Full-bleed system surfaces keep backgrounds
   edge to edge, but place interactive content inside these boundaries. Home is
   exempt from the bottom safe area: its dock uses its own 12px bottom spacing,
   and the App Library extends to the bottom. Home still respects the top inset.

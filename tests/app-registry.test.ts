@@ -24,6 +24,10 @@ describe("mini-app registry", () => {
     }
   });
 
+  it("lets Weather draw beneath both system bars", () => {
+    expect(getMiniApp("weather").viewport).toBe("full-bleed");
+  });
+
   it("keeps About out of app discovery and standalone launch targets", () => {
     expect(isMiniAppId("info")).toBe(false);
     expect(searchMiniApps("info")).toEqual([]);

@@ -5,7 +5,8 @@ import Index from "@/components/screens/boot";
 import Frame from "@/components/screens/Frame";
 import { PhoneScreenBoundary } from "@/components/screens/PhoneScreenBoundary";
 import dynamic from "next/dynamic";
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
+import { useAppPreviews } from "@/hooks/useAppPreviews";
 import { getMiniApp, isMiniAppId, MINI_APPS } from "@/lib/app-registry";
 import { usePhoneStore } from "@/stores/usePhoneStore";
 
@@ -31,6 +32,8 @@ const HomeScreen = dynamic(
 );
 
 const Phone = () => {
+  const appViewport = useRef<HTMLDivElement>(null);
+  useAppPreviews(appViewport);
   const currentScreen = usePhoneStore((state) => state.currentScreen);
   const returnHome = () => usePhoneStore.getState().setCurrentScreen("home");
   const viewport = isMiniAppId(currentScreen)
@@ -58,7 +61,7 @@ const Phone = () => {
           ) : currentScreen === "home" ? (
             <HomeScreen />
           ) : Screen ? (
-            <div className="phone-app-safe-area" data-layout={viewport}>
+            <div ref={appViewport} className="phone-app-safe-area" data-layout={viewport}>
               <Screen />
             </div>
           ) : (

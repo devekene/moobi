@@ -1,9 +1,11 @@
+import { localDateKey } from "@/lib/todos";
 import { CalendarEvent } from "@/types";
 import { Dispatch, SetStateAction } from "react";
 import { cn } from "@/lib/utils";
 
 interface CalendarGridProps {
   currentDate: Date;
+  taskDates?: ReadonlySet<string>;
   getEventsForDate: (date: string) => CalendarEvent[];
   selectedDate: string | null;
   setSelectedDate: Dispatch<SetStateAction<string>>;
@@ -11,15 +13,16 @@ interface CalendarGridProps {
 
 const CalendarGrid = ({
   currentDate,
+  taskDates,
   getEventsForDate,
   selectedDate,
   setSelectedDate,
 }: CalendarGridProps) => {
   const today = new Date();
-  const todayString = today.toISOString().split("T")[0];
+  const todayString = localDateKey(today);
 
   const handleDateClick = (date: Date) => {
-    const dateString = date.toISOString().split("T")[0];
+    const dateString = localDateKey(date);
     setSelectedDate(dateString);
   };
 
@@ -33,7 +36,7 @@ const CalendarGrid = ({
     const days = [];
     const current = new Date(startDate);
 
-    for (let i = 0; i < 35; i++) {
+    for (let i = 0; i < 42; i++) {
       days.push(new Date(current));
       current.setDate(current.getDate() + 1);
     }
@@ -57,7 +60,7 @@ const CalendarGrid = ({
 
       <div className="grid grid-cols-7 gap-1">
         {calendarDays.map((day, index) => {
-          const dateString = day.toISOString().split("T")[0];
+          const dateString = localDateKey(day);
           const isCurrentMonth = day.getMonth() === currentDate.getMonth();
           const isToday = dateString === todayString;
           const isSelected = dateString === selectedDate;
@@ -67,6 +70,7 @@ const CalendarGrid = ({
           return (
             <button
               key={index}
+              aria-label={`${dateString}${taskDates?.has(dateString) ? ", scheduled todos" : ""}`}
               onClick={() => handleDateClick(day)}
               className={cn(
                 "relative aspect-square rounded-lg text-sm font-medium transition-all duration-200",
@@ -80,9 +84,14 @@ const CalendarGrid = ({
               )}
             >
               {day.getDate()}
-              {hasEvents && (
-                <div className="absolute left-1/2 top-1 flex -translate-x-1/2 transform gap-0.5">
-                  <div className="h-1 w-1 rounded-full bg-white" />
+              {(hasEvents || taskDates?.has(dateString)) && (
+                <div className="absolute top-1 left-1/2 flex -translate-x-1/2 transform gap-0.5">
+                  {hasEvents && (
+                    <div className="h-1 w-1 rounded-full bg-white" />
+                  )}
+                  {taskDates?.has(dateString) && (
+                    <div className="h-1 w-1 rounded-full bg-[var(--phone-alarm-accent)]" />
+                  )}
                 </div>
               )}
             </button>

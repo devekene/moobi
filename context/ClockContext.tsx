@@ -24,6 +24,13 @@ import {
   type TimerState,
 } from "@/lib/timers";
 
+import {
+  INITIAL_STOPWATCH_STATE,
+  stopwatchReducer,
+  type StopwatchAction,
+  type StopwatchState,
+} from "@/lib/stopwatch";
+
 interface ContextType {
   currentClockScreen: ClockScreen;
   setCurrentClockScreen: Dispatch<SetStateAction<ClockScreen>>;
@@ -39,10 +46,8 @@ interface ContextType {
   silenceRingingAudio: () => boolean;
 
   // STOPWATCH
-  elapsedSwTime: number;
-  setElapsedSwTime: Dispatch<SetStateAction<number>>;
-  stopwatchIsRunning: boolean;
-  setStopwatchIsRunning: Dispatch<SetStateAction<boolean>>;
+  stopwatch: StopwatchState;
+  dispatchStopwatch: Dispatch<StopwatchAction>;
 
   // TIMER
   timer: TimerState;
@@ -61,14 +66,15 @@ const ClockProvider = ({ children }: { children: ReactNode }) => {
   const [selectedTimezones, setSelectedTimezones] = useState<Timezone[]>([]);
   const [alarms, setAlarms] = useState<Alarm[]>([]);
   const [ringingAlarmId, setRingingAlarmId] = useState<number | null>(null);
-  const [elapsedSwTime, setElapsedSwTime] = useState(0);
-  const [stopwatchIsRunning, setStopwatchIsRunning] = useState(false);
+  const [stopwatch, dispatchStopwatch] = useReducer(
+    stopwatchReducer,
+    INITIAL_STOPWATCH_STATE,
+  );
 
   // TIMER
   const [timer, dispatchTimer] = useReducer(timerReducer, INITIAL_TIMER_STATE);
 
   const alarmAudioRef = useRef<HTMLAudioElement | null>(null);
-  const stopwatchRef = useRef<NodeJS.Timeout | null>(null);
   const timerAudioRef = useRef<HTMLAudioElement | null>(null);
 
   // ALARM
@@ -137,21 +143,6 @@ const ClockProvider = ({ children }: { children: ReactNode }) => {
     checkAlarms();
     return () => clearTimeout(timeout);
   }, [ringingAlarmId]);
-
-  // STOPWATCH
-  useEffect(() => {
-    if (stopwatchIsRunning) {
-      stopwatchRef.current = setInterval(
-        () => setElapsedSwTime((v) => v + 10),
-        10,
-      );
-    } else if (stopwatchRef.current) {
-      clearInterval(stopwatchRef.current);
-    }
-    return () => {
-      if (stopwatchRef.current) clearInterval(stopwatchRef.current);
-    };
-  }, [stopwatchIsRunning]);
 
   const hasRunningTimer = timer.items.some((item) => item.status === "running");
   const hasRingingTimer = timer.items.some((item) => item.status === "ringing");
@@ -224,10 +215,8 @@ const ClockProvider = ({ children }: { children: ReactNode }) => {
         setRingingAlarmId,
         alarmAudioRef,
         silenceRingingAudio,
-        elapsedSwTime,
-        setElapsedSwTime,
-        stopwatchIsRunning,
-        setStopwatchIsRunning,
+        stopwatch,
+        dispatchStopwatch,
         timer,
         dispatchTimer,
       }}

@@ -45,7 +45,7 @@ export interface MiniAppDefinition {
   };
   readonly availability: MiniAppAvailability;
   readonly homePage: number;
-  readonly viewport?: "contained" | "scroll";
+  readonly viewport?: "contained" | "scroll" | "full-bleed";
   readonly loadScreen: () => Promise<ScreenModule>;
 }
 
@@ -168,6 +168,7 @@ export const MINI_APPS = [
   },
   {
     id: "weather",
+    viewport: "full-bleed",
     name: "Weather",
     icon: TiWeatherDownpour,
     color: "bg-blue-500",

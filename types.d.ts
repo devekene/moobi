@@ -86,88 +86,56 @@ interface CustomSearchResult {
 
 interface WeatherCondition {
   text: string;
-  icon: string;
   code: number;
+  is_day: boolean;
 }
 
 interface CurrentWeather {
+  pressure_mb: number;
+  wind_kph: number;
+  wind_degree: number;
+  gust_kph: number;
+  uv: number;
+  dewpoint_c: number;
+  time_epoch: number;
   temp_c: number;
   temp_f: number;
   condition: WeatherCondition;
   wind_mph: number;
-  wind_kph: number;
   wind_dir: string;
-  pressure_mb: number;
-  pressure_in: number;
-  precip_mm: number;
-  precip_in: number;
   humidity: number;
-  cloud: number;
   feelslike_c: number;
   feelslike_f: number;
-  vis_km: number;
-  vis_miles: number;
-  uv: number;
-  gust_mph: number;
-  gust_kph: number;
+  vis_miles: number | null;
 }
 
 interface HourlyWeather {
+  wind_kph: number;
+  precip_mm: number;
   time_epoch: number;
   time: string;
   temp_c: number;
   temp_f: number;
-  is_day: number;
   condition: WeatherCondition;
-  wind_mph: number;
-  wind_kph: number;
-  wind_dir: string;
-  pressure_mb: number;
-  pressure_in: number;
-  precip_mm: number;
-  precip_in: number;
-  humidity: number;
-  cloud: number;
-  feelslike_c: number;
-  feelslike_f: number;
   chance_of_rain: number;
-  chance_of_snow: number;
-  vis_km: number;
-  vis_miles: number;
-  gust_mph: number;
-  gust_kph: number;
-  uv: number;
 }
 
 interface DailyWeather {
   date: string;
-  date_epoch: number;
+  sunrise: number;
+  sunset: number;
+  moonrise: number | null;
+  moonset: number | null;
+  moon_phase: number;
   day: {
     maxtemp_c: number;
     maxtemp_f: number;
     mintemp_c: number;
     mintemp_f: number;
-    avgtemp_c: number;
-    avgtemp_f: number;
-    maxwind_mph: number;
-    maxwind_kph: number;
-    totalprecip_mm: number;
-    totalprecip_in: number;
-    avghumidity: number;
-    daily_will_it_rain: number;
     daily_chance_of_rain: number;
-    daily_will_it_snow: number;
-    daily_chance_of_snow: number;
-    condition: WeatherCondition;
+    totalprecip_mm: number;
     uv: number;
-  };
-  astro: {
-    sunrise: string;
-    sunset: string;
-    moonrise: string;
-    moonset: string;
-    moon_phase: string;
-    moon_illumination: string;
+    condition: WeatherCondition;
   };
   hour: HourlyWeather[];
 }
@@ -177,16 +145,15 @@ interface WeatherLocation {
   region: string;
   country: string;
   localtime: string;
+  timezone: string;
+  latitude: number;
+  longitude: number;
 }
 
 interface WeatherData {
   location: WeatherLocation;
   current: CurrentWeather;
-  forecast: {
-    forecastday: DailyWeather[];
-  };
-  alerts: any[];
-  air_quality: any;
+  forecast: { forecastday: DailyWeather[] };
 }
 
 interface Timezone {
@@ -239,6 +206,7 @@ interface TodoItem {
   text: string;
   completed: boolean;
   priority: ToDoPriority;
+  /** Local YYYY-MM-DD calendar date, without a time zone or time of day. */
   dueDate?: string;
 }
 

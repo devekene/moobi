@@ -1,0 +1,167 @@
+.widget {
+  width: 100%;
+  container-type: inline-size;
+  color: var(--phone-on-accent);
+  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+}
+.card {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 0;
+  border-radius: 22%;
+  padding: 0;
+  background: linear-gradient(155deg, #8f9cab 0%, #788695 52%, #6c7a8b 100%);
+  box-shadow:
+    inset 0 1px 1px rgb(255 255 255 / 55%),
+    inset 0 -1px 1px rgb(220 233 249 / 35%),
+    0 2px 6px rgb(0 0 0 / 12%);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+.card[data-sky="clear"] {
+  background: linear-gradient(145deg, #4b91bb, #2b6eaa);
+}
+.card[data-sky="night"] {
+  background: linear-gradient(145deg, #344763, #1e2c43);
+}
+.card:focus-visible {
+  outline: 2px solid var(--phone-on-accent);
+  outline-offset: 3px;
+}
+.top,
+.bottom {
+  position: absolute;
+  left: 11%;
+  right: 10%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.top {
+  top: 10%;
+}
+.bottom {
+  bottom: 9.5%;
+}
+.city {
+  display: flex;
+  align-items: center;
+  gap: 1.8cqw;
+  max-width: 100%;
+  font-size: 9cqw;
+  line-height: 1.12;
+  font-weight: 750;
+  letter-spacing: -0.2px;
+}
+.city > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.city svg {
+  width: 6cqw;
+  height: 6cqw;
+  flex-shrink: 0;
+}
+.temperature {
+  font-size: 26cqw;
+  line-height: 1.1;
+  font-weight: 200;
+  letter-spacing: -1.3cqw;
+  margin: 0.4cqw 0 0 -0.5cqw;
+}
+.icon {
+  width: 11cqw;
+  height: 9cqw;
+  fill: var(--phone-on-accent);
+  stroke-width: 1.4;
+  margin-bottom: 2cqw;
+}
+.condition {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 7.7cqw;
+  line-height: 1.16;
+  font-weight: 650;
+}
+.range {
+  font-size: 7.7cqw;
+  font-weight: 650;
+  line-height: 1.15;
+  margin-top: 1.6cqw;
+  white-space: nowrap;
+  letter-spacing: -0.2px;
+}
+.caption {
+  display: block;
+  text-align: center;
+  margin-top: 5px;
+  font-size: 10px;
+  line-height: 13px;
+  font-weight: 550;
+  text-shadow: 0 1px 4px rgb(0 0 0 / 75%);
+}
+.empty {
+  position: absolute;
+  inset: 12%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 6cqw;
+  text-align: center;
+}
+.empty svg {
+  width: 24cqw;
+  height: 24cqw;
+}
+.empty strong {
+  font-size: 10cqw;
+}
+.empty > span {
+  font-size: 8cqw;
+  opacity: 0.8;
+}
+.widget[data-size="medium"] {
+  max-width: 300px;
+}
+.widget[data-size="medium"] .card {
+  aspect-ratio: 2;
+  border-radius: 12% / 24%;
+}
+.widget[data-size="medium"] .city {
+  font-size: 6cqw;
+}
+.widget[data-size="medium"] .temperature {
+  font-size: 18cqw;
+}
+.widget[data-size="medium"] .bottom {
+  left: 55%;
+}
+.widget[data-size="medium"] .icon {
+  width: 9cqw;
+  height: 8cqw;
+}
+.widget[data-size="medium"] .condition,
+.widget[data-size="medium"] .range {
+  font-size: 5cqw;
+}
+.widget[data-size="large"] {
+  max-width: 300px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .card {
+    transition: filter 0.15s ease;
+  }
+  .card:active {
+    filter: brightness(0.94);
+  }
+}

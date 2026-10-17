@@ -1,0 +1,185 @@
+.screen {
+  container-type: inline-size;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  color: var(--phone-text);
+  padding-inline: 14px;
+}
+.hero {
+  display: grid;
+  place-items: center;
+  flex: 0 0 42%;
+  min-height: 160px;
+  touch-action: pan-y;
+  user-select: none;
+}
+.digitalTime {
+  max-width: 100%;
+  font-size: clamp(32px, 26cqw, 88px);
+  font-variant-numeric: tabular-nums;
+  font-weight: 300;
+  line-height: 1;
+  letter-spacing: -2.5px;
+  transform: translateY(-6px);
+}
+.longDigital {
+  font-size: clamp(28px, 21cqw, 76px);
+}
+.dial {
+  width: min(78%, 280px);
+  max-height: 100%;
+  aspect-ratio: 1;
+  overflow: visible;
+  transform: translateY(-10px);
+}
+.minorTick {
+  stroke: var(--phone-text-muted);
+  stroke-opacity: 0.55;
+  stroke-width: 1;
+}
+.majorTick {
+  stroke: var(--phone-text-secondary);
+  stroke-width: 1.5;
+}
+.dialNumber,
+.minuteNumber {
+  fill: var(--phone-text);
+  font-weight: 500;
+  text-anchor: middle;
+  dominant-baseline: central;
+  font-variant-numeric: tabular-nums;
+}
+.dialNumber {
+  font-size: 23px;
+}
+.minuteNumber {
+  font-size: 12px;
+}
+.orangeHand {
+  stroke: var(--phone-alarm-accent);
+  stroke-width: 1.7;
+  stroke-linecap: round;
+}
+.lapHand {
+  stroke: #0a84ff;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+}
+:global([data-phone-theme="light"]) .lapHand {
+  stroke: #0065c8;
+}
+.orangeCap {
+  fill: var(--phone-alarm-accent);
+}
+.centerCap {
+  fill: var(--phone-canvas);
+  stroke: var(--phone-alarm-accent);
+  stroke-width: 1.4;
+}
+.dialTime {
+  fill: var(--phone-text);
+  font-size: 18px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-anchor: middle;
+}
+.controls {
+  display: grid;
+  grid-template-columns: 60px 1fr 60px;
+  align-items: center;
+  margin-block: 16px 8px;
+  flex-shrink: 0;
+}
+.secondary,
+.primary {
+  display: grid;
+  width: 60px;
+  height: 60px;
+  place-items: center;
+  border-radius: 50%;
+  font-size: 14px;
+  font-weight: 500;
+}
+.secondary {
+  background: var(--phone-surface-elevated);
+  color: var(--phone-text);
+}
+.secondary:disabled {
+  background: var(--phone-surface);
+  color: var(--phone-text-muted);
+}
+.start {
+  color: var(--phone-positive);
+  background: color-mix(
+    in srgb,
+    var(--phone-positive) 18%,
+    var(--phone-canvas)
+  );
+}
+.stop {
+  color: var(--phone-negative);
+  background: color-mix(
+    in srgb,
+    var(--phone-negative) 20%,
+    var(--phone-canvas)
+  );
+}
+.pages {
+  display: flex;
+  justify-content: center;
+}
+.pages button {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 44px;
+  border-radius: 50%;
+}
+.pages span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--phone-text-muted);
+  opacity: 0.55;
+}
+.pages [aria-pressed="true"] span {
+  background: var(--phone-text);
+  opacity: 1;
+}
+.primary:active,
+.secondary:enabled:active {
+  opacity: 0.7;
+}
+.laps {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-top: 1px solid color-mix(in srgb, var(--phone-text) 16%, transparent);
+  padding-bottom: 88px;
+  scrollbar-width: none;
+}
+.laps::-webkit-scrollbar {
+  display: none;
+}
+.lap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 38px;
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--phone-text) 16%, transparent);
+  font-size: 13px;
+}
+.lapTime {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.25px;
+}
+.fastest {
+  color: var(--phone-positive);
+}
+.slowest {
+  color: var(--phone-negative);
+}

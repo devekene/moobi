@@ -1,3 +1,6 @@
+import CalendarTasks from "./CalendarTasks";
+import { scheduledTasks, localDateKey } from "@/lib/todos";
+import { useNotesStore } from "@/stores/useNotesStore";
 import { Button } from "@/components/ui/button";
 import { LuChevronLeft, LuChevronRight, LuPlus } from "react-icons/lu";
 import { CgMoreVertical } from "react-icons/cg";
@@ -22,6 +25,8 @@ const CalendarHome = ({
   setSelectedEvent,
 }: CalendarHomeProps) => {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const notes = useNotesStore((state) => state.notes);
+  const taskDates = new Set(scheduledTasks(notes).map((task) => task.dueDate));
 
   const goToPreviousMonth = () => {
     setCurrentDate(
@@ -37,6 +42,7 @@ const CalendarHome = ({
 
   const goToToday = () => {
     setCurrentDate(new Date());
+    setSelectedDate(localDateKey());
   };
 
   // Get events for a specific date
@@ -90,12 +96,14 @@ const CalendarHome = ({
       </div>
 
       <CalendarGrid
+        taskDates={taskDates}
         currentDate={currentDate}
         getEventsForDate={getEventsForDate}
         selectedDate={selectedDate}
         setSelectedDate={setSelectedDate}
       />
 
+      <CalendarTasks date={selectedDate} />
       <EventList
         getEventsForDate={getEventsForDate}
         selectedDate={selectedDate}

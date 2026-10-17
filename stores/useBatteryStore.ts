@@ -1,3 +1,4 @@
+import { encryptedStorage } from "@/lib/encrypted-storage";
 import { create } from "zustand";
 import {
   createJSONStorage,
@@ -147,6 +148,7 @@ export const createBatteryStore = (
       {
         name: "moobi-virtual-battery",
         storage: createJSONStorage(() => storage),
+        skipHydration: storage === encryptedStorage,
         partialize: (state): PersistedBatteryState => ({
           level: state.level,
           chargerPhase:
@@ -163,15 +165,4 @@ export const createBatteryStore = (
     ),
   );
 
-const browserStorage: StateStorage = {
-  getItem: (name) =>
-    typeof window === "undefined" ? null : window.localStorage.getItem(name),
-  setItem: (name, value) => {
-    if (typeof window !== "undefined") window.localStorage.setItem(name, value);
-  },
-  removeItem: (name) => {
-    if (typeof window !== "undefined") window.localStorage.removeItem(name);
-  },
-};
-
-export const useBatteryStore = createBatteryStore(browserStorage);
+export const useBatteryStore = createBatteryStore(encryptedStorage);

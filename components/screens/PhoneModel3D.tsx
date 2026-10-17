@@ -1042,7 +1042,9 @@ const PhoneModel3D = ({
               >
                 {showControlCenter && <ControlCenter />}
                 {showAppSwitcher && <AppSwitcher />}
-                {children}
+                <div className="relative h-full w-full" inert={showAppSwitcher}>
+                  {children}
+                </div>
                 {ringingAlarmId && <AlarmRingOverlay />}
                 <TimerRingBanner />
               </div>

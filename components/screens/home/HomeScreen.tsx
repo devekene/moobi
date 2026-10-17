@@ -374,18 +374,36 @@ const HomeScreen = () => {
               ) : (
                 <div className="grid grid-cols-4 content-start gap-x-[1%] gap-y-[clamp(0.75rem,3.5cqw,1rem)] pb-3">
                   {page === 0 && (
-                    <>
-                      <div className="col-span-2 mx-[4%] aspect-square overflow-hidden rounded-[22%]">
+                    <div
+                      className="col-span-4 grid grid-cols-2"
+                      style={{ columnGap: "clamp(12px, 4cqw, 18px)" }}
+                    >
+                      <div className="min-w-0">
                         <WeatherWidget size="small" />
                       </div>
 
-                      <div className="col-span-2 mx-[4%]">
+                      <div className="min-w-0">
                         <CalendarWidget
                           date={now}
                           onOpen={() => setCurrentScreen("calendar")}
                         />
+                        <span
+                          aria-hidden="true"
+                          style={{
+                            display: "block",
+                            marginTop: 5,
+                            textAlign: "center",
+                            fontSize: 10,
+                            lineHeight: "13px",
+                            fontWeight: 550,
+                            color: "var(--phone-on-accent)",
+                            textShadow: "0 1px 4px rgb(0 0 0 / 75%)",
+                          }}
+                        >
+                          Calendar
+                        </span>
                       </div>
-                    </>
+                    </div>
                   )}
 
                   {visiblePages[page]?.map((app) => appIcon(app, false, page))}
