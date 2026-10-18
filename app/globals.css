@@ -169,6 +169,11 @@ body {
 .phone-theme {
   --phone-shell: #14161b;
   --phone-canvas: #090a0c;
+  --phone-music-canvas: #171914;
+  --phone-music-accent: #e4b079;
+  --phone-music-on-accent: #24251e;
+  --phone-music-art: #e7ae77;
+  --phone-music-ink: #292c23;
   --phone-calendar-canvas: #000;
   --phone-calendar-accent: #ff475b;
   --phone-settings-canvas: #000;
@@ -220,6 +225,9 @@ body {
 .phone-theme[data-phone-theme="light"] {
   --phone-shell: #d9dce2;
   --phone-canvas: #f3f4f7;
+  --phone-music-canvas: #f6f3eb;
+  --phone-music-accent: #985026;
+  --phone-music-on-accent: #fffaf2;
   --phone-calendar-canvas: #fff;
   --phone-calendar-accent: #f52f46;
   --phone-settings-canvas: #f2f2f7;

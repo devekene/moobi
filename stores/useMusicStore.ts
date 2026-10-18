@@ -8,6 +8,7 @@ interface MusicState {
   currentSong: Song | null;
   queue: Song[];
   progress: number[];
+  duration: number;
   isPlaying: boolean;
   isLoading: boolean;
   audioError: string | null;
@@ -15,6 +16,9 @@ interface MusicState {
   // Player UI state
   currentPlayerScreen: MusicPlayerScreen;
   lastPlayerScreen: MusicPlayerScreen;
+
+  savedSongs: Song[];
+  toggleSavedSong: (song: Song) => void;
 
   // Playback settings
   isShuffled: boolean;
@@ -42,6 +46,7 @@ export const useMusicStore = create<MusicState>()(
       currentSong: null,
       queue: [],
       progress: [0],
+      duration: 0,
       isPlaying: false,
       isLoading: false,
       audioError: null,
@@ -49,6 +54,14 @@ export const useMusicStore = create<MusicState>()(
       lastPlayerScreen: "library",
       isShuffled: false,
       repeatMode: "off",
+
+      savedSongs: [],
+      toggleSavedSong: (song) =>
+        set((state) => ({
+          savedSongs: state.savedSongs.some((saved) => saved.id === song.id)
+            ? state.savedSongs.filter((saved) => saved.id !== song.id)
+            : [song, ...state.savedSongs],
+        })),
 
       // Actions
       setCurrentSong: (song) => set({ currentSong: song }),
@@ -89,6 +102,7 @@ export const useMusicStore = create<MusicState>()(
         set({
           currentSong: null,
           progress: [0],
+          duration: 0,
           isPlaying: false,
           isLoading: false,
           audioError: null,
@@ -101,6 +115,7 @@ export const useMusicStore = create<MusicState>()(
       storage: createJSONStorage(() => encryptedStorage),
       skipHydration: true,
       partialize: (state) => ({
+        savedSongs: state.savedSongs,
         queue: state.queue,
         currentSong: state.currentSong,
         isShuffled: state.isShuffled,

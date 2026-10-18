@@ -1,0 +1,284 @@
+.scene {
+  flex: 1;
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 22px 30px;
+  overflow: hidden;
+}
+.illustration {
+  position: relative;
+  width: 240px;
+  height: 205px;
+  margin-bottom: 24px;
+}
+.halo {
+  position: absolute;
+  inset: 0 -30px -10px;
+  background: radial-gradient(
+    ellipse,
+    color-mix(in srgb, var(--phone-accent) 14%, transparent),
+    transparent 68%
+  );
+}
+.doorFrame {
+  position: absolute;
+  left: 131px;
+  top: 17px;
+  width: 82px;
+  height: 157px;
+  border-radius: 43px 43px 4px 4px;
+  padding: 5px;
+  background: var(--phone-surface-elevated);
+  box-shadow: 0 12px 35px
+    color-mix(in srgb, var(--phone-canvas) 65%, transparent);
+  perspective: 400px;
+}
+.light {
+  position: absolute;
+  inset: 5px;
+  border-radius: 40px 40px 2px 2px;
+  background: var(--phone-accent);
+  opacity: 0.22;
+}
+.door {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 40px 40px 2px 2px;
+  background: linear-gradient(
+    125deg,
+    color-mix(in srgb, var(--phone-accent) 50%, var(--phone-surface-elevated)),
+    var(--phone-surface)
+  );
+  transform-origin: right center;
+  transition: transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.window {
+  position: absolute;
+  left: 19px;
+  top: 25px;
+  width: 34px;
+  height: 43px;
+  background: color-mix(in srgb, var(--phone-accent) 23%, var(--phone-canvas));
+  border-radius: 20px 20px 4px 4px;
+  box-shadow: inset 0 0 0 2px
+    color-mix(in srgb, var(--phone-text) 8%, transparent);
+}
+.handle {
+  position: absolute;
+  left: 10px;
+  top: 92px;
+  width: 12px;
+  height: 4px;
+  border-radius: 4px;
+  background: var(--phone-text-secondary);
+}
+.person {
+  position: absolute;
+  left: 53px;
+  top: 78px;
+  width: 60px;
+  height: 96px;
+  transform-origin: bottom center;
+  animation: breathe 2.4s ease-in-out infinite;
+  transition:
+    transform 0.9s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.6s;
+}
+.head {
+  position: absolute;
+  left: 7px;
+  top: 0;
+  width: 40px;
+  height: 35px;
+  border-radius: 16px 16px 14px 14px;
+  background: var(--phone-text-secondary);
+  transform: rotate(6deg);
+}
+.head i {
+  position: absolute;
+  width: 4px;
+  height: 5px;
+  border-radius: 50%;
+  top: 15px;
+  right: 9px;
+  background: var(--phone-canvas);
+}
+.head i:first-child {
+  right: 20px;
+}
+.body {
+  position: absolute;
+  left: 10px;
+  top: 31px;
+  width: 35px;
+  height: 43px;
+  border-radius: 17px 17px 9px 9px;
+  background: var(--phone-accent);
+  box-shadow: inset -7px 0 0
+    color-mix(in srgb, var(--phone-canvas) 15%, transparent);
+}
+.arm {
+  position: absolute;
+  left: 35px;
+  top: 40px;
+  width: 36px;
+  height: 11px;
+  border-radius: 10px;
+  background: var(--phone-text-secondary);
+  transform-origin: 3px center;
+  transform: rotate(-28deg);
+  animation: knock 1.8s ease-in-out infinite;
+}
+.legLeft,
+.legRight {
+  position: absolute;
+  top: 68px;
+  width: 12px;
+  height: 27px;
+  border-radius: 3px 3px 6px 6px;
+  background: var(--phone-text-secondary);
+}
+.legLeft {
+  left: 14px;
+  transform: rotate(8deg);
+}
+.legRight {
+  left: 33px;
+  transform: rotate(-8deg);
+}
+.ground {
+  position: absolute;
+  left: 21px;
+  right: 10px;
+  top: 175px;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--phone-border),
+    transparent
+  );
+}
+.knock {
+  position: absolute;
+  left: 119px;
+  top: 95px;
+  font-size: 15px;
+  color: var(--phone-accent);
+  animation: sparkle 1.8s ease-in-out infinite;
+}
+.host {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11px;
+  color: var(--phone-text-muted);
+  margin-bottom: 8px;
+}
+.script {
+  font-size: 18px;
+  font-weight: 550;
+  letter-spacing: -0.5px;
+  color: var(--phone-text);
+  text-align: center;
+}
+.open {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  justify-content: center;
+  margin-top: 23px;
+  min-height: 44px;
+  padding: 0 19px;
+  border-radius: 14px;
+  background: var(--phone-surface-elevated);
+  font-size: 12px;
+  color: var(--phone-text-secondary);
+}
+.scene[data-stage="loading"] .door {
+  transform: rotateY(48deg);
+}
+.scene[data-stage="blocked"] .person {
+  animation: recoil 0.45s ease-out both;
+}
+.scene[data-stage="blocked"] .arm {
+  animation: none;
+  transform: rotate(28deg);
+}
+.scene[data-stage="leaving"] .door,
+.scene[data-stage="external"] .door {
+  transform: rotateY(78deg);
+}
+.scene[data-stage="leaving"] .person,
+.scene[data-stage="external"] .person {
+  animation: none;
+  transform: translateX(87px) scale(0.84);
+  opacity: 0;
+}
+.scene[data-stage="leaving"] .knock,
+.scene[data-stage="external"] .knock {
+  display: none;
+}
+@keyframes breathe {
+  50% {
+    transform: translateY(-2px);
+  }
+}
+@keyframes knock {
+  0%,
+  35%,
+  65%,
+  100% {
+    transform: rotate(-28deg);
+  }
+  45%,
+  55% {
+    transform: rotate(-48deg);
+  }
+}
+@keyframes sparkle {
+  0%,
+  35%,
+  70%,
+  100% {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  45%,
+  55% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes recoil {
+  50% {
+    transform: translateX(-7px) rotate(-6deg);
+  }
+  100% {
+    transform: translateX(-3px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scene *,
+  .scene *::before {
+    animation: none !important;
+    transition: none !important;
+  }
+  .scene[data-stage="leaving"] .person,
+  .scene[data-stage="external"] .person {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+.scene[data-paused="true"] * {
+  animation-play-state: paused !important;
+}
+.scene[data-stage="external"] * {
+  animation: none;
+}

@@ -1,77 +1,100 @@
-import { useBrowserStore } from "@/stores";
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import Loader from "@/components/Loader";
+import { useBrowserStore } from "@/stores/useBrowserStore";
+import { useEffect, useRef } from "react";
+import { LuArrowUpRight, LuGlobe } from "react-icons/lu";
+import { browserHost } from "@/lib/browser";
+import { beginBrowserVisit } from "@/lib/browser-visit";
+import type { BrowserTab } from "@/lib/browser-tabs";
+import { usePhoneStore } from "@/stores/usePhoneStore";
+import BrowserDoor from "./BrowserDoor";
+import styles from "./browser.module.css";
 
-const BrowserIframe = () => {
-  const { selectedUrl, changeBrowserScreen } = useBrowserStore();
-  const [isLoading, setIsLoading] = useState(true);
-  const [isEmbeddable, setIsEmbeddable] = useState(true);
-
+export default function BrowserIframe({ tab }: { tab: BrowserTab }) {
+  const selected = tab.selectedUrl;
+  const stage = tab.visitStage;
+  const setStage = (stage: BrowserTab["visitStage"]) =>
+    useBrowserStore.getState().setVisitStage(tab.id, tab.visitId, stage);
+  const active = useBrowserStore(
+    (state) => state.activeTabId === tab.id && !state.tabSwitcherOpen,
+  );
+  const visit = useRef<ReturnType<typeof beginBrowserVisit> | null>(null);
+  const url = selected?.link;
+  const { id: tabId, visitId } = tab;
   useEffect(() => {
-    if (!selectedUrl) return;
-
-    let active = true;
-
-    const checkIfEmbeddable = async () => {
-      try {
-        const res = await fetch(
-          `/api/browser/ping?url=${encodeURIComponent(selectedUrl.link)}`,
-        );
-        const data = await res.json();
-        if (active) setIsEmbeddable(data.status === "ok");
-      } catch (err) {
-        console.log(err);
-        if (active) setIsEmbeddable(false);
-      } finally {
-        if (active) setIsLoading(false);
-      }
-    };
-
-    void checkIfEmbeddable();
+    if (!url) return;
+    const state = useBrowserStore.getState();
+    const saved = state.tabs.find((item) => item.id === tabId);
+    if (
+      !saved ||
+      saved.visitStage === "ready" ||
+      saved.visitStage === "external"
+    )
+      return;
+    state.setVisitStage(tabId, visitId, "checking");
+    const current = beginBrowserVisit(
+      url,
+      (stage) =>
+        useBrowserStore.getState().setVisitStage(tabId, visitId, stage),
+      () => {
+        const state = useBrowserStore.getState();
+        const phone = usePhoneStore.getState();
+        if (
+          document.visibilityState === "visible" &&
+          state.activeTabId === tabId &&
+          !state.tabSwitcherOpen &&
+          phone.currentScreen === "chrome-browser"
+        )
+          window.open(url, "_blank", "noopener,noreferrer");
+      },
+    );
+    visit.current = current;
     return () => {
-      active = false;
+      current.cancel();
+      visit.current = null;
     };
-  }, [selectedUrl]);
-
-  if (!selectedUrl) {
-    changeBrowserScreen("browser-search-results");
-    return;
+  }, [url, tabId, visitId]);
+  function openManually() {
+    visit.current?.cancel();
+    setStage("external");
   }
-
+  if (!selected) return null;
   return (
-    <div className="relative h-full w-full">
-      {isLoading && (
-        <div className="flex-center">
-          <Loader />
-        </div>
-      )}
-
-      {isEmbeddable ? (
-        <iframe
-          src={selectedUrl.link}
-          className="h-full w-full rounded-lg"
-          sandbox="allow-scripts allow-same-origin allow-popups"
-        ></iframe>
-      ) : (
-        <div className="flex-center h-[90%] flex-col gap-4 px-6 text-white">
-          <h1 className="text-center text-2xl">
-            Site cannot be embedded in an iframe.
-          </h1>
-          <Button asChild variant="link" className="shimmer-btn">
-            <Link
-              href={selectedUrl.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-lg"
-            >
-              View in a new tab
-            </Link>
-          </Button>
-        </div>
-      )}
+    <div className={styles.page}>
+      <div className={styles.pageHeading}>
+        <LuGlobe size={18} />
+        <span>{browserHost(selected.link)}</span>
+        <a
+          onClick={openManually}
+          aria-label="Open website in new tab"
+          href={selected.link}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <LuArrowUpRight size={20} />
+        </a>
+      </div>
+      <div className={styles.pageBody}>
+        {stage !== "ready" && (
+          <BrowserDoor
+            active={active}
+            onOpen={openManually}
+            stage={stage}
+            host={browserHost(selected.link)}
+            url={selected.link}
+          />
+        )}
+        {(stage === "loading" || stage === "ready") && (
+          <iframe
+            title={selected.title}
+            src={selected.link}
+            onLoad={() => visit.current?.loaded()}
+            onError={() => visit.current?.failed()}
+            className={styles.iframe}
+            style={{ visibility: stage === "ready" ? "visible" : "hidden" }}
+            sandbox="allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"
+            referrerPolicy="no-referrer"
+          />
+        )}
+      </div>
     </div>
   );
-};
-export default BrowserIframe;
+}

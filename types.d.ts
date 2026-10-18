@@ -62,6 +62,8 @@ declare interface Song {
 
 interface CustomSearchResultData {
   title: string;
+  favicon?: string;
+  siteName?: string;
   link: string;
   displayLink?: string;
   snippet?: string;
@@ -75,13 +77,6 @@ interface CustomSearchResult {
   totalResults: string;
   searchTime: string;
   results: CustomSearchResultData[];
-  nextPage?: {
-    startIndex: number;
-  };
-  previousPage?: {
-    startIndex: number;
-  };
-  onPageChange?: (startIndex: number) => void;
 }
 
 interface WeatherCondition {

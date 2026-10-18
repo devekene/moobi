@@ -17,9 +17,11 @@ import { useNotesStore } from "@/stores/useNotesStore";
 import { usePhoneAppearanceStore } from "@/stores/usePhoneAppearanceStore";
 import { usePhoneSettingsStore } from "@/stores/usePhoneSettingsStore";
 
+import { useBrowserCacheStore } from "@/stores/useBrowserCacheStore";
 import { useCalculatorStore } from "@/stores/useCalculatorStore";
 
 const stores = [
+  useBrowserCacheStore,
   useCalendarStore,
   useCalculatorStore,
   useWeatherLocationsStore,

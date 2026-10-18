@@ -11,6 +11,21 @@ const renderTabs = (items: readonly TabItem[], value?: string) =>
   );
 
 describe("glass tabs", () => {
+  it("accepts an app active color while preserving caller styles", () => {
+    const markup = renderToStaticMarkup(
+      createElement(Tabs, {
+        items: [{ value: "discover", label: "Discover", icon }],
+        value: "discover",
+        activeColor: "var(--phone-music-accent)",
+        style: { height: "100%" },
+      }),
+    );
+    expect(markup).toContain("--tabs-active-color:var(--phone-music-accent)");
+    expect(markup).toContain("height:100%");
+    expect(markup).not.toContain("activeColor=");
+    expect(markup).toContain("var(--tabs-active-color,var(--phone-accent))");
+  });
+
   it("renders labelled tabs and selects the first enabled item by default", () => {
     const markup = renderTabs([
       { value: "preview", label: "Preview", icon, disabled: true },

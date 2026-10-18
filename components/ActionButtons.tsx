@@ -1,3 +1,4 @@
+import { activeBrowserTab } from "@/stores/useBrowserStore";
 import {
   LuHouse,
   LuPower,
@@ -47,7 +48,10 @@ const ActionButtons = ({
   const pinCode = usePhoneSettingsStore((state) => state.pinCode);
   const setPinLock = usePhoneSettingsStore((state) => state.setPinLock);
   const disablePinLock = usePhoneSettingsStore((state) => state.disablePinLock);
-  const { currentBrowserScreen, changeBrowserScreen } = useBrowserStore();
+  const browserScreen = useBrowserStore(
+    (state) => activeBrowserTab(state).screen,
+  );
+  const { tabSwitcherOpen, goBack: browserBack } = useBrowserStore();
   const { currentPlayerScreen, setCurrentPlayerScreen } = useMusicStore();
 
   const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -105,10 +109,8 @@ const ActionButtons = ({
       case "home":
         break;
       case "chrome-browser":
-        if (currentBrowserScreen === "browser-frame") {
-          changeBrowserScreen("browser-search-results");
-        } else if (currentBrowserScreen !== "browser-home") {
-          changeBrowserScreen("browser-home");
+        if (tabSwitcherOpen || browserScreen !== "browser-home") {
+          browserBack();
         } else {
           setCurrentScreen("home");
         }

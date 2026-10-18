@@ -21,7 +21,7 @@ Here’s what Moobi can (or will) do:
 - 📱 Multi-app environment under one persistent “frame”
 - 🚀 Live dev preview: load your local `http://localhost:…` in a mobile shell
 - 🧠 Dynamic screen loading (code splitting) for performance
-- 🎶 Built-in music player (stream or local files)
+- 🎶 FORM music: discover, stream, and save independent tracks via Audius
 - ⏰ Clock app (alarm, timer, stopwatch, world clock)
 - 🔁 App switching / recent apps UI
 - 🌗 System overlays (control center, brightness/volume)
@@ -77,9 +77,9 @@ npm run dev
 Set these in `.env.local` only for the related integrations. Core phone and app previews do not require API credentials.
 
 - `NEXT_PUBLIC_EMAILJS_SERVICE_ID`, `NEXT_PUBLIC_EMAILJS_TEMPLATE_ID`, and `NEXT_PUBLIC_EMAILJS_PUBLIC_KEY` enable the Mail app. These values are exposed to the browser by design.
-- `GOOGLE_SEARCH_ENGINE_ID` and `GOOGLE_SEARCH_API_KEY` enable Browser search.
+- `TAVILY_API_KEY` enables Browser search through Tavily. This is a server-only credential; do not use a `NEXT_PUBLIC_` prefix. Google search credentials are no longer used. Each search requests up to 20 results using basic depth (1 credit per request under Tavily's current pricing), with AI answers, images, and raw page extraction disabled. Tavily does not provide offset pagination, so results appear in one scrollable list. Exact-query results are cached for 24 hours on the server and in the encrypted browser cache (up to 30 queries per installation); simultaneous identical queries share a request. Quota and provider failures offer retry or external Google search. See [Tavily Search API](https://docs.tavily.com/documentation/api-reference/endpoint/search). Restart development or redeploy after changing the key.
 - Weather uses [Open-Meteo](https://open-meteo.com/en/docs) forecasts and city geocoding without an API key. Remove the old `WEATHER_API_SECRET_KEY` if configured. The hosted free API is for non-commercial use (limits: 600 calls/minute, 5,000/hour, 10,000/day); commercial use requires a paid plan. See [terms](https://open-meteo.com/en/terms). City searches use the first matching result; coordinate lookups display coordinates because reverse geocoding is unavailable. Forecasts are cached for 10 minutes and city lookups for 24 hours. Weather alerts and air quality are not requested. Weather owns a full-display viewport and scrolls behind both system bars. Its detail cards use live forecast fields (including UV, precipitation, lunar events, and pressure). The precipitation chart is a point forecast; the optional OpenStreetMap view has no radar layer, and historical averages are not displayed.
-- `GNEWS_API_KEY` enables News results.
+- `GNEWS_API_KEY` enables the Browser home news feed. Successful news results are cached for six hours in the shared server data cache and the encrypted browser cache, including across page reloads. Home checks freshness only when opened; there is no polling. Refresh reloads the shared feed without bypassing the provider cache. If refresh fails, cached stories remain visible for up to seven days with a retry state. Server cache eviction or deployments may cause additional provider requests. Browser cache hydration uses `StorageBoundary`; cache storage errors use the shared retry flow.
 
 ### Weather locations
 
@@ -127,6 +127,12 @@ Open Settings → Wallpaper to choose a local JPEG, PNG, WebP, or AVIF (up to 15
 
 The wallpaper belongs to this browser and site origin, with no account sync. Clearing site data or browser storage eviction removes it; private browsing may discard it at session end. Failed reads show the bundled default, and failed saves retain the current wallpaper with a retryable message in Settings. The default retains the theme's wallpaper opacity; custom photos display at full opacity.
 
+### Browser tabs
+
+The Browser has a tab switcher with new-tab, select, and close controls. Each tab owns its page, search results, address draft, and connection stage; bookmarks, history, and news are shared. Tab views stay mounted while switching between them, preserving embedded pages and scroll position. Closing a tab cancels its pending search and connection work. The last closed tab is replaced with a start page. Background tabs do not trigger external-window handoffs.
+
+Tabs are kept in memory for the current page session, including across mini-app switches; refreshing Moobi resets them. Returning from another mini app can reload embedded third-party pages. Sites that forbid embedding still require an external browser tab, subject to popup settings.
+
 ### Browser storage security
 
 App-owned saved state and wallpaper now use AES-256-GCM encryption, with automatic
@@ -136,6 +142,10 @@ casual storage inspection; same-origin scripts and a compromised browser profile
 can still access decrypted data. Losing the key database makes saved data
 unrecoverable. See [storage security](docs/browser-storage-security.md) for the
 scope, limits, migration behavior, and persistence authoring contract.
+
+### FORM music
+
+FORM is the bundled listening room: live Audius discovery, genre filters, debounced search, a saved collection, and a player with queue, seek, shuffle, repeat, and virtual-phone volume. Saved tracks are metadata persisted through the encrypted music store; audio is streamed, not downloaded for offline playback. Catalog and stream availability depend on Audius. Errors offer retry without substituting fake tracks. A single browser audio owner keeps playback and system widgets synchronized across app navigation; refresh does not autoplay. The CSS record artwork needs no downloaded decorative assets and has no continuous animation.
 
 ### Virtual device simulations
 

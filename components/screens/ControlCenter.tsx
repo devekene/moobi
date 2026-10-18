@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import MusicWidget from "@/components/screens/MusicWidget";
+import { skipMusic, toggleMusic } from "@/lib/music-playback";
 import CustomSlider from "./CustomSlider";
 
 import { downloadPhoneScreenshot } from "@/lib/phone-screenshot";
@@ -252,6 +253,9 @@ const ControlCenter = () => {
   const currentSong = useMusicStore((state) => state.currentSong);
 
   const isPlaying = useMusicStore((state) => state.isPlaying);
+  const isMusicLoading = useMusicStore((state) => state.isLoading);
+  const musicError = useMusicStore((state) => state.audioError);
+  const canSkipMusic = useMusicStore((state) => state.queue.length > 1);
 
   /* Screenshot */
 
@@ -424,7 +428,12 @@ const ControlCenter = () => {
           <MusicWidget
             currentSong={currentSong}
             isPlaying={isPlaying}
-            onOpen={() => openApp("music-player")}
+            isLoading={isMusicLoading}
+            audioError={musicError}
+            canSkip={canSkipMusic}
+            onPlayPause={toggleMusic}
+            onPrevious={() => skipMusic(-1)}
+            onNext={() => skipMusic(1)}
           />
         </div>
 

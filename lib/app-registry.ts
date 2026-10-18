@@ -1,14 +1,14 @@
 import type { ComponentType } from "react";
 import type { IconType } from "react-icons";
 import { BiCalculator, BiTerminal } from "react-icons/bi";
-import { BsBrowserChrome, BsCalendar3, BsClockFill } from "react-icons/bs";
+import { BsCalendar3, BsClockFill } from "react-icons/bs";
 import { FaChessQueen, FaPhone } from "react-icons/fa6";
-import { FcMusic } from "react-icons/fc";
 import { GiSnake } from "react-icons/gi";
 import { IoInformationCircle, IoLogoAppleAppstore } from "react-icons/io5";
-import { LuBrain, LuListTodo, LuSettings } from "react-icons/lu";
+import { LuBrain, LuDisc3, LuListTodo, LuSettings } from "react-icons/lu";
 import { TiWeatherDownpour } from "react-icons/ti";
 import { TfiEmail, TfiGallery } from "react-icons/tfi";
+import MoBrowserIcon from "@/components/icons/MoBrowserIcon";
 
 export type MiniAppCategory =
   | "games"
@@ -106,9 +106,9 @@ export const MINI_APPS = [
   {
     id: "chrome-browser",
     name: "Mo Browser",
-    icon: BsBrowserChrome,
+    icon: MoBrowserIcon,
     color:
-      "bg-gradient-to-br from-red-500 via-yellow-500 to-green-500 text-white",
+      "bg-gradient-to-br from-indigo-500 via-violet-600 to-indigo-950 text-white",
     category: "utilities",
     launchTarget: { kind: "phone-screen", screen: "chrome-browser" },
     description: "Browse and search from the virtual phone.",
@@ -116,6 +116,7 @@ export const MINI_APPS = [
     previewCapabilities: { bundled: true, executesUserCode: false },
     availability: "available",
     homePage: 0,
+    viewport: "full-bleed",
     loadScreen: () => import("@/components/screens/browser"),
   },
   {
@@ -193,12 +194,14 @@ export const MINI_APPS = [
   },
   {
     id: "music-player",
-    name: "iTunes",
-    icon: FcMusic,
-    color: "bg-red-200",
+    viewport: "full-bleed",
+    name: "FORM",
+    icon: LuDisc3,
+    color: "bg-orange-200 text-stone-900",
     category: "entertainment",
     launchTarget: { kind: "phone-screen", screen: "music-player" },
-    description: "Browse and play music in the preview.",
+    description:
+      "A listening room for independent sound. Discover, play, and collect music.",
     version: "1.0.0",
     previewCapabilities: { bundled: true, executesUserCode: false },
     availability: "available",

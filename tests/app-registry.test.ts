@@ -14,7 +14,7 @@ describe("mini-app registry", () => {
     for (const id of ["settings", "app-store", "guess"] as const) {
       expect(getMiniApp(id).viewport).toBe("scroll");
     }
-    for (const id of ["snake", "chrome-browser", "notes"] as const) {
+    for (const id of ["snake", "notes"] as const) {
       expect(getMiniApp(id).viewport ?? "contained").toBe("contained");
     }
   });
@@ -29,6 +29,10 @@ describe("mini-app registry", () => {
 
   it("lets Weather draw beneath both system bars", () => {
     expect(getMiniApp("weather").viewport).toBe("full-bleed");
+  });
+
+  it("lets Music fill the display without shell safe-area insets", () => {
+    expect(getMiniApp("music-player").viewport).toBe("full-bleed");
   });
 
   it("keeps About out of app discovery and standalone launch targets", () => {

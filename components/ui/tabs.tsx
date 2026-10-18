@@ -21,6 +21,7 @@ export type TabsProps<Value extends string = string> = Omit<
   defaultValue?: Value;
   onValueChange?: (value: Value) => void;
   listClassName?: string;
+  activeColor?: string;
   label?: string;
 };
 
@@ -50,7 +51,7 @@ const TabsTrigger = React.forwardRef<
     className={cn(
       "relative flex min-h-[48px] min-w-[44px] flex-1 shrink-0 flex-col items-center justify-center gap-0.5 rounded-full text-[var(--phone-text-secondary)]",
       "transition-[background-color,color,transform] duration-200 enabled:active:scale-[0.96] motion-reduce:transform-none motion-reduce:transition-none",
-      "data-[state=active]:bg-[color-mix(in_srgb,var(--phone-text)_12%,transparent)] data-[state=active]:text-[var(--phone-accent)]",
+      "data-[state=active]:bg-[color-mix(in_srgb,var(--phone-text)_12%,transparent)] data-[state=active]:text-[var(--tabs-active-color,var(--phone-accent))]",
       "focus-visible:ring-2 focus-visible:ring-[var(--phone-focus)] focus-visible:outline-none focus-visible:ring-inset disabled:opacity-40",
       className,
     )}
@@ -89,13 +90,20 @@ function Tabs<Value extends string>({
   defaultValue,
   onValueChange,
   listClassName,
+  activeColor,
+  style,
   label = "App tabs",
   children,
   ...props
 }: TabsProps<Value>) {
+  const tabStyle: React.CSSProperties & { "--tabs-active-color"?: string } = {
+    ...style,
+    "--tabs-active-color": activeColor,
+  };
   return (
     <TabsPrimitive.Root
       {...props}
+      style={tabStyle}
       value={value}
       defaultValue={defaultValue ?? items.find((item) => !item.disabled)?.value}
       onValueChange={(nextValue) => {
