@@ -1,17 +1,12 @@
 import type { ComponentType } from "react";
 import type { IconType } from "react-icons";
 import { BiCalculator, BiTerminal } from "react-icons/bi";
-import {
-  BsBrowserChrome,
-  BsCalendar3,
-  BsClockFill,
-  BsFolder,
-} from "react-icons/bs";
+import { BsBrowserChrome, BsCalendar3, BsClockFill } from "react-icons/bs";
 import { FaChessQueen, FaPhone } from "react-icons/fa6";
 import { FcMusic } from "react-icons/fc";
 import { GiSnake } from "react-icons/gi";
 import { IoInformationCircle, IoLogoAppleAppstore } from "react-icons/io5";
-import { LuBrain, LuCamera, LuListTodo, LuSettings } from "react-icons/lu";
+import { LuBrain, LuListTodo, LuSettings } from "react-icons/lu";
 import { TiWeatherDownpour } from "react-icons/ti";
 import { TfiEmail, TfiGallery } from "react-icons/tfi";
 
@@ -139,7 +134,7 @@ export const MINI_APPS = [
   },
   {
     id: "calendar",
-    viewport: "scroll",
+    viewport: "full-bleed",
     name: "Calendar",
     icon: BsCalendar3,
     color: "text-blue-500",
@@ -151,21 +146,6 @@ export const MINI_APPS = [
     availability: "available",
     homePage: 1,
     loadScreen: () => import("@/components/screens/calendar"),
-  },
-  {
-    id: "camera",
-    name: "Camera",
-    icon: LuCamera,
-    color: "bg-white text-black",
-    category: "system",
-    launchTarget: { kind: "phone-screen", screen: "camera" },
-    description:
-      "Camera is a preview placeholder; it does not access device hardware.",
-    version: "0.1.0",
-    previewCapabilities: { bundled: true, executesUserCode: false },
-    availability: "preview",
-    homePage: 1,
-    loadScreen: () => import("@/components/screens/UnavailableMiniApp"),
   },
   {
     id: "weather",
@@ -240,21 +220,6 @@ export const MINI_APPS = [
     loadScreen: () => import("@/components/screens/notes/NotesApp"),
   },
   {
-    id: "file-manager",
-    name: "File Manager",
-    icon: BsFolder,
-    color: "bg-yellow-300",
-    category: "system",
-    launchTarget: { kind: "phone-screen", screen: "file-manager" },
-    description:
-      "File Manager is a preview placeholder and does not browse device files.",
-    version: "0.1.0",
-    previewCapabilities: { bundled: true, executesUserCode: false },
-    availability: "preview",
-    homePage: 1,
-    loadScreen: () => import("@/components/screens/UnavailableMiniApp"),
-  },
-  {
     id: "app-store",
     viewport: "scroll",
     name: "Mi Store",
@@ -314,7 +279,15 @@ export const MINI_APPS = [
 ] as const satisfies readonly MiniAppDefinition[];
 
 export type MiniAppId = (typeof MINI_APPS)[number]["id"];
-export type RegisteredMiniApp = MiniAppDefinition & (typeof MINI_APPS)[number];
+// Consumers use the full app contract even when today's catalog contains only
+// available apps; preview remains a supported availability for future entries.
+export type RegisteredMiniApp = MiniAppDefinition & {
+  readonly id: MiniAppId;
+  readonly launchTarget: {
+    readonly kind: "phone-screen";
+    readonly screen: MiniAppId;
+  };
+};
 export type PhoneScreen =
   "screen-boot" | "screen-shutdown" | "screen-lock" | "home" | MiniAppId;
 
@@ -328,7 +301,7 @@ export function getMiniApp(id: MiniAppId): RegisteredMiniApp {
   return app;
 }
 
-export const mobileApps = Array.from(
+export const mobileApps: RegisteredMiniApp[][] = Array.from(
   { length: Math.max(...MINI_APPS.map((app) => app.homePage)) + 1 },
   (_, page) => MINI_APPS.filter((app) => app.homePage === page),
 );
@@ -340,7 +313,7 @@ export function isMiniAppId(id: string): id is MiniAppId {
 export function searchMiniApps(
   query: string,
   category?: MiniAppCategory | "all",
-) {
+): RegisteredMiniApp[] {
   const normalizedQuery = query.trim().toLocaleLowerCase();
   return MINI_APPS.filter((app) => {
     const matchesCategory =

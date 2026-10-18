@@ -29,13 +29,16 @@ phone history and app launch targets refer to them.
   flowing content. The shell then scrolls the full display and puts top/bottom
   safe-area spacing inside the screen, allowing content to pass behind the
   transparent top bar. Do not add a nested page scroller or fixed page height.
-  Settings (including About), Calendar, Mi Store, and Guess use this mode. The default `contained`
+  Settings (including About), Mi Store, and Guess use this mode. The default `contained`
   viewport keeps fixed layouts and apps with internal scrolling inside the safe
   area.
 - Weather explicitly uses `viewport: "full-bleed"`. This immersive mode removes
   both shell insets and leaves scrolling with the app. Weather draws and scrolls
   behind the status bar and home indicator, with its own header and floating
   controls. It does not consume the top or bottom safe-area variables.
+- Calendar also uses `viewport: "full-bleed"`, retains its own top safe-area
+  spacing, and does not reserve the bottom safe area. Its floating controls use
+  a fixed bottom margin, and sheets extend to the bottom edge.
 - About is an internal Settings page, not a registered mini app. It has no
   separate Home/App Library/Mi Store icon or recent-app entry.
 - Treat the virtual display like a mobile screen: `--phone-safe-area-top` and
@@ -43,7 +46,7 @@ phone history and app launch targets refer to them.
   the visitor's hardware or browser `env()` insets. The top protects the status
   row and Dynamic Island; the bottom protects the home gesture region. The shell
   applies these once to mini apps except those explicitly using `full-bleed`. Full-bleed system surfaces keep backgrounds
-  edge to edge, but place interactive content inside these boundaries. Home is
+  edge to edge and apply their documented app-specific inset rules. Home is
   exempt from the bottom safe area: its dock uses its own 12px bottom spacing,
   and the App Library extends to the bottom. Home still respects the top inset.
 - Use the phone semantic properties documented in
@@ -56,8 +59,8 @@ phone history and app launch targets refer to them.
 ## Availability and untrusted extensions
 
 `available` entries open a bundled screen. Use `preview` for unfinished routes
-and provide an honest description. Camera and File Manager currently open a
-preview explanation; they do not access real device hardware or files.
+and provide an honest description. Camera and File Manager are not registered
+and do not appear in app discovery.
 
 Only trusted bundled screens execute in this app origin. Moobi does not accept
 or execute user-submitted mini-app JavaScript. A future extension preview needs

@@ -61,7 +61,7 @@ export const getAppLibraryCategoryApps = (
   if (!category) return [];
   return category.appIds
     .map((id) => MINI_APPS.find((app) => app.id === id))
-    .filter((app): app is RegisteredMiniApp => app !== undefined)
+    .filter((app) => app !== undefined)
     .filter((app) => query.trim().length === 0 || matchesQuery(app, query));
 };
 

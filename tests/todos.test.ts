@@ -163,7 +163,7 @@ describe("Calendar task discovery", () => {
         taskDates: new Set(["2026-08-31"]),
       }),
     );
-    expect(markup.match(/<button/g)).toHaveLength(42);
+    expect(markup.match(/<button/g)).toHaveLength(31);
     expect(markup).toContain('aria-label="2026-08-31, scheduled todos"');
   });
 });

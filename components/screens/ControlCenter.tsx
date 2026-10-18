@@ -273,7 +273,7 @@ const ControlCenter = () => {
   });
 
   const openApp = (
-    screen: "settings" | "clock" | "calculator" | "camera" | "music-player",
+    screen: "settings" | "clock" | "calculator" | "music-player",
   ) => {
     toggleControlCenter();
     setCurrentScreen(screen);

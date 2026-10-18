@@ -12,6 +12,7 @@ import { useBatteryStore } from "@/stores/useBatteryStore";
 import { useDeviceStore } from "@/stores/useDeviceStore";
 import { useHomeScreenStore } from "@/stores/useHomeScreenStore";
 import { useMusicStore } from "@/stores/useMusicStore";
+import { useCalendarStore } from "@/stores/useCalendarStore";
 import { useNotesStore } from "@/stores/useNotesStore";
 import { usePhoneAppearanceStore } from "@/stores/usePhoneAppearanceStore";
 import { usePhoneSettingsStore } from "@/stores/usePhoneSettingsStore";
@@ -19,6 +20,7 @@ import { usePhoneSettingsStore } from "@/stores/usePhoneSettingsStore";
 import { useCalculatorStore } from "@/stores/useCalculatorStore";
 
 const stores = [
+  useCalendarStore,
   useCalculatorStore,
   useWeatherLocationsStore,
   useBatteryStore,

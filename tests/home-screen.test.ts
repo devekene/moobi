@@ -77,14 +77,15 @@ describe("home screen app arrangement", () => {
     });
   });
 
-  it("balances non-dock mini apps across the two home pages", () => {
-    const pageSizes = [0, 1].map(
-      (page) =>
-        MINI_APPS.filter(
-          (app) => app.homePage === page && !DOCK_APP_IDS.includes(app.id),
-        ).length,
-    );
-    expect(Math.abs(pageSizes[0] - pageSizes[1])).toBeLessThanOrEqual(1);
+  it("removes retired apps from saved layouts while preserving remaining app placement", () => {
+    const pageApps = MINI_APPS.filter(
+      (app) => app.homePage === 1 && !DOCK_APP_IDS.includes(app.id),
+    ).map((app) => app.id);
+    const order = reconcileHomeAppOrder(pageApps, ["file-manager", "calendar", "camera"]);
+    expect(order[0]).toBe("calendar");
+    expect([...order].sort()).toEqual([...pageApps].sort());
+    expect(order).not.toContain("camera");
+    expect(order).not.toContain("file-manager");
   });
 });
 

@@ -98,6 +98,23 @@ after reload and refreshes only its displayed location when needed. Summaries re
 10 minutes, with at most two requests in flight. Failed updates keep the saved
 summary and show a retry action. Maps remain pending.
 
+### Calendar
+
+Calendar opens to a Monday-first, scrolling year overview. Select a month, then a
+date to open its day timeline. The top view control switches between timeline and
+agenda; Today returns to the current date in the active view. Dates from 1900
+through 2100 are supported. Hour labels open a new event at that time. Calendar
+keeps the top safe area and extends to the bottom edge without a bottom safe-area inset.
+
+Create, edit, reschedule, search, and delete local all-day or timed events. Events
+are saved through the shared encrypted browser storage boundary. The selected
+date and view survive app switching in the current session. Notes todos retain
+one source of truth in Notes, including completion state; Calendar does not copy
+them into events. Calendars controls visibility of local events, included
+holidays, and todos. Included holidays are the existing fixed collection, not a
+live or regional holiday feed. Calendar accounts, recurring events, invitations,
+notifications, and external sync are not implemented.
+
 ### Dependency and validation baseline
 
 On 2026-10-13, the original installed tree passed `npm run lint`, `npx tsc --noEmit`, and `npm run build`. Its initial `npm audit` reported 30 advisories (1 critical, 23 high, 4 moderate, 2 low). The current tree uses Next.js 16.4.0, Tailwind CSS 4.3.3, Math.js 15.2.0, and Sharp 0.35.5; the latest audit reports 5 high advisories, all in the Next.js ESLint configuration dependency tree. In the restricted validation runner, Turbopack could not bind its CSS worker port; `npm run build -- --webpack` completed successfully. Recheck with `npm audit` before release because advisory data changes over time.
@@ -164,7 +181,7 @@ Here’s a quick dive into how the magic is wired:
 - `lib/app-registry.ts` owns typed app IDs, launch targets, icons, categories,
   descriptions, versions, availability, home placement, and lazy screen loaders.
 - Home, Mi Store, and App Switcher read from the same registry. Camera and File
-  Manager are explicitly labeled preview placeholders.
+  Manager are not registered.
 - See [the bundled mini-app contract](./docs/mini-app-contract.md) before adding
   an app. User-submitted code is not executed in the main app origin.
 

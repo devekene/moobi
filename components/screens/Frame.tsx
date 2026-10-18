@@ -22,6 +22,7 @@ import {
 } from "@/lib/battery";
 
 const Frame = ({ children }: { children: React.ReactNode }) => {
+  const [hardwareStatus, setHardwareStatus] = useState("");
   const [isOn, setIsOn] = useState(true);
   const {
     currentScreen,
@@ -50,6 +51,7 @@ const Frame = ({ children }: { children: React.ReactNode }) => {
 
   const handleHardwareButton = useCallback(
     (button: HardwareButtonId) => {
+      setHardwareStatus("");
       const phone = usePhoneStore.getState();
       switch (button) {
         case "volume-up":
@@ -86,7 +88,7 @@ const Frame = ({ children }: { children: React.ReactNode }) => {
           }
           break;
         case "camera-control":
-          if (isOn) setCurrentScreen("camera");
+          if (isOn) setHardwareStatus("Camera is unavailable in this preview.");
           break;
       }
     },
@@ -236,6 +238,11 @@ const Frame = ({ children }: { children: React.ReactNode }) => {
             ))
           )}
         </select>
+        {hardwareStatus && (
+          <p role="status" className="max-w-40 text-xs text-[var(--phone-text-muted)]">
+            {hardwareStatus}
+          </p>
+        )}
         {availableModels.length === 0 && (
           <p className="max-w-40 text-xs text-[var(--phone-text-muted)]">
             Enlarge the window to preview a virtual iPhone at a usable size.

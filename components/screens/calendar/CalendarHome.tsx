@@ -1,116 +1,178 @@
-import CalendarTasks from "./CalendarTasks";
-import { scheduledTasks, localDateKey } from "@/lib/todos";
-import { useNotesStore } from "@/stores/useNotesStore";
-import { Button } from "@/components/ui/button";
-import { LuChevronLeft, LuChevronRight, LuPlus } from "react-icons/lu";
-import { CgMoreVertical } from "react-icons/cg";
-import CalendarGrid from "@/components/screens/calendar/CalendarGrid";
-import EventList from "@/components/screens/calendar/EventList";
-import { CalendarEvent, CalendarScreen } from "@/types";
-import { Dispatch, SetStateAction, useState } from "react";
+import { useLayoutEffect, useRef, useState, type UIEvent } from "react";
+import type { CalendarEvent } from "@/types";
+import { calendarDate, monthDays, WEEKDAYS } from "@/lib/calendar";
+import { localDateKey } from "@/lib/todos";
+import CalendarGrid from "./CalendarGrid";
+import styles from "./calendar.module.css";
 
-interface CalendarHomeProps {
-  selectedDate: string;
-  setSelectedDate: Dispatch<SetStateAction<string>>;
-  allEvents: CalendarEvent[];
-  setScreen: Dispatch<SetStateAction<CalendarScreen>>;
-  setSelectedEvent: Dispatch<SetStateAction<CalendarEvent | null>>;
+// Keep a small scrolling window. Adding earlier pages preserves the visible content.
+function useCalendarWindow(anchor: number, minimum: number, maximum: number) {
+  const [range, setRange] = useState({
+    start: Math.max(minimum, anchor - 1),
+    end: Math.min(maximum, anchor + 1),
+  });
+  const scroll = useRef<HTMLDivElement>(null);
+  const target = useRef<HTMLElement>(null);
+  const previousHeight = useRef<number | null>(null);
+  const extending = useRef(false);
+  useLayoutEffect(() => {
+    const root = scroll.current;
+    if (root && target.current)
+      root.scrollTop = target.current.offsetTop - root.offsetTop;
+  }, []);
+  useLayoutEffect(() => {
+    if (previousHeight.current !== null && scroll.current) {
+      scroll.current.scrollTop +=
+        scroll.current.scrollHeight - previousHeight.current;
+      previousHeight.current = null;
+    }
+    extending.current = false;
+  }, [range]);
+  const onScroll = (event: UIEvent<HTMLDivElement>) => {
+    const root = event.currentTarget;
+    if (extending.current) return;
+    if (root.scrollTop < 100 && range.start > minimum) {
+      extending.current = true;
+      previousHeight.current = root.scrollHeight;
+      setRange({ ...range, start: range.start - 1 });
+    } else if (
+      root.scrollHeight - root.scrollTop - root.clientHeight < 300 &&
+      range.end < maximum
+    ) {
+      extending.current = true;
+      setRange({ ...range, end: range.end + 1 });
+    }
+  };
+  return { range, scroll, target, onScroll };
 }
 
-const CalendarHome = ({
-  selectedDate,
-  setSelectedDate,
-  allEvents,
-  setScreen,
-  setSelectedEvent,
-}: CalendarHomeProps) => {
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const notes = useNotesStore((state) => state.notes);
-  const taskDates = new Set(scheduledTasks(notes).map((task) => task.dueDate));
-
-  const goToPreviousMonth = () => {
-    setCurrentDate(
-      new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1),
-    );
-  };
-
-  const goToNextMonth = () => {
-    setCurrentDate(
-      new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1),
-    );
-  };
-
-  const goToToday = () => {
-    setCurrentDate(new Date());
-    setSelectedDate(localDateKey());
-  };
-
-  // Get events for a specific date
-  const getEventsForDate = (date: string) => {
-    return allEvents.filter((event) => event.date === date);
-  };
-
-  const monthYear = currentDate.toLocaleDateString("en-US", {
-    month: "long",
-    year: "numeric",
-  });
-
-  return (
-    <>
-      <div className="mb-4 flex items-end justify-end gap-4">
-        <Button
-          onClick={() => setScreen("add-edit")}
-          className="rounded-full border-0 bg-transparent p-2 text-white hover:bg-transparent"
-        >
-          <LuPlus />
-        </Button>
-        <Button className="bg-transparent p-0 text-white">
-          <CgMoreVertical />
-        </Button>
-      </div>
-
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-white">Calendar</h1>
-        <Button
-          onClick={goToToday}
-          className="rounded-full border-0 bg-blue-500 px-4 py-2 text-sm text-white hover:bg-blue-600"
-        >
-          Today
-        </Button>
-      </div>
-
-      <div className="mb-6 flex items-center justify-between">
-        <Button
-          onClick={goToPreviousMonth}
-          className="rounded-full border-0 bg-white/10 p-2 text-white hover:bg-white/20"
-        >
-          <LuChevronLeft className="h-5 w-5" />
-        </Button>
-        <h2 className="text-base font-semibold text-white">{monthYear}</h2>
-        <Button
-          onClick={goToNextMonth}
-          className="rounded-full border-0 bg-white/10 p-2 text-white hover:bg-white/20"
-        >
-          <LuChevronRight className="h-5 w-5" />
-        </Button>
-      </div>
-
-      <CalendarGrid
-        taskDates={taskDates}
-        currentDate={currentDate}
-        getEventsForDate={getEventsForDate}
-        selectedDate={selectedDate}
-        setSelectedDate={setSelectedDate}
-      />
-
-      <CalendarTasks date={selectedDate} />
-      <EventList
-        getEventsForDate={getEventsForDate}
-        selectedDate={selectedDate}
-        setSelectedEvent={setSelectedEvent}
-        setScreen={setScreen}
-      />
-    </>
-  );
+type Props = {
+  selectedDate: string;
+  onSelect: (date: string) => void;
 };
-export default CalendarHome;
+export function YearOverview({ selectedDate, onSelect }: Props) {
+  const selected = calendarDate(selectedDate);
+  const year = selected.getFullYear();
+  const { range, scroll, target, onScroll } = useCalendarWindow(
+    year,
+    1900,
+    2100,
+  );
+  const today = new Date();
+  return (
+    <div
+      className={styles.scroll}
+      ref={scroll}
+      onScroll={onScroll}
+      aria-label="Calendar years"
+    >
+      {Array.from(
+        { length: range.end - range.start + 1 },
+        (_, index) => range.start + index,
+      ).map((value) => (
+        <section
+          key={value}
+          ref={value === year ? target : undefined}
+          className={styles.yearSection}
+          aria-label={String(value)}
+        >
+          <h1
+            className={styles.yearTitle}
+            data-current={value === today.getFullYear()}
+          >
+            {value}
+          </h1>
+          <div className={styles.yearGrid}>
+            {Array.from({ length: 12 }, (_, month) => (
+              <button
+                key={month}
+                className={styles.miniMonth}
+                aria-label={`${new Date(value, month, 1).toLocaleDateString("en-GB", { month: "long", year: "numeric" })}`}
+                onClick={() =>
+                  onSelect(localDateKey(new Date(value, month, 1)))
+                }
+              >
+                <h2
+                  data-current={
+                    value === today.getFullYear() && month === today.getMonth()
+                  }
+                >
+                  {new Date(value, month, 1).toLocaleDateString("en", {
+                    month: "short",
+                  })}
+                </h2>
+                <span className={styles.miniGrid}>
+                  {monthDays(value, month).map((key, i) => (
+                    <span
+                      key={key ?? i}
+                      data-today={key === localDateKey(today)}
+                    >
+                      {key ? calendarDate(key).getDate() : ""}
+                    </span>
+                  ))}
+                </span>
+              </button>
+            ))}
+          </div>
+        </section>
+      ))}
+    </div>
+  );
+}
+export function MonthOverview({
+  selectedDate,
+  onSelect,
+  events,
+  taskDates,
+}: Props & { events: CalendarEvent[]; taskDates: ReadonlySet<string> }) {
+  const date = calendarDate(selectedDate);
+  const anchor = date.getFullYear() * 12 + date.getMonth();
+  const { range, scroll, target, onScroll } = useCalendarWindow(
+    anchor,
+    1900 * 12,
+    2100 * 12 + 11,
+  );
+  return (
+    <div
+      className={styles.scroll}
+      ref={scroll}
+      onScroll={onScroll}
+      aria-label="Calendar months"
+    >
+      {Array.from(
+        { length: range.end - range.start + 1 },
+        (_, index) => range.start + index,
+      ).map((value) => {
+        const month = new Date(Math.floor(value / 12), value % 12, 1);
+        return (
+          <section
+            key={value}
+            ref={value === anchor ? target : undefined}
+            className={styles.monthSection}
+          >
+            <h1>
+              {month.toLocaleDateString("en", { month: "long" })}
+              {month.getFullYear() !== date.getFullYear() && (
+                <small> {month.getFullYear()}</small>
+              )}
+            </h1>
+            <div className={styles.weekdays}>
+              {WEEKDAYS.map((day, i) => (
+                <span key={i}>{day}</span>
+              ))}
+            </div>
+            <CalendarGrid
+              currentDate={month}
+              selectedDate={selectedDate}
+              setSelectedDate={onSelect}
+              taskDates={taskDates}
+              getEventsForDate={(key) =>
+                events.filter((event) => event.date === key)
+              }
+            />
+          </section>
+        );
+      })}
+    </div>
+  );
+}

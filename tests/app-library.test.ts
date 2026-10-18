@@ -73,6 +73,6 @@ describe("home App Library", () => {
       getAlphabeticalAppGroups("ca").flatMap(({ apps }) =>
         apps.map((app) => app.name),
       ),
-    ).toEqual(["Calculator", "Calendar", "Camera"]);
+    ).toEqual(["Calculator", "Calendar"]);
   });
 });

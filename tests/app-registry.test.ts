@@ -11,7 +11,7 @@ import {
 
 describe("mini-app registry", () => {
   it("uses full-display scrolling for flowing screens and keeps fixed layouts contained", () => {
-    for (const id of ["settings", "calendar", "app-store", "guess"] as const) {
+    for (const id of ["settings", "app-store", "guess"] as const) {
       expect(getMiniApp(id).viewport).toBe("scroll");
     }
     for (const id of ["snake", "chrome-browser", "notes"] as const) {
@@ -21,6 +21,10 @@ describe("mini-app registry", () => {
 
   it("lets Calculator extend its history sheet to the display edge", () => {
     expect(getMiniApp("calculator").viewport).toBe("full-bleed");
+  });
+
+  it("lets Calendar keep its floating controls within the full display", () => {
+    expect(getMiniApp("calendar").viewport).toBe("full-bleed");
   });
 
   it("lets Weather draw beneath both system bars", () => {
@@ -34,6 +38,16 @@ describe("mini-app registry", () => {
       false,
     );
     expect(getAppMetadata("info").id).toBe("home");
+  });
+
+  it("excludes Camera and File Manager from discovery and launch metadata", () => {
+    for (const id of ["camera", "file-manager"]) {
+      expect(isMiniAppId(id)).toBe(false);
+      expect(mobileApps.flat().some((app) => String(app.id) === id)).toBe(false);
+      expect(getAppMetadata(id).id).toBe("home");
+    }
+    expect(searchMiniApps("camera")).toEqual([]);
+    expect(searchMiniApps("file manager")).toEqual([]);
   });
 
   it("provides unique typed launch metadata and a screen loader for every bundled app", () => {
@@ -56,18 +70,13 @@ describe("mini-app registry", () => {
     }
   });
 
-  it("places every discoverable app on a home page and marks unfinished routes as previews", () => {
+  it("places every discoverable app on a home page", () => {
     expect(
       mobileApps
         .flat()
         .map((app) => app.id)
         .sort(),
     ).toEqual(MINI_APPS.map((app) => app.id).sort());
-    expect(
-      MINI_APPS.filter((app) => app.availability === "preview").map(
-        (app) => app.id,
-      ),
-    ).toEqual(["camera", "file-manager"]);
     expect(MINI_APP_CONTRACT).toMatchObject({
       lifecycle: "unmount-on-switch",
       navigation: "system-home-control",
@@ -89,10 +98,10 @@ describe("mini-app registry", () => {
   });
 
   it("returns recent-app metadata and a safe fallback for unknown screen names", () => {
-    expect(getAppMetadata("camera")).toMatchObject({
-      id: "camera",
-      name: "Camera",
-      availability: "preview",
+    expect(getAppMetadata("calendar")).toMatchObject({
+      id: "calendar",
+      name: "Calendar",
+      availability: "available",
     });
     expect(getAppMetadata("missing-app")).toMatchObject({
       name: "Home",

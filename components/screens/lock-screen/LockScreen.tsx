@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
 import lockscreen from "@/public/images/lockscreen.webp";
-import { LuCamera, LuDelete, LuFlashlight, LuScanFace } from "react-icons/lu";
+import { LuDelete, LuFlashlight, LuScanFace } from "react-icons/lu";
 import { usePhoneStore } from "@/stores/usePhoneStore";
 import { usePhoneSettingsStore } from "@/stores/usePhoneSettingsStore";
 import { getLockScreenTimePresentation } from "@/lib/lock-screen";
@@ -213,17 +213,6 @@ const LockScreen = ({
         <span className="text-[10px] font-medium">
           {isUnlocking ? "Unlocking" : "Face ID"}
         </span>
-      </button>
-
-      <button
-        type="button"
-        onClick={() => setCurrentScreen("camera")}
-        className={`${LOCK_CONTROL_CLASS} absolute right-[13%] bottom-[8.5%] z-20`}
-        aria-label="Open camera preview"
-        title="Open camera preview"
-        data-no-turntable
-      >
-        <LuCamera className="h-6 w-6" aria-hidden="true" />
       </button>
 
       {passcodeEntryOpen && pinLockEnabled && (

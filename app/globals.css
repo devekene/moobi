@@ -169,6 +169,8 @@ body {
 .phone-theme {
   --phone-shell: #14161b;
   --phone-canvas: #090a0c;
+  --phone-calendar-canvas: #000;
+  --phone-calendar-accent: #ff475b;
   --phone-settings-canvas: #000;
   --phone-settings-group: #1c1c1e;
   --phone-settings-divider: #38383a;
@@ -218,6 +220,8 @@ body {
 .phone-theme[data-phone-theme="light"] {
   --phone-shell: #d9dce2;
   --phone-canvas: #f3f4f7;
+  --phone-calendar-canvas: #fff;
+  --phone-calendar-accent: #f52f46;
   --phone-settings-canvas: #f2f2f7;
   --phone-settings-group: #fff;
   --phone-settings-divider: #d8d8dc;
