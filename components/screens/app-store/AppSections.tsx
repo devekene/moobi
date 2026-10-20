@@ -1,54 +1,59 @@
+import { LuArrowUpRight } from "react-icons/lu";
 import type { RegisteredMiniApp } from "@/lib/app-registry";
+import AppIcon from "./AppIcon";
+import styles from "./store.module.css";
 
-const AppSections = ({
+export default function AppSections({
   title,
+  subtitle,
   apps,
   onSelect,
+  onOpen,
 }: {
   title: string;
+  subtitle?: string;
   apps: readonly RegisteredMiniApp[];
-  onSelect: (app: RegisteredMiniApp) => void;
-}) => (
-  <section aria-label={title} className="space-y-2">
-    <h2 className="text-base font-semibold text-[var(--phone-text)]">{title}</h2>
-    {apps.length === 0 ? (
-      <p className="rounded-xl bg-[var(--phone-surface)] p-4 text-sm text-[var(--phone-text-muted)]">
-        No mini apps to show here yet.
-      </p>
-    ) : (
-      <ul className="space-y-2">
-        {apps.map((app) => {
-          const Icon = app.icon;
-          return (
-            <li key={app.id}>
-              <button
-                type="button"
-                onClick={() => onSelect(app)}
-                className="flex w-full items-center gap-3 rounded-xl bg-[var(--phone-surface)] p-3 text-left transition-colors hover:bg-[var(--phone-surface-elevated)]"
-              >
-                <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${app.color}`}>
-                  <Icon aria-hidden="true" className="h-6 w-6" />
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate font-medium text-[var(--phone-text)]">
-                    {app.name}
-                  </span>
-                  <span className="block truncate text-xs capitalize text-[var(--phone-text-muted)]">
-                    {app.category} · {app.version}
-                  </span>
-                </span>
-                {app.availability === "preview" && (
-                  <span className="shrink-0 rounded-full bg-[var(--phone-surface-elevated)] px-2 py-1 text-[10px] text-[var(--phone-text-secondary)]">
-                    Preview
-                  </span>
-                )}
-              </button>
-            </li>
-          );
-        })}
+  onSelect: (app: RegisteredMiniApp, trigger: HTMLButtonElement) => void;
+  onOpen: (app: RegisteredMiniApp) => void;
+}) {
+  return (
+    <section className={styles.section} aria-label={title}>
+      <header className={styles.sectionHeading}>
+        <div>
+          <h2>{title}</h2>
+          {subtitle && <p>{subtitle}</p>}
+        </div>
+        <span>{String(apps.length).padStart(2, "0")}</span>
+      </header>
+      <ul className={styles.appList}>
+        {apps.map((app) => (
+          <li key={app.id}>
+            <button
+              type="button"
+              className={styles.appInfo}
+              onClick={(event) => onSelect(app, event.currentTarget)}
+              aria-label={`About ${app.name}`}
+              data-store-entry={`${title}-${app.id}`}
+            >
+              <AppIcon app={app} />
+              <span>
+                <strong>{app.name}</strong>
+                <small>{app.store?.tagline ?? app.description}</small>
+                <em>{app.category}</em>
+              </span>
+            </button>
+            <button
+              type="button"
+              className={styles.openPill}
+              onClick={() => onOpen(app)}
+              aria-label={`Open ${app.name}`}
+            >
+              Open
+              <LuArrowUpRight aria-hidden="true" />
+            </button>
+          </li>
+        ))}
       </ul>
-    )}
-  </section>
-);
-
-export default AppSections;
+    </section>
+  );
+}

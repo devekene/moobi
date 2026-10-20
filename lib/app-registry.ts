@@ -21,7 +21,17 @@ export type MiniAppCategory =
 export type MiniAppAvailability = "available" | "preview";
 type ScreenModule = { default: ComponentType };
 
+export interface StoreListing {
+  readonly tagline: string;
+  readonly headline: string;
+  readonly story: string;
+  readonly highlights: readonly string[];
+  readonly previewCaptions: readonly string[];
+}
+
 export interface MiniAppDefinition {
+  /** Null for built-in phone apps; only explicit listings appear in the store. */
+  readonly store: StoreListing | null;
   readonly id: string;
   readonly name: string;
   readonly icon: IconType;
@@ -47,6 +57,7 @@ export interface MiniAppDefinition {
 export const MINI_APPS = [
   {
     id: "settings",
+    store: null,
     viewport: "scroll",
     name: "Settings",
     icon: LuSettings,
@@ -62,6 +73,19 @@ export const MINI_APPS = [
   },
   {
     id: "snake",
+    viewport: "full-bleed",
+    store: {
+      tagline: "A little nostalgia. A lot of one more go.",
+      headline: "Small game.\nBig obsession.",
+      story:
+        "The classic you know, made for a quick break. Guide your snake, collect food, and keep your next move in mind. Every bite makes the board a little trickier.",
+      highlights: [
+        "Classic arcade play",
+        "Simple directional controls",
+        "Pause and pick up again",
+      ],
+      previewCaptions: ["Chase your next bite"],
+    },
     name: "Snake",
     icon: GiSnake,
     color: "text-green-600",
@@ -69,13 +93,18 @@ export const MINI_APPS = [
     launchTarget: { kind: "phone-screen", screen: "snake" },
     description: "A classic snake game.",
     version: "1.0.0",
-    previewCapabilities: { bundled: true, executesUserCode: false },
+    previewCapabilities: {
+      bundled: true,
+      executesUserCode: false,
+      screenshotUrls: ["/images/appstore/screenshots/snake-1.webp"],
+    },
     availability: "available",
     homePage: 0,
     loadScreen: () => import("@/components/screens/snake/SnakeGame"),
   },
   {
     id: "calculator",
+    store: null,
     name: "Calculator",
     icon: BiCalculator,
     color: "text-orange-500",
@@ -91,6 +120,7 @@ export const MINI_APPS = [
   },
   {
     id: "clock",
+    store: null,
     name: "Clock",
     icon: BsClockFill,
     color: "text-gray-400",
@@ -105,6 +135,7 @@ export const MINI_APPS = [
   },
   {
     id: "chrome-browser",
+    store: null,
     name: "Mo Browser",
     icon: MoBrowserIcon,
     color:
@@ -121,6 +152,7 @@ export const MINI_APPS = [
   },
   {
     id: "live-dev",
+    store: null,
     name: "Live Dev",
     icon: BiTerminal,
     color: "text-white",
@@ -135,6 +167,7 @@ export const MINI_APPS = [
   },
   {
     id: "calendar",
+    store: null,
     viewport: "full-bleed",
     name: "Calendar",
     icon: BsCalendar3,
@@ -150,6 +183,7 @@ export const MINI_APPS = [
   },
   {
     id: "weather",
+    store: null,
     viewport: "full-bleed",
     name: "Weather",
     icon: TiWeatherDownpour,
@@ -165,21 +199,41 @@ export const MINI_APPS = [
   },
   {
     id: "guess",
+    store: {
+      tagline: "Small puzzles. Big aha.",
+      headline: "Stay curious.\nTake a guess.",
+      story:
+        "Decode emoji combinations, uncover hidden words, or hunt a secret number. Explore five-round sessions with two difficulty levels, helpful hints, and personal records.",
+      highlights: [
+        "Three ways to play",
+        "Five-round puzzle sessions",
+        "Hints and personal records",
+      ],
+      previewCaptions: ["A number worth finding", "Every clue gets you closer"],
+    },
     viewport: "scroll",
     name: "Guess",
     icon: LuBrain,
     color: "text-primary bg-white",
     category: "games",
     launchTarget: { kind: "phone-screen", screen: "guess" },
-    description: "Play a short number guessing game.",
+    description: "Decode emoji, solve word riddles, and hunt secret numbers.",
     version: "1.0.0",
-    previewCapabilities: { bundled: true, executesUserCode: false },
+    previewCapabilities: {
+      bundled: true,
+      executesUserCode: false,
+      screenshotUrls: [
+        "/images/appstore/screenshots/guess-1.webp",
+        "/images/appstore/screenshots/guess-2.webp",
+      ],
+    },
     availability: "available",
     homePage: 0,
     loadScreen: () => import("@/components/screens/guess/GuessGame"),
   },
   {
     id: "mail-composer",
+    store: null,
     name: "Mail",
     icon: TfiEmail,
     color: "bg-blue-500",
@@ -194,6 +248,18 @@ export const MINI_APPS = [
   },
   {
     id: "music-player",
+    store: {
+      tagline: "A listening room for independent sound.",
+      headline: "Find your\nnext feeling.",
+      story:
+        "Step into FORM, a quiet space for discovering independent music. Explore the catalog, start a listening session, and collect the tracks you want to come back to.",
+      highlights: [
+        "Discover independent music",
+        "Build your own collection",
+        "Keep the listening queue flowing",
+      ],
+      previewCaptions: ["A room for discovery", "Keep your favorites close"],
+    },
     viewport: "full-bleed",
     name: "FORM",
     icon: LuDisc3,
@@ -210,6 +276,7 @@ export const MINI_APPS = [
   },
   {
     id: "notes",
+    store: null,
     name: "Notes",
     icon: LuListTodo,
     color: "bg-yellow-300",
@@ -224,6 +291,7 @@ export const MINI_APPS = [
   },
   {
     id: "app-store",
+    store: null,
     viewport: "scroll",
     name: "Mi Store",
     icon: IoLogoAppleAppstore,
@@ -239,6 +307,7 @@ export const MINI_APPS = [
   },
   {
     id: "phone-dialer",
+    store: null,
     name: "Phone",
     icon: FaPhone,
     color: "bg-green-600",
@@ -253,6 +322,18 @@ export const MINI_APPS = [
   },
   {
     id: "chess",
+    store: {
+      tagline: "Make a little room for your next move.",
+      headline: "Your move.\nYour moment.",
+      story:
+        "Settle into a game against the built-in opponent. A tactile wooden board brings a familiar classic to your virtual phone, with time to think through your next move.",
+      highlights: [
+        "Play the built-in opponent",
+        "A dimensional wooden board",
+        "Click or drag to move",
+      ],
+      previewCaptions: ["Choose your challenge", "Think one move ahead"],
+    },
     name: "Chess",
     icon: FaChessQueen,
     color: "bg-yellow-200",
@@ -260,13 +341,21 @@ export const MINI_APPS = [
     launchTarget: { kind: "phone-screen", screen: "chess" },
     description: "Play chess against the built-in opponent.",
     version: "1.0.0",
-    previewCapabilities: { bundled: true, executesUserCode: false },
+    previewCapabilities: {
+      bundled: true,
+      executesUserCode: false,
+      screenshotUrls: [
+        "/images/appstore/screenshots/chess-1.webp",
+        "/images/appstore/screenshots/chess-2.webp",
+      ],
+    },
     availability: "available",
     homePage: 1,
     loadScreen: () => import("@/components/screens/chess/Home"),
   },
   {
     id: "gallery",
+    store: null,
     name: "Gallery",
     icon: TfiGallery,
     color: "bg-blue-300",
@@ -328,6 +417,26 @@ export function searchMiniApps(
         .includes(normalizedQuery);
     return matchesCategory && matchesQuery;
   });
+}
+
+export const STORE_APPS: readonly RegisteredMiniApp[] = MINI_APPS.filter(
+  (app) => app.store !== null,
+);
+
+export function searchStoreApps(
+  query: string,
+  category?: MiniAppCategory | "all",
+) {
+  return searchMiniApps(query, category).filter((app) => app.store !== null);
+}
+
+export function recentStoreApps(
+  history: readonly string[],
+): RegisteredMiniApp[] {
+  return [...new Set([...history].reverse())]
+    .filter(isMiniAppId)
+    .map(getMiniApp)
+    .filter((app) => app.store !== null);
 }
 
 export interface MiniAppContract {

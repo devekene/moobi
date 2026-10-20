@@ -8,9 +8,17 @@ second route map in the phone shell.
 
 Each entry has a stable `id`, a matching `launchTarget.screen`, name, icon,
 category, description, version, availability, preview capability metadata,
-home page, and `loadScreen` callback. Optional screenshots belong on
+home page, a `store` value, and `loadScreen` callback. Optional screenshots belong on
 `previewCapabilities.screenshotUrls`. Keep IDs stable after release because
 phone history and app launch targets refer to them.
+
+Built-in phone apps use `store: null`; they remain on Home and in the App
+Library but never appear in store browsing, search, filters, or recents.
+Curated store apps provide a `StoreListing` with a tagline, editorial headline,
+story, highlights, and screenshot captions. Store discovery uses `STORE_APPS`,
+`searchStoreApps`, and `recentStoreApps`; general launcher discovery still uses
+the complete registry. Use current app captures for screenshots, keep them local
+and compressed, and avoid invented ratings, downloads, or installation claims.
 
 ## Lifecycle and navigation
 

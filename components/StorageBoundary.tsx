@@ -19,8 +19,12 @@ import { usePhoneSettingsStore } from "@/stores/usePhoneSettingsStore";
 
 import { useBrowserCacheStore } from "@/stores/useBrowserCacheStore";
 import { useCalculatorStore } from "@/stores/useCalculatorStore";
+import { useGuessStore } from "@/stores/useGuessStore";
+import { useSnakeStore } from "@/stores/useSnakeStore";
 
 const stores = [
+  useGuessStore,
+  useSnakeStore,
   useBrowserCacheStore,
   useCalendarStore,
   useCalculatorStore,

@@ -1,0 +1,808 @@
+.app {
+  --guess-ink: var(--phone-text);
+  --guess-muted: var(--phone-text-muted);
+  --guess-accent: var(--phone-accent);
+  color: var(--guess-ink);
+  background:
+    radial-gradient(
+      ellipse at 90% 15%,
+      color-mix(in srgb, var(--guess-accent) 7%, transparent),
+      transparent 55%
+    ),
+    var(--phone-canvas);
+  min-height: 100%;
+  padding: 10px 20px 24px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.app button {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 0.18s,
+    background 0.18s;
+}
+.app button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+.app button:disabled {
+  cursor: default;
+}
+.app button:focus-visible,
+.app input:focus-visible {
+  outline: 2px solid var(--phone-focus);
+  outline-offset: 4px;
+}
+.app h1:focus {
+  outline: none;
+}
+.app h1,
+.app h2,
+.app p {
+  margin: 0;
+}
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.brand {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  font-size: 25px;
+  font-weight: 850;
+  letter-spacing: -1.5px;
+}
+.brandDot {
+  color: var(--guess-accent);
+}
+.brandMark {
+  width: 31px;
+  height: 34px;
+  border-radius: 12px;
+  background: var(--guess-accent);
+  color: var(--phone-on-accent);
+  font-size: 28px;
+  line-height: 28px;
+  position: relative;
+  box-shadow: inset 0 -3px 0
+    color-mix(in srgb, var(--phone-text) 15%, transparent);
+}
+.brandMark span {
+  font-size: 11px;
+  position: absolute;
+  right: 3px;
+  top: -1px;
+}
+.headerActions {
+  display: flex;
+  gap: 5px;
+}
+.iconButton {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--phone-border);
+  border-radius: 50%;
+  background: var(--phone-surface);
+  font-size: 17px;
+}
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 9px;
+  letter-spacing: 1.8px;
+  font-weight: 750;
+  color: var(--guess-accent);
+}
+.eyebrow > span {
+  width: 5px;
+  height: 5px;
+  background: currentColor;
+  border-radius: 50%;
+}
+.intro h1 {
+  font-size: clamp(30px, 10cqi, 39px);
+  line-height: 1.1;
+  letter-spacing: -1.8px;
+  font-weight: 780;
+  margin: 12px 0 10px;
+}
+.intro h1 > span {
+  color: var(--guess-accent);
+}
+.intro > p:last-of-type {
+  color: var(--guess-muted);
+  font-size: 12px;
+  line-height: 1.65;
+}
+.art {
+  height: 155px;
+  position: relative;
+  width: 100%;
+  max-width: 310px;
+  margin: 0 auto 12px;
+  isolation: isolate;
+}
+.orbit,
+.orbitTwo {
+  position: absolute;
+  width: 235px;
+  height: 95px;
+  border: 1px solid color-mix(in srgb, var(--guess-accent) 13%, transparent);
+  border-radius: 50%;
+  left: 50%;
+  top: 35px;
+  transform: translateX(-50%) rotate(-20deg);
+}
+.orbitTwo {
+  transform: translateX(-50%) rotate(20deg);
+  width: 250px;
+  height: 105px;
+}
+.question {
+  position: absolute;
+  left: calc(50% - 49px);
+  top: 15px;
+  width: 98px;
+  height: 112px;
+  display: grid;
+  place-items: center;
+  font-size: 90px;
+  line-height: 1;
+  font-weight: 900;
+  font-family: system-ui, sans-serif;
+  color: #f4edff;
+  border-radius: 34px;
+  transform: rotate(-12deg);
+  background: radial-gradient(
+    circle at 25% 15%,
+    #bdb0ff,
+    #8872e9 48%,
+    #6248bb 90%
+  );
+  text-shadow:
+    0 3px 0 #b7a4f5,
+    0 5px 0 #6045b6,
+    0 9px 12px #44239455;
+  box-shadow:
+    inset 2px 3px 4px #ffffff70,
+    inset -3px -5px 5px #442b9e80,
+    6px 12px 0 #5137a2,
+    8px 22px 24px #7351ac30;
+}
+.artTile,
+.numberTile {
+  position: absolute;
+  width: 48px;
+  height: 49px;
+  display: grid;
+  place-items: center;
+  border-radius: 15px;
+  font-size: 23px;
+  font-weight: 750;
+  box-shadow:
+    inset 1px 2px 2px #ffffffb0,
+    2px 5px 0 #d2a8a3,
+    4px 9px 15px #7c4a5120;
+  background: #f8d8cc;
+  color: #8c4f49;
+  left: calc(50% - 117px);
+  top: 68px;
+  transform: rotate(-18deg);
+}
+.numberTile {
+  background: #e4eccd;
+  color: #566743;
+  box-shadow:
+    inset 1px 2px 2px #ffffffb0,
+    2px 5px 0 #acba8c,
+    4px 9px 15px #41551f20;
+  left: auto;
+  right: calc(50% - 115px);
+  top: 28px;
+  transform: rotate(16deg);
+}
+.sparkOne,
+.sparkTwo {
+  color: var(--guess-accent);
+  position: absolute;
+  font-size: 24px;
+  top: 16px;
+  left: 46px;
+}
+.sparkTwo {
+  font-size: 17px;
+  top: 115px;
+  left: auto;
+  right: 53px;
+}
+.artSmall {
+  height: 155px;
+  margin-top: 10px;
+}
+.sectionHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  gap: 8px;
+}
+.sectionHeading h2 {
+  font-size: 15px;
+  font-weight: 750;
+  letter-spacing: -0.4px;
+}
+.sectionHeading > span {
+  color: var(--guess-muted);
+  font-size: 10px;
+}
+.modeList {
+  display: grid;
+  gap: 9px;
+}
+.modeCard {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  text-align: left;
+  padding: 13px 12px;
+  border: 1px solid
+    color-mix(in srgb, var(--guess-accent) 12%, var(--phone-border));
+  border-radius: 19px;
+  background: var(--phone-surface);
+}
+.modeCard:hover {
+  background: color-mix(in srgb, var(--guess-accent) 7%, var(--phone-surface));
+}
+.modeCard > svg {
+  flex-shrink: 0;
+  color: var(--guess-muted);
+}
+.modeSymbol {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 45px;
+  height: 48px;
+  border-radius: 14px;
+  color: var(--guess-accent);
+  background: color-mix(in srgb, var(--guess-accent) 12%, var(--phone-surface));
+  font-size: 24px;
+  font-weight: 750;
+}
+.word .modeSymbol {
+  color: var(--phone-alarm-accent);
+  background: color-mix(
+    in srgb,
+    var(--phone-alarm-accent) 12%,
+    var(--phone-surface)
+  );
+}
+.number .modeSymbol {
+  color: var(--phone-positive);
+  background: color-mix(
+    in srgb,
+    var(--phone-positive) 10%,
+    var(--phone-surface)
+  );
+}
+.modeCopy {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+.modeTitle {
+  font-size: 13px;
+  font-weight: 750;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  align-items: center;
+}
+.modeCopy > span:last-child {
+  color: var(--guess-muted);
+  font-size: 10px;
+  line-height: 1.4;
+}
+.tag {
+  font-size: 6px;
+  letter-spacing: 0.5px;
+  color: var(--guess-accent);
+  background: color-mix(in srgb, var(--guess-accent) 10%, transparent);
+  padding: 3px 5px;
+  border-radius: 4px;
+}
+.difficulty {
+  display: flex;
+  padding: 4px;
+  border-radius: 14px;
+  background: var(--phone-surface-elevated);
+  margin: 17px auto 9px;
+}
+.difficulty button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  flex: 1;
+  min-height: 38px;
+  border-radius: 10px;
+  font-weight: 650;
+  color: var(--guess-muted);
+}
+.difficulty button[aria-pressed="true"] {
+  background: var(--phone-surface);
+  color: var(--guess-ink);
+  box-shadow: 0 2px 5px color-mix(in srgb, var(--phone-text) 7%, transparent);
+}
+.note {
+  font-size: 10px;
+  text-align: center;
+  color: var(--guess-muted);
+}
+.primary,
+.secondary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 47px;
+  padding: 12px 14px;
+  border-radius: 15px;
+  font-weight: 700;
+}
+.primary {
+  background: var(--guess-accent);
+  color: var(--phone-on-accent);
+  box-shadow: 0 5px 14px
+    color-mix(in srgb, var(--guess-accent) 18%, transparent);
+}
+.primary > svg:last-child {
+  margin-left: auto;
+}
+.secondary {
+  margin-top: 9px;
+  color: var(--guess-muted);
+  background: var(--phone-surface);
+}
+.back {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  margin-bottom: 18px;
+  color: var(--guess-muted);
+  font-size: 11px;
+}
+.info h1,
+.results h1,
+.panel h1 {
+  font-size: 30px;
+  line-height: 1.15;
+  letter-spacing: -1.2px;
+  font-weight: 750;
+  margin: 12px 0;
+}
+.info > p:not(.eyebrow),
+.results > p:not(.eyebrow),
+.panel p {
+  color: var(--guess-muted);
+}
+.instructions {
+  display: grid;
+  gap: 24px;
+  margin: 28px 0;
+}
+.instructions > div {
+  display: flex;
+  gap: 13px;
+}
+.instructions > div > span {
+  color: var(--guess-accent);
+  font-size: 12px;
+  font-weight: 750;
+  padding-top: 2px;
+}
+.instructions h2 {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+.instructions p {
+  color: var(--guess-muted);
+  font-size: 12px;
+}
+.records {
+  display: grid;
+  gap: 10px;
+  margin: 20px 0;
+}
+.records > div {
+  display: flex;
+  gap: 12px;
+  padding: 18px;
+  align-items: center;
+  border-radius: 18px;
+  background: var(--phone-surface);
+}
+.records svg {
+  color: var(--guess-accent);
+  font-size: 20px;
+}
+.records strong {
+  font-size: 25px;
+}
+.records span {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--guess-muted);
+}
+.gameTop {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.gameTop > span {
+  font-size: 13px;
+  font-weight: 700;
+}
+.gameTop small {
+  display: block;
+  font-size: 10px;
+  color: var(--guess-muted);
+  font-weight: 450;
+}
+.gameTop .score {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: auto;
+  color: var(--guess-accent);
+}
+.progress {
+  display: flex;
+  gap: 5px;
+  margin: 22px 0 13px;
+}
+.progress > span {
+  height: 5px;
+  flex: 1;
+  border-radius: 5px;
+  background: var(--phone-surface-elevated);
+}
+.progress > span[data-current="true"] {
+  background: var(--guess-accent);
+}
+.progress > span[data-done="true"] {
+  background: color-mix(in srgb, var(--guess-accent) 50%, var(--phone-surface));
+}
+.roundMeta {
+  display: flex;
+  justify-content: space-between;
+  color: var(--guess-muted);
+  font-size: 9px;
+  letter-spacing: 0.8px;
+}
+.gameTitle {
+  font-size: 25px;
+  line-height: 1.2;
+  letter-spacing: -0.9px;
+  font-weight: 750;
+  margin: 17px 0 !important;
+}
+.puzzleCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 180px;
+  padding: 22px 18px;
+  border-radius: 25px;
+  border: 1px solid
+    color-mix(in srgb, var(--guess-accent) 18%, var(--phone-border));
+  background:
+    radial-gradient(
+      ellipse at 50% 0,
+      color-mix(in srgb, var(--guess-accent) 14%, transparent),
+      transparent 90%
+    ),
+    var(--phone-surface);
+  text-align: center;
+}
+.emojiVisual {
+  font-size: clamp(35px, 14cqi, 49px);
+  line-height: 1.5;
+  letter-spacing: 5px;
+  margin-bottom: 10px;
+}
+.puzzleVisual {
+  font-size: 52px;
+  font-weight: 850;
+  color: var(--guess-accent);
+  line-height: 1.1;
+  margin-bottom: 12px;
+}
+.puzzleCard p {
+  font-size: 14px;
+  font-weight: 550;
+  line-height: 1.65;
+}
+.letterCount {
+  margin-top: 12px;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--guess-muted);
+}
+.feedback {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: var(--guess-muted);
+  text-align: center;
+  padding: 9px 0;
+}
+.answers {
+  display: grid;
+  gap: 9px;
+}
+.answers button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 13px;
+  min-height: 49px;
+  border-radius: 15px;
+  border: 1px solid var(--phone-border);
+  background: var(--phone-surface);
+  text-align: left;
+  font-size: 13px;
+  font-weight: 600;
+}
+.answers button > span {
+  font-size: 10px;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: var(--phone-surface-elevated);
+  color: var(--guess-muted);
+}
+.answers button:hover:not(:disabled) {
+  border-color: var(--guess-accent);
+}
+.answers button:disabled {
+  text-decoration: line-through;
+  color: var(--guess-muted);
+  background: transparent;
+}
+.answers button > svg {
+  margin-left: auto;
+  color: var(--phone-negative);
+}
+.hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  min-height: 46px;
+  margin-top: 15px;
+  padding: 9px;
+  color: var(--guess-accent);
+  font-size: 11px;
+}
+.hint span {
+  font-size: 9px;
+  color: var(--guess-muted);
+}
+.hint:disabled {
+  text-align: center;
+  line-height: 1.6;
+  color: var(--guess-muted);
+}
+.hint svg {
+  flex-shrink: 0;
+}
+.reveal {
+  padding: 19px;
+  border-radius: 22px;
+  background: var(--phone-surface);
+  border: 1px solid var(--phone-border);
+}
+.reveal > span {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  color: var(--guess-accent);
+  font-size: 12px;
+  font-weight: 650;
+}
+.reveal[data-solved="true"] > span {
+  color: var(--phone-positive);
+}
+.reveal h2 {
+  font-size: 27px;
+  font-weight: 750;
+  margin: 10px 0;
+}
+.reveal p {
+  color: var(--guess-muted);
+  font-size: 12px;
+  margin-bottom: 20px;
+}
+.numberForm label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-weight: 650;
+}
+.numberForm label span {
+  color: var(--guess-muted);
+  font-weight: 450;
+}
+.numberForm > div:first-of-type {
+  display: flex;
+  gap: 8px;
+}
+.numberForm input {
+  width: 0;
+  flex: 1;
+  padding: 14px;
+  border-radius: 15px;
+  border: 1px solid var(--phone-border);
+  background: var(--phone-surface);
+  font-size: 22px;
+}
+.numberForm .primary {
+  width: 53px;
+  flex-shrink: 0;
+  font-size: 22px;
+}
+.numberForm .primary svg {
+  margin: 0;
+}
+.numberForm > p {
+  font-size: 11px;
+  color: var(--phone-negative);
+  margin-top: 10px;
+}
+.numberHistory {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 14px;
+}
+.numberHistory span {
+  padding: 6px 10px;
+  background: var(--phone-surface-elevated);
+  border-radius: 8px;
+  font-size: 12px;
+}
+.results {
+  text-align: center;
+}
+.results .eyebrow {
+  justify-content: center;
+}
+.results > h1 {
+  font-size: 28px;
+}
+.finalScore {
+  display: grid;
+  padding: 20px;
+  margin: 22px 0;
+  border-radius: 24px;
+  background: color-mix(in srgb, var(--guess-accent) 8%, var(--phone-surface));
+}
+.finalScore > span {
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: var(--guess-accent);
+}
+.finalScore strong {
+  font-size: 54px;
+  letter-spacing: -2px;
+  line-height: 1.4;
+}
+.finalScore small {
+  font-size: 16px;
+  letter-spacing: 0;
+  color: var(--guess-muted);
+  font-weight: 450;
+}
+.recap {
+  margin: 0 0 23px;
+}
+.recap > div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--phone-border);
+  font-size: 12px;
+}
+.recap > div > span:first-child {
+  color: var(--guess-muted);
+  font-size: 9px;
+}
+.recap strong {
+  margin-right: auto;
+  font-weight: 550;
+  text-align: left;
+}
+.recap svg {
+  color: var(--guess-accent);
+}
+.recap b {
+  min-width: 25px;
+  text-align: right;
+}
+.panel {
+  padding: 50px 0;
+}
+.panel p {
+  margin-bottom: 28px;
+}
+.largeIcon {
+  font-size: 40px;
+  color: var(--guess-accent);
+  margin-bottom: 20px;
+}
+@media (max-width: 360px) {
+  .app {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+  .modeCard {
+    gap: 8px;
+  }
+  .modeCopy > span:last-child {
+    font-size: 9px;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .question {
+    animation: arrive 0.5s ease-out both;
+  }
+  .reveal {
+    animation: reveal 0.25s ease-out both;
+  }
+}
+@keyframes arrive {
+  from {
+    opacity: 0;
+    transform: translateY(10px) rotate(-18deg) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotate(-12deg) scale(1);
+  }
+}
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app button {
+    transition: none;
+  }
+}

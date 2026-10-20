@@ -14,7 +14,8 @@ describe("mini-app registry", () => {
     for (const id of ["settings", "app-store", "guess"] as const) {
       expect(getMiniApp(id).viewport).toBe("scroll");
     }
-    for (const id of ["snake", "notes"] as const) {
+    expect(getMiniApp("snake").viewport).toBe("full-bleed");
+    for (const id of ["notes"] as const) {
       expect(getMiniApp(id).viewport ?? "contained").toBe("contained");
     }
   });

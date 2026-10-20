@@ -1,107 +1,222 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import AppDetails from "@/components/screens/app-store/AppDetails";
-import AppSearch from "@/components/screens/app-store/AppSearch";
-import AppSections from "@/components/screens/app-store/AppSections";
-import { Button } from "@/components/ui/button";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
+import { LuArrowUpRight, LuCompass, LuSearch } from "react-icons/lu";
+import AppDetails from "./AppDetails";
+import AppSearch from "./AppSearch";
+import AppSections from "./AppSections";
+import StoreArtwork from "./StoreArtwork";
 import {
-  isMiniAppId,
+  STORE_APPS,
   getMiniApp,
-  MINI_APPS,
-  searchMiniApps,
+  recentStoreApps,
+  searchStoreApps,
   type MiniAppCategory,
   type RegisteredMiniApp,
 } from "@/lib/app-registry";
 import { usePhoneStore } from "@/stores/usePhoneStore";
+import styles from "./store.module.css";
 
-const categories: Array<MiniAppCategory | "all"> = [
+const categories: readonly (MiniAppCategory | "all")[] = [
   "all",
-  ...Array.from(new Set(MINI_APPS.map((app) => app.category))),
+  ...new Set(STORE_APPS.map((app) => app.category)),
 ];
+const featured = getMiniApp("music-player");
 
-const MiStore = () => {
+export default function MiStore() {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<MiniAppCategory | "all">("all");
-  const [selectedApp, setSelectedApp] = useState<RegisteredMiniApp | null>(null);
-  const { history, setCurrentScreen } = usePhoneStore();
-
+  const [selectedApp, setSelectedApp] = useState<RegisteredMiniApp | null>(
+    null,
+  );
+  const history = usePhoneStore((state) => state.history);
+  const setCurrentScreen = usePhoneStore((state) => state.setCurrentScreen);
+  const rootRef = useRef<HTMLElement>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const returnEntry = useRef<string | null>(null);
+  const scrollPosition = useRef(0);
+  const hadDetails = useRef(false);
   const matchingApps = useMemo(
-    () => searchMiniApps(query, category),
+    () => searchStoreApps(query, category),
     [query, category],
   );
-  const recentApps = useMemo(() => {
-    const recentIds = [...history].reverse().filter(isMiniAppId);
-    return recentIds
-      .filter((id, index) => recentIds.indexOf(id) === index)
-      .filter((id) => id !== "app-store")
-      .map(getMiniApp);
-  }, [history]);
+  const recentApps = useMemo(
+    () => recentStoreApps(history).slice(0, 3),
+    [history],
+  );
+  const filtering = Boolean(query.trim()) || category !== "all";
 
-  const openApp = (app: RegisteredMiniApp) => {
-    setSelectedApp(null);
+  useLayoutEffect(() => {
+    const scroller = rootRef.current?.closest<HTMLElement>(
+      '.phone-app-safe-area[data-layout="scroll"]',
+    );
+    if (selectedApp) {
+      scroller?.scrollTo({ top: 0, behavior: "instant" });
+      headingRef.current?.focus({ preventScroll: true });
+      hadDetails.current = true;
+    } else if (hadDetails.current) {
+      scroller?.scrollTo({ top: scrollPosition.current, behavior: "instant" });
+      Array.from(
+        rootRef.current?.querySelectorAll<HTMLButtonElement>(
+          "button[data-store-entry]",
+        ) ?? [],
+      )
+        .find(
+          (button) =>
+            button.getAttribute("data-store-entry") === returnEntry.current,
+        )
+        ?.focus({ preventScroll: true });
+      hadDetails.current = false;
+    }
+  }, [selectedApp]);
+
+  const selectApp = (app: RegisteredMiniApp, trigger: HTMLButtonElement) => {
+    returnEntry.current = trigger.getAttribute("data-store-entry");
+    scrollPosition.current =
+      rootRef.current?.closest<HTMLElement>(
+        '.phone-app-safe-area[data-layout="scroll"]',
+      )?.scrollTop ?? 0;
+    setSelectedApp(app);
+  };
+  const openApp = (app: RegisteredMiniApp) =>
     setCurrentScreen(app.launchTarget.screen);
+  const resetFilters = () => {
+    setQuery("");
+    setCategory("all");
   };
 
   return (
-    <main className="relative w-full bg-[var(--phone-canvas)] px-4 text-[var(--phone-text)]">
+    <main
+      ref={rootRef}
+      className={styles.store}
+      onKeyDown={(event) => {
+        if (
+          event.key === "Escape" &&
+          selectedApp &&
+          !rootRef.current?.querySelector("dialog[open]")
+        ) {
+          event.stopPropagation();
+          setSelectedApp(null);
+        }
+      }}
+    >
       {selectedApp ? (
         <AppDetails
+          key={selectedApp.id}
           app={selectedApp}
+          headingRef={headingRef}
           onBack={() => setSelectedApp(null)}
           onOpen={() => openApp(selectedApp)}
         />
       ) : (
-        <div className="space-y-5 pb-6">
-          <header>
-            <h1 className="text-2xl font-bold">Mini apps</h1>
-            <p className="mt-1 text-sm text-[var(--phone-text-muted)]">
-              Discover bundled apps and preview them in the virtual phone.
-            </p>
+        <div className={styles.browse}>
+          <header className={styles.masthead}>
+            <div>
+              <span className={styles.eyebrow}>THE MOOBI EDIT</span>
+              <h1>
+                App Store<span>.</span>
+              </h1>
+            </div>
+            <span className={styles.brandMark} aria-hidden="true">
+              <LuCompass />
+            </span>
           </header>
-
+          <p className={styles.intro}>Small apps. Great discoveries.</p>
           <AppSearch query={query} onQueryChange={setQuery} />
-
-          <nav aria-label="Filter mini apps" className="flex gap-2 overflow-x-auto pb-1">
+          <nav className={styles.filters} aria-label="Filter store apps">
             {categories.map((option) => (
-              <Button
+              <button
                 key={option}
                 type="button"
-                size="sm"
-                onClick={() => setCategory(option)}
                 aria-pressed={category === option}
-                className={`shrink-0 capitalize ${category === option ? "bg-[var(--phone-accent)] text-white" : "bg-[var(--phone-surface)] text-[var(--phone-text-secondary)] hover:bg-[var(--phone-surface-elevated)]"}`}
+                onClick={() => setCategory(option)}
               >
-                {option === "all" ? "All apps" : option}
-              </Button>
+                {option === "all"
+                  ? "Discover"
+                  : option === "entertainment"
+                    ? "Music & audio"
+                    : option}
+              </button>
             ))}
           </nav>
-
-          {query.trim() || category !== "all" ? (
-            <AppSections
-              title={`Results (${matchingApps.length})`}
-              apps={matchingApps}
-              onSelect={setSelectedApp}
-            />
+          {filtering ? (
+            <>
+              <p role="status" className={styles.resultCount}>
+                {matchingApps.length}{" "}
+                {matchingApps.length === 1 ? "app" : "apps"}
+                {query.trim() ? ` for “${query.trim()}”` : " to explore"}
+              </p>
+              {matchingApps.length ? (
+                <AppSections
+                  title={category === "games" ? "Time to play" : "Made for you"}
+                  apps={matchingApps}
+                  onSelect={selectApp}
+                  onOpen={openApp}
+                />
+              ) : (
+                <div className={styles.empty}>
+                  <LuSearch aria-hidden="true" />
+                  <h2>A new discovery awaits</h2>
+                  <p>Try another name or explore the full collection.</p>
+                  <button type="button" onClick={resetFilters}>
+                    Explore all apps
+                  </button>
+                </div>
+              )}
+            </>
           ) : (
             <>
+              <button
+                type="button"
+                className={styles.featured}
+                onClick={(event) => selectApp(featured, event.currentTarget)}
+                aria-label="Discover FORM"
+                data-store-entry="featured-form"
+              >
+                <div className={styles.featuredTop}>
+                  <span className={styles.eyebrow}>IN THE SPOTLIGHT</span>
+                  <span className={styles.featureTag}>EDITOR’S PICK</span>
+                </div>
+                <StoreArtwork id={featured.id} />
+                <div className={styles.featuredCopy}>
+                  <span>FORM / MUSIC & AUDIO</span>
+                  <h2>
+                    Find your
+                    <br />
+                    next feeling.
+                  </h2>
+                  <p>A listening room for independent sound.</p>
+                  <span className={styles.featureLink}>
+                    Meet FORM
+                    <LuArrowUpRight />
+                  </span>
+                </div>
+              </button>
               <AppSections
-                title="Recently opened"
-                apps={recentApps}
-                onSelect={setSelectedApp}
+                title="A little play goes a long way"
+                subtitle="Quick breaks. Worth taking."
+                apps={STORE_APPS.filter((app) => app.category === "games")}
+                onSelect={selectApp}
+                onOpen={openApp}
               />
-              <AppSections
-                title="All mini apps"
-                apps={MINI_APPS}
-                onSelect={setSelectedApp}
-              />
+              {recentApps.length > 0 && (
+                <AppSections
+                  title="Back to your favorites"
+                  subtitle="Recently opened by you"
+                  apps={recentApps}
+                  onSelect={selectApp}
+                  onOpen={openApp}
+                />
+              )}
+              <footer className={styles.footer}>
+                <LuCompass aria-hidden="true" />
+                <strong>Little windows. New possibilities.</strong>
+                <p>Curated mini apps for your Moobi.</p>
+              </footer>
             </>
           )}
-
         </div>
       )}
     </main>
   );
-};
-
-export default MiStore;
+}
