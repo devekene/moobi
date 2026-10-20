@@ -59,22 +59,9 @@
   color: var(--guess-accent);
 }
 .brandMark {
-  width: 31px;
-  height: 34px;
-  border-radius: 12px;
-  background: var(--guess-accent);
-  color: var(--phone-on-accent);
-  font-size: 28px;
-  line-height: 28px;
-  position: relative;
-  box-shadow: inset 0 -3px 0
-    color-mix(in srgb, var(--phone-text) 15%, transparent);
-}
-.brandMark span {
-  font-size: 11px;
-  position: absolute;
-  right: 3px;
-  top: -1px;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
 }
 .headerActions {
   display: flex;

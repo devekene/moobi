@@ -103,8 +103,9 @@ describe("App Store presentation", () => {
     expect(html).toContain("Good to know");
     expect(html.match(/<h1\b/g)).toHaveLength(1);
     expect(html).not.toContain("rating");
-    expect(html).not.toContain("Previous screenshot");
-    expect(html).not.toContain("Next screenshot");
+    expect(html).toMatch(/aria-label="Previous screenshot" disabled=""/);
+    expect(html).toContain('aria-label="Next screenshot"');
+    expect(html).toContain('aria-label="Enlarge Snake screenshot 2"');
   });
 });
 

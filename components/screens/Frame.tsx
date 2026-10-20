@@ -16,12 +16,15 @@ import { useDeviceStore } from "@/stores/useDeviceStore";
 import { useBatteryStore } from "@/stores/useBatteryStore";
 import { usePhoneSettingsStore } from "@/stores/usePhoneSettingsStore";
 import { PHONE_VOLUME_STEP, type HardwareButtonId } from "@/lib/phone-buttons";
+import { downloadPhoneDisplayScreenshot } from "@/lib/phone-screenshot";
+import { useIsPhoneBrowser } from "@/hooks/useIsPhoneBrowser";
 import {
   CHARGER_CONNECTION_DURATION_MS,
   LOW_BATTERY_THRESHOLD,
 } from "@/lib/battery";
 
 const Frame = ({ children }: { children: React.ReactNode }) => {
+  const showDeviceControls = !useIsPhoneBrowser();
   const [hardwareStatus, setHardwareStatus] = useState("");
   const [isOn, setIsOn] = useState(true);
   const {
@@ -41,6 +44,7 @@ const Frame = ({ children }: { children: React.ReactNode }) => {
   );
   const [viewport, setViewport] = useState({ width: 390, height: 844 });
   const frameRef = useRef<HTMLDivElement>(null);
+  const screenshotPending = useRef(false);
   const batteryLevel = useBatteryStore((state) => state.level);
   const chargerPhase = useBatteryStore((state) => state.chargerPhase);
   const lowBatteryDismissed = useBatteryStore(
@@ -88,7 +92,20 @@ const Frame = ({ children }: { children: React.ReactNode }) => {
           }
           break;
         case "camera-control":
-          if (isOn) setHardwareStatus("Camera is unavailable in this preview.");
+          if (!isOn || !frameRef.current || screenshotPending.current) break;
+          screenshotPending.current = true;
+          setHardwareStatus("Creating screenshot…");
+          void downloadPhoneDisplayScreenshot(
+            frameRef.current,
+            phone.currentScreen,
+          )
+            .then(() => setHardwareStatus("Screenshot saved."))
+            .catch(() =>
+              setHardwareStatus("Could not capture the screen. Try again."),
+            )
+            .finally(() => {
+              screenshotPending.current = false;
+            });
           break;
       }
     },
@@ -210,7 +227,9 @@ const Frame = ({ children }: { children: React.ReactNode }) => {
       className="phone-theme relative flex h-full min-h-0 w-full flex-col items-center gap-2 px-2 py-2 sm:gap-3"
       data-phone-theme={appearance}
     >
-      <div className="flex w-full max-w-[44rem] shrink-0 items-center justify-center gap-2">
+      <div
+        className={`${showDeviceControls ? "flex" : "hidden"} w-full max-w-[44rem] shrink-0 items-center justify-center gap-2`}
+      >
         <label htmlFor="virtual-iphone-model" className="sr-only">
           Virtual iPhone model
         </label>
@@ -238,11 +257,6 @@ const Frame = ({ children }: { children: React.ReactNode }) => {
             ))
           )}
         </select>
-        {hardwareStatus && (
-          <p role="status" className="max-w-40 text-xs text-[var(--phone-text-muted)]">
-            {hardwareStatus}
-          </p>
-        )}
         {availableModels.length === 0 && (
           <p className="max-w-40 text-xs text-[var(--phone-text-muted)]">
             Enlarge the window to preview a virtual iPhone at a usable size.
@@ -250,7 +264,17 @@ const Frame = ({ children }: { children: React.ReactNode }) => {
         )}
       </div>
 
+      {hardwareStatus && (
+        <p
+          role="status"
+          className="text-center text-xs text-[var(--phone-text-muted)]"
+        >
+          {hardwareStatus}
+        </p>
+      )}
+
       <VirtualIPhone
+        showDeviceControls={showDeviceControls}
         model={displayedModel}
         size={deviceSize}
         brightness={brightnessValue}
@@ -273,7 +297,7 @@ const Frame = ({ children }: { children: React.ReactNode }) => {
       </p>
 
       {/* Action Buttons */}
-      <div className="shrink-0">
+      <div className={`${showDeviceControls ? "block" : "hidden"} shrink-0`}>
         <ActionButtons isOn={isOn} setIsOn={setIsOn} />
       </div>
     </div>

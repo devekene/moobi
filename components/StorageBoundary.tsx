@@ -20,9 +20,11 @@ import { usePhoneSettingsStore } from "@/stores/usePhoneSettingsStore";
 import { useBrowserCacheStore } from "@/stores/useBrowserCacheStore";
 import { useCalculatorStore } from "@/stores/useCalculatorStore";
 import { useGuessStore } from "@/stores/useGuessStore";
+import { useMailStore } from "@/stores/useMailStore";
 import { useSnakeStore } from "@/stores/useSnakeStore";
 
 const stores = [
+  useMailStore,
   useGuessStore,
   useSnakeStore,
   useBrowserCacheStore,

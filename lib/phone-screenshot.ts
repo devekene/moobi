@@ -29,3 +29,15 @@ export const downloadPhoneScreenshot = async (
   link.remove();
   window.setTimeout(() => URL.revokeObjectURL(objectUrl), 0);
 };
+
+export const downloadPhoneDisplayScreenshot = async (
+  phoneRoot: Pick<HTMLElement, "querySelector">,
+  screen: string,
+) => {
+  // Capture the untransformed display content, excluding the 3D shell and stage.
+  const display = phoneRoot.querySelector<HTMLElement>(
+    '[data-phone-display="true"]',
+  );
+  if (!display) throw new Error("The phone display is not ready yet.");
+  await downloadPhoneScreenshot(display, screen);
+};

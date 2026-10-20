@@ -361,16 +361,25 @@
   color: var(--phone-canvas);
 }
 .appIcon[data-app="chess"] {
-  background: var(--phone-surface-elevated);
-  color: var(--phone-text);
+  background:
+    radial-gradient(ellipse at 90% 10%, #477457, transparent 75%), #193a2b;
+  color: #fff8e9;
+  border-color: #477457;
 }
 .appIcon[data-app="snake"] {
-  background: color-mix(
-    in srgb,
-    var(--phone-success, var(--phone-accent)) 12%,
-    var(--phone-surface)
-  );
-  color: var(--phone-success, var(--phone-accent));
+  background: #183d2b;
+  color: #8dcd70;
+  border-color: #36563c;
+}
+.snakeArt {
+  display: grid;
+  height: 100%;
+  place-items: center;
+  background: radial-gradient(ellipse at center, #36563c, #182d24 75%);
+}
+.snakeArt svg {
+  width: 62%;
+  height: 90%;
 }
 .appIcon[data-large="true"] {
   width: 76px;
@@ -586,33 +595,30 @@
 .detailHero .artwork {
   height: 164px;
 }
+.artwork[data-app="chess"] {
+  background:
+    radial-gradient(ellipse at 90% 10%, #477457, transparent 75%), #193a2b;
+}
 .chessArt {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  transform: rotate(-12deg);
-  font-size: 110px;
-  line-height: 1;
-  font-family: Georgia, serif;
+  transform: rotate(-9deg);
+  font-size: 105px;
+  filter: drop-shadow(7px 12px 12px #0004);
 }
-.chessArt > span:last-child {
-  opacity: 0.4;
-  font-size: 80px;
+.appIcon[data-app="guess"] {
+  background: #eee8fc;
+  border-color: #d7c7f6;
 }
-.numberArt {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  font-size: 35px;
-  font-weight: 750;
-  letter-spacing: -0.08em;
+.guessArt {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(ellipse at center, #e5d8ff, #c4acec);
 }
-.numberArt strong {
-  font-size: 110px;
-  transform: rotate(10deg);
-}
-.numberArt > span {
-  opacity: 0.45;
+.guessArt svg {
+  width: 140px;
+  height: 140px;
+  filter: drop-shadow(5px 10px 10px #50309625);
 }
 .screenshots {
   margin-top: 27px;

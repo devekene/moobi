@@ -1,4 +1,7 @@
 import { LuDisc3 } from "react-icons/lu";
+import ChessMogulIcon from "@/components/icons/ChessMogulIcon";
+import GuessIcon from "@/components/icons/GuessIcon";
+import SnakeIcon from "@/components/icons/SnakeIcon";
 import type { MiniAppId } from "@/lib/app-registry";
 import styles from "./store.module.css";
 
@@ -13,14 +16,15 @@ export default function StoreArtwork({ id }: { id: MiniAppId }) {
         </div>
       ) : id === "chess" ? (
         <div className={styles.chessArt}>
-          <span>♞</span>
-          <span>♙</span>
+          <ChessMogulIcon />
+        </div>
+      ) : id === "snake" ? (
+        <div className={styles.snakeArt}>
+          <SnakeIcon />
         </div>
       ) : id === "guess" ? (
-        <div className={styles.numberArt}>
-          <span>25</span>
-          <strong>?</strong>
-          <span>75</span>
+        <div className={styles.guessArt}>
+          <GuessIcon />
         </div>
       ) : (
         <svg viewBox="0 0 320 180" fill="none">

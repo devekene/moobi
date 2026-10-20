@@ -47,6 +47,9 @@ and compressed, and avoid invented ratings, downloads, or installation claims.
 - Calendar also uses `viewport: "full-bleed"`, retains its own top safe-area
   spacing, and does not reserve the bottom safe area. Its floating controls use
   a fixed bottom margin, and sheets extend to the bottom edge.
+- Chess uses `viewport: "full-bleed"` and applies its own top safe-area spacing.
+  Its header, board, and move history scroll together. Only the bottom game
+  controls stay pinned, with an app-owned bottom inset above the home indicator.
 - About is an internal Settings page, not a registered mini app. It has no
   separate Home/App Library/Mi Store icon or recent-app entry.
 - Treat the virtual display like a mobile screen: `--phone-safe-area-top` and

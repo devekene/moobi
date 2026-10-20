@@ -15,6 +15,7 @@ import type { HardwareButtonId } from "@/lib/phone-buttons";
 import React, { useRef, useState } from "react";
 
 type VirtualIPhoneProps = {
+  showDeviceControls: boolean;
   model: IPhoneModel;
   size: PreviewSize;
   brightness: number;
@@ -41,6 +42,7 @@ const TURN_CONTROL_CLASS =
   "flex h-10 min-w-10 items-center justify-center rounded-xl text-lg text-[var(--phone-text)] transition hover:bg-[var(--phone-surface-elevated)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--phone-focus)] motion-reduce:transition-none";
 
 const VirtualIPhone = ({
+  showDeviceControls,
   model,
   size,
   brightness,
@@ -257,7 +259,9 @@ const VirtualIPhone = ({
         </div>
       </div>
 
-      <div className="flex shrink-0 flex-wrap items-center justify-center gap-1 rounded-2xl border border-[var(--phone-border)] bg-[var(--phone-surface)]/95 p-1.5 shadow-md">
+      <div
+        className={`${showDeviceControls ? "flex" : "hidden"} shrink-0 flex-wrap items-center justify-center gap-1 rounded-2xl border border-[var(--phone-border)] bg-[var(--phone-surface)]/95 p-1.5 shadow-md`}
+      >
         <button
           type="button"
           onClick={() => rotateBy(0, -45)}

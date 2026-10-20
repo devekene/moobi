@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import ChessMogulIcon from "@/components/icons/ChessMogulIcon";
 import {
   getAppMetadata,
   getMiniApp,
@@ -36,6 +37,21 @@ describe("mini-app registry", () => {
     expect(getMiniApp("music-player").viewport).toBe("full-bleed");
   });
 
+  it("lets Chess anchor game controls at the display bottom", () => {
+    expect(getMiniApp("chess").viewport).toBe("full-bleed");
+  });
+
+  it("shares the Chess Mogul identity across launch and store metadata", () => {
+    const app = getMiniApp("chess");
+    expect(app.icon).toBe(ChessMogulIcon);
+    expect(app.color).toContain("#193a2b");
+    expect(app.previewCapabilities.screenshotUrls).toEqual([
+      "/images/appstore/screenshots/chess-setup.webp",
+      "/images/appstore/screenshots/chess-match.webp",
+    ]);
+    expect(app.store?.previewCaptions).toHaveLength(2);
+  });
+
   it("keeps About out of app discovery and standalone launch targets", () => {
     expect(isMiniAppId("info")).toBe(false);
     expect(searchMiniApps("info")).toEqual([]);
@@ -48,7 +64,9 @@ describe("mini-app registry", () => {
   it("excludes Camera and File Manager from discovery and launch metadata", () => {
     for (const id of ["camera", "file-manager"]) {
       expect(isMiniAppId(id)).toBe(false);
-      expect(mobileApps.flat().some((app) => String(app.id) === id)).toBe(false);
+      expect(mobileApps.flat().some((app) => String(app.id) === id)).toBe(
+        false,
+      );
       expect(getAppMetadata(id).id).toBe("home");
     }
     expect(searchMiniApps("camera")).toEqual([]);

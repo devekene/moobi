@@ -24,6 +24,7 @@ import {
   type GuessMode,
 } from "@/lib/guess";
 import { useGuessStore } from "@/stores/useGuessStore";
+import GuessIcon from "@/components/icons/GuessIcon";
 import styles from "./guess.module.css";
 
 function MysteryArt({ small = false }: { small?: boolean }) {
@@ -104,9 +105,7 @@ export default function GuessGame() {
           }}
           aria-label="Guess home"
         >
-          <span className={styles.brandMark}>
-            g<span>✦</span>
-          </span>
+          <GuessIcon className={styles.brandMark} aria-hidden="true" />
           <span>
             guess<span className={styles.brandDot}>.</span>
           </span>
@@ -229,34 +228,21 @@ export default function GuessGame() {
                   <span>Sessions finished</span>
                 </div>
               </div>
-              <p className={styles.note}>
-                Records are saved in this browser. Finish all five rounds to set
-                a record.
-              </p>
             </>
           )}
         </section>
       ) : !session ? (
         <>
           <section className={styles.intro}>
-            <p className={styles.eyebrow}>
-              <span /> SMALL PUZZLES. BIG AHA.
-            </p>
             <h1 ref={heading} tabIndex={-1}>
               Stay curious.
               <br />
               <span>Take a guess.</span>
             </h1>
-            <p>
-              A little intuition. A little imagination.
-              <br />
-              What will you figure out today?
-            </p>
             <MysteryArt />
           </section>
           <div className={styles.sectionHeading}>
             <h2>Pick your playground</h2>
-            <span>3 ways to play</span>
           </div>
           <div className={styles.modeList}>
             {(Object.keys(MODES) as GuessMode[]).map((mode, i) => (
@@ -293,11 +279,6 @@ export default function GuessGame() {
               <LuFlame /> Expert
             </button>
           </div>
-          <p className={styles.note}>
-            {difficulty === "casual"
-              ? "Room to explore. No rush, just discovery."
-              : "Fewer guesses. A little more challenge."}
-          </p>
         </>
       ) : isFinished ? (
         <section className={styles.results}>

@@ -348,9 +348,6 @@ export default function SnakeGame() {
       {screen === "home" && (
         <main className={styles.home}>
           <div className={styles.intro}>
-            <span className={styles.eyebrow}>
-              A CLASSIC, WITH A LITTLE CHARM
-            </span>
             <h1 ref={heading} tabIndex={-1}>
               Snake<span>Take the long way.</span>
             </h1>
@@ -377,7 +374,7 @@ export default function SnakeGame() {
           </button>
           <div className={styles.modeHeading}>
             <span>Pick your pace</span>
-            <span>Make it your own</span>
+            <span />
           </div>
           <div
             className={styles.modes}
@@ -401,9 +398,6 @@ export default function SnakeGame() {
           <button className={styles.primary} onClick={launch}>
             Let’s play <LuArrowRight />
           </button>
-          <p className={styles.footer}>
-            A little focus. A little fun. One more go.
-          </p>
         </main>
       )}
 

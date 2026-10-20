@@ -2,13 +2,15 @@ import type { ComponentType } from "react";
 import type { IconType } from "react-icons";
 import { BiCalculator, BiTerminal } from "react-icons/bi";
 import { BsCalendar3, BsClockFill } from "react-icons/bs";
-import { FaChessQueen, FaPhone } from "react-icons/fa6";
-import { GiSnake } from "react-icons/gi";
+import { FaPhone } from "react-icons/fa6";
 import { IoInformationCircle, IoLogoAppleAppstore } from "react-icons/io5";
-import { LuBrain, LuDisc3, LuListTodo, LuSettings } from "react-icons/lu";
+import { LuDisc3, LuListTodo, LuSettings } from "react-icons/lu";
 import { TiWeatherDownpour } from "react-icons/ti";
 import { TfiEmail, TfiGallery } from "react-icons/tfi";
 import MoBrowserIcon from "@/components/icons/MoBrowserIcon";
+import ChessMogulIcon from "@/components/icons/ChessMogulIcon";
+import GuessIcon from "@/components/icons/GuessIcon";
+import SnakeIcon from "@/components/icons/SnakeIcon";
 
 export type MiniAppCategory =
   | "games"
@@ -84,11 +86,11 @@ export const MINI_APPS = [
         "Simple directional controls",
         "Pause and pick up again",
       ],
-      previewCaptions: ["Chase your next bite"],
+      previewCaptions: ["Find your pace", "Chase your next bite"],
     },
     name: "Snake",
-    icon: GiSnake,
-    color: "text-green-600",
+    icon: SnakeIcon,
+    color: "bg-[#183d2b] text-[#8dcd70]",
     category: "games",
     launchTarget: { kind: "phone-screen", screen: "snake" },
     description: "A classic snake game.",
@@ -96,7 +98,10 @@ export const MINI_APPS = [
     previewCapabilities: {
       bundled: true,
       executesUserCode: false,
-      screenshotUrls: ["/images/appstore/screenshots/snake-1.webp"],
+      screenshotUrls: [
+        "/images/appstore/screenshots/snake-welcome.webp",
+        "/images/appstore/screenshots/snake-garden.webp",
+      ],
     },
     availability: "available",
     homePage: 0,
@@ -209,12 +214,12 @@ export const MINI_APPS = [
         "Five-round puzzle sessions",
         "Hints and personal records",
       ],
-      previewCaptions: ["A number worth finding", "Every clue gets you closer"],
+      previewCaptions: ["Find your next aha", "Decode a little mystery"],
     },
     viewport: "scroll",
     name: "Guess",
-    icon: LuBrain,
-    color: "text-primary bg-white",
+    icon: GuessIcon,
+    color: "text-violet-600 bg-[#eee8fc]",
     category: "games",
     launchTarget: { kind: "phone-screen", screen: "guess" },
     description: "Decode emoji, solve word riddles, and hunt secret numbers.",
@@ -223,8 +228,8 @@ export const MINI_APPS = [
       bundled: true,
       executesUserCode: false,
       screenshotUrls: [
-        "/images/appstore/screenshots/guess-1.webp",
-        "/images/appstore/screenshots/guess-2.webp",
+        "/images/appstore/screenshots/guess-discover.webp",
+        "/images/appstore/screenshots/guess-decoder.webp",
       ],
     },
     availability: "available",
@@ -239,7 +244,8 @@ export const MINI_APPS = [
     color: "bg-blue-500",
     category: "communication",
     launchTarget: { kind: "phone-screen", screen: "mail-composer" },
-    description: "Compose an email in the virtual phone.",
+    description:
+      "Write emails, keep drafts, and browse your sent messages. Sending requires a configured mail service; history is saved in this browser.",
     version: "1.0.0",
     previewCapabilities: { bundled: true, executesUserCode: false },
     availability: "available",
@@ -322,21 +328,25 @@ export const MINI_APPS = [
   },
   {
     id: "chess",
+    viewport: "full-bleed",
     store: {
       tagline: "Make a little room for your next move.",
       headline: "Your move.\nYour moment.",
       story:
-        "Settle into a game against the built-in opponent. A tactile wooden board brings a familiar classic to your virtual phone, with time to think through your next move.",
+        "Find your rhythm against the built-in opponent. Choose a quick timed match or settle into untimed play, with sculpted pieces, optional direction hints, and a quiet focus soundtrack.",
       highlights: [
-        "Play the built-in opponent",
-        "A dimensional wooden board",
-        "Click or drag to move",
+        "Timed matches or untimed play",
+        "Three levels of challenge",
+        "Optional music and direction hints",
       ],
-      previewCaptions: ["Choose your challenge", "Think one move ahead"],
+      previewCaptions: [
+        "Your pace. Your challenge.",
+        "Every second. Every move.",
+      ],
     },
     name: "Chess",
-    icon: FaChessQueen,
-    color: "bg-yellow-200",
+    icon: ChessMogulIcon,
+    color: "bg-[#193a2b] text-[#fff8e9]",
     category: "games",
     launchTarget: { kind: "phone-screen", screen: "chess" },
     description: "Play chess against the built-in opponent.",
@@ -345,8 +355,8 @@ export const MINI_APPS = [
       bundled: true,
       executesUserCode: false,
       screenshotUrls: [
-        "/images/appstore/screenshots/chess-1.webp",
-        "/images/appstore/screenshots/chess-2.webp",
+        "/images/appstore/screenshots/chess-setup.webp",
+        "/images/appstore/screenshots/chess-match.webp",
       ],
     },
     availability: "available",

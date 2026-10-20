@@ -1099,6 +1099,7 @@ const PhoneModel3D = ({
       {screenTarget &&
         createPortal(
           <div
+            data-phone-display="true"
             className="phone-screen-content relative h-full w-full overflow-hidden bg-[var(--phone-canvas)]"
             style={screenStyle}
           >

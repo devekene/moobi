@@ -208,11 +208,6 @@ export default function MiStore() {
                   onOpen={openApp}
                 />
               )}
-              <footer className={styles.footer}>
-                <LuCompass aria-hidden="true" />
-                <strong>Little windows. New possibilities.</strong>
-                <p>Curated mini apps for your Moobi.</p>
-              </footer>
             </>
           )}
         </div>
