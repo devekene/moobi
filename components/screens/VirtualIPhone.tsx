@@ -137,8 +137,15 @@ const VirtualIPhone = ({
     setIsCapturingScreenshot(true);
     setScreenshotStatus("Creating screenshot…");
     try {
-      await downloadPhoneScreenshot(phoneElement, currentScreen);
-      setScreenshotStatus("Screenshot saved.");
+      const { gallerySaved } = await downloadPhoneScreenshot(
+        phoneElement,
+        currentScreen,
+      );
+      setScreenshotStatus(
+        gallerySaved
+          ? "Screenshot saved to Gallery."
+          : "Screenshot downloaded, but Gallery could not save it.",
+      );
     } catch {
       setScreenshotStatus(
         "Could not capture the phone. Try again when the screen is fully visible.",

@@ -1,16 +1,22 @@
 import type { ComponentType } from "react";
 import type { IconType } from "react-icons";
-import { BiCalculator, BiTerminal } from "react-icons/bi";
-import { BsCalendar3, BsClockFill } from "react-icons/bs";
+import { BiTerminal } from "react-icons/bi";
 import { FaPhone } from "react-icons/fa6";
 import { IoInformationCircle, IoLogoAppleAppstore } from "react-icons/io5";
-import { LuDisc3, LuListTodo, LuSettings } from "react-icons/lu";
+import { LuDisc3, LuListTodo } from "react-icons/lu";
 import { TiWeatherDownpour } from "react-icons/ti";
-import { TfiEmail, TfiGallery } from "react-icons/tfi";
+import { TfiEmail } from "react-icons/tfi";
 import MoBrowserIcon from "@/components/icons/MoBrowserIcon";
 import ChessMogulIcon from "@/components/icons/ChessMogulIcon";
 import GuessIcon from "@/components/icons/GuessIcon";
 import SnakeIcon from "@/components/icons/SnakeIcon";
+import {
+  CalculatorIcon,
+  CalendarIcon,
+  ClockIcon,
+  GalleryIcon,
+  SettingsIcon,
+} from "@/components/icons/SystemAppIcons";
 
 export type MiniAppCategory =
   | "games"
@@ -21,6 +27,7 @@ export type MiniAppCategory =
   | "system";
 
 export type MiniAppAvailability = "available" | "preview";
+export type AppIconPresentation = "contained" | "full-bleed";
 type ScreenModule = { default: ComponentType };
 
 export interface StoreListing {
@@ -37,6 +44,7 @@ export interface MiniAppDefinition {
   readonly id: string;
   readonly name: string;
   readonly icon: IconType;
+  readonly iconPresentation?: AppIconPresentation;
   readonly color: string;
   readonly category: MiniAppCategory;
   readonly launchTarget: {
@@ -62,8 +70,9 @@ export const MINI_APPS = [
     store: null,
     viewport: "scroll",
     name: "Settings",
-    icon: LuSettings,
-    color: "text-slate-500",
+    icon: SettingsIcon,
+    iconPresentation: "contained",
+    color: "bg-transparent text-white",
     category: "system",
     launchTarget: { kind: "phone-screen", screen: "settings" },
     description: "Personalize the virtual phone display, sound, and security.",
@@ -111,8 +120,9 @@ export const MINI_APPS = [
     id: "calculator",
     store: null,
     name: "Calculator",
-    icon: BiCalculator,
-    color: "text-orange-500",
+    icon: CalculatorIcon,
+    iconPresentation: "full-bleed",
+    color: "bg-transparent text-white",
     category: "utilities",
     launchTarget: { kind: "phone-screen", screen: "calculator" },
     description: "A basic calculator for everyday arithmetic.",
@@ -127,8 +137,9 @@ export const MINI_APPS = [
     id: "clock",
     store: null,
     name: "Clock",
-    icon: BsClockFill,
-    color: "text-gray-400",
+    icon: ClockIcon,
+    iconPresentation: "full-bleed",
+    color: "bg-transparent text-white",
     category: "utilities",
     launchTarget: { kind: "phone-screen", screen: "clock" },
     description: "Alarms, world clocks, timers, and a stopwatch.",
@@ -175,8 +186,9 @@ export const MINI_APPS = [
     store: null,
     viewport: "full-bleed",
     name: "Calendar",
-    icon: BsCalendar3,
-    color: "text-blue-500",
+    icon: CalendarIcon,
+    iconPresentation: "full-bleed",
+    color: "bg-transparent text-white",
     category: "productivity",
     launchTarget: { kind: "phone-screen", screen: "calendar" },
     description: "View and manage calendar events.",
@@ -366,9 +378,11 @@ export const MINI_APPS = [
   {
     id: "gallery",
     store: null,
+    viewport: "full-bleed",
     name: "Gallery",
-    icon: TfiGallery,
-    color: "bg-blue-300",
+    icon: GalleryIcon,
+    iconPresentation: "full-bleed",
+    color: "bg-transparent text-white",
     category: "entertainment",
     launchTarget: { kind: "phone-screen", screen: "gallery" },
     description: "Browse the sample photos and videos.",
@@ -476,6 +490,7 @@ export interface AppMetadata {
   readonly id: MiniAppId | "home";
   readonly name: string;
   readonly icon: IconType;
+  readonly iconPresentation: AppIconPresentation;
   readonly color: string;
   readonly availability: MiniAppAvailability;
 }
@@ -484,6 +499,7 @@ const fallbackMetadata: AppMetadata = {
   id: "home",
   name: "Home",
   icon: IoInformationCircle,
+  iconPresentation: "contained",
   color: "#007AFF",
   availability: "available",
 };
@@ -495,6 +511,7 @@ export function getAppMetadata(id: string): AppMetadata {
         id: app.id,
         name: app.name,
         icon: app.icon,
+        iconPresentation: app.iconPresentation ?? "contained",
         color: tailwindColorToHex(app.color),
         availability: app.availability,
       }

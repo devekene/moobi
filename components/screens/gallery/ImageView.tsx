@@ -1,43 +1,35 @@
 import Image from "next/image";
 import { useSwipeable } from "react-swipeable";
-import type React from "react";
-import { GalleryMedia } from "@/types";
+import type { MediaItem } from "@/types";
+import styles from "./gallery.module.css";
 
-const ImageView = ({
+export default function ImageView({
   media,
   goToNextMedia,
   goToPreviousMedia,
 }: {
-  media: GalleryMedia;
+  media: MediaItem;
   goToNextMedia: () => void;
   goToPreviousMedia: () => void;
-}) => {
+}) {
   const swipeHandlers = useSwipeable({
-    onSwipedLeft: () => {
-      goToNextMedia();
-    },
-    onSwipedRight: () => {
-      goToPreviousMedia();
-    },
+    onSwipedLeft: goToNextMedia,
+    onSwipedRight: goToPreviousMedia,
     preventScrollOnSwipe: true,
     trackMouse: true,
-    delta: 10,
+    delta: 18,
   });
 
   return (
-    <div
-      className="flex-center relative h-[85%] w-full overflow-hidden"
-      {...swipeHandlers}
-    >
+    <div className={styles.imageStage} {...swipeHandlers}>
       <Image
-        src={media.url}
-        alt="gallery-image"
-        width={400}
-        height={400}
-        className="h-full w-auto object-center"
+        src={media.thumbnail}
+        alt={media.title?.trim() || "Gallery photo"}
+        fill
+        priority
+        sizes="(max-width: 480px) 100vw, 480px"
+        unoptimized={media.thumbnail.startsWith("blob:")}
       />
     </div>
   );
-};
-
-export default ImageView;
+}

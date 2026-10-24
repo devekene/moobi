@@ -1,4 +1,4 @@
-import { type CalendarEvent, type HistoryType } from "@/types";
+import { type CalendarEvent, type HistoryType, type MediaItem } from "@/types";
 import { mobileApps } from "@/lib/app-registry";
 import { BsTwitterX } from "react-icons/bs";
 import { FaGithub, FaLinkedin } from "react-icons/fa6";
@@ -21,7 +21,11 @@ export const socialMediaPlatforms = [
   },
 ];
 
-export const gallery = [
+export const gallery: Array<{
+  title: string;
+  date: Date;
+  items: MediaItem[];
+}> = [
   {
     title: "Today",
     date: new Date(),

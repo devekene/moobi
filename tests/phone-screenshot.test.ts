@@ -5,6 +5,14 @@ import {
   downloadPhoneScreenshot,
 } from "@/lib/phone-screenshot";
 
+const saveScreenshot = vi.hoisted(() => vi.fn(async () => true));
+
+vi.mock("@/stores/useGalleryStore", () => ({
+  useGalleryStore: {
+    getState: () => ({ saveScreenshot }),
+  },
+}));
+
 vi.mock("html-to-image", () => ({
   toBlob: vi.fn(async () => new Blob(["png"])),
 }));
@@ -38,10 +46,11 @@ describe("phone screenshot export", () => {
     });
 
     const phoneElement = {} as HTMLElement;
-    await downloadPhoneScreenshot(
+    const capturedAt = new Date("2026-10-14T03:42:16.046Z");
+    const result = await downloadPhoneScreenshot(
       phoneElement,
       "screen-lock",
-      new Date("2026-10-14T03:42:16.046Z"),
+      capturedAt,
     );
 
     expect(toBlob).toHaveBeenCalledWith(
@@ -58,6 +67,15 @@ describe("phone screenshot export", () => {
     expect(link.click).toHaveBeenCalledOnce();
     expect(link.remove).toHaveBeenCalledOnce();
     expect(revokeObjectURL).toHaveBeenCalledWith("blob:phone-screenshot");
+    expect(saveScreenshot).toHaveBeenCalledWith(
+      expect.any(Blob),
+      "screen-lock",
+      capturedAt,
+    );
+    expect(result).toEqual({
+      filename: "moobi-screen-lock-2026-10-14T03-42-16-046Z.png",
+      gallerySaved: true,
+    });
   });
 
   it("captures only the display content within the requested phone", async () => {
@@ -104,5 +122,6 @@ describe("phone screenshot export", () => {
     await expect(
       downloadPhoneScreenshot({} as HTMLElement, "home"),
     ).rejects.toThrow("The phone screenshot could not be created.");
+    expect(saveScreenshot).not.toHaveBeenCalled();
   });
 });

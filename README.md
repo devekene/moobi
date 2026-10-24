@@ -164,6 +164,12 @@ App previews are best-effort frozen captures taken when leaving an app or openin
 
 The frame's volume, Action, side/power, and Camera Control buttons operate the virtual phone. Volume and Silent mode affect Moobi's music and gallery video only; they do not control the visitor's operating-system audio or physical phone.
 
+Virtual-phone screenshots are downloaded as PNG files and saved into Gallery in
+this browser. Gallery keeps the newest 20 captures as encrypted image data in
+IndexedDB; captures are not uploaded or account-synced, and clearing site data
+removes them. If browser storage is unavailable or full, the PNG download still
+completes and Moobi reports that Gallery could not retain its copy.
+
 Battery drain, charging, and the charging cable are simulations owned by the virtual phone. Battery level persists in this browser, drains only while the Moobi tab is visible, and can be recharged or reset from Control Center. Moobi never reads or changes the actual device battery or charging hardware.
 
 ## 🧠 How Moobi Works (Architecture Notes)

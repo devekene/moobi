@@ -12,6 +12,13 @@ home page, a `store` value, and `loadScreen` callback. Optional screenshots belo
 `previewCapabilities.screenshotUrls`. Keep IDs stable after release because
 phone history and app launch targets refer to them.
 
+Launcher artwork defaults to `iconPresentation: "contained"`, which keeps a
+glyph at its intrinsic size inside the shared icon tile. Set
+`iconPresentation: "full-bleed"` when the icon component supplies its own
+complete rounded-square background and should fill the available tile. The
+shared icon renderer applies this choice across Home, the dock, App Library,
+recents, and Store surfaces; do not add surface-specific sizing overrides.
+
 Built-in phone apps use `store: null`; they remain on Home and in the App
 Library but never appear in store browsing, search, filters, or recents.
 Curated store apps provide a `StoreListing` with a tagline, editorial headline,

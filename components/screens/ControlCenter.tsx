@@ -302,9 +302,16 @@ const ControlCenter = () => {
     setScreenshotStatus("Creating screenshot…");
 
     try {
-      await downloadPhoneScreenshot(phoneElement, currentScreen);
+      const { gallerySaved } = await downloadPhoneScreenshot(
+        phoneElement,
+        currentScreen,
+      );
 
-      setScreenshotStatus("Screenshot saved.");
+      setScreenshotStatus(
+        gallerySaved
+          ? "Screenshot saved to Gallery."
+          : "Screenshot downloaded, but Gallery could not save it.",
+      );
     } catch {
       setScreenshotStatus("Could not capture the virtual phone. Try again.");
     } finally {

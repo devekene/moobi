@@ -2,16 +2,7 @@ import type React from "react";
 
 type ScreenOptions = import("@/lib/app-registry").PhoneScreen;
 
-// CameraGallery
-type GalleryScreen = "album" | "image-view" | "video-player" | "library";
-
 type MediaType = "photo" | "video";
-
-declare interface GalleryMedia {
-  type: MediaType;
-  url: string;
-  title: string;
-}
 
 // Browser
 type BrowserScreen =

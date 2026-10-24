@@ -356,6 +356,14 @@
   width: 26px;
   height: 26px;
 }
+.appIcon[data-presentation="full-bleed"] {
+  overflow: hidden;
+}
+.appIcon[data-presentation="full-bleed"] svg {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+}
 .appIcon[data-app="music-player"] {
   background: var(--phone-text);
   color: var(--phone-canvas);
@@ -389,6 +397,10 @@
 .appIcon[data-large="true"] svg {
   width: 42px;
   height: 42px;
+}
+.appIcon[data-large="true"][data-presentation="full-bleed"] svg {
+  width: 100%;
+  height: 100%;
 }
 .openPill {
   flex-shrink: 0;

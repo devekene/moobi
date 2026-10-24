@@ -6,6 +6,7 @@ import {
   type MiniAppId,
   type MiniAppCategory,
   type MiniAppAvailability,
+  type AppIconPresentation,
 } from "@/lib/app-registry";
 import type { InstalledApp } from "@/lib/mini-app-installations";
 import { APP_ID } from "@/lib/private-store-contract";
@@ -17,6 +18,7 @@ export interface PhoneApp {
   name: string;
   description: string;
   icon: IconType;
+  iconPresentation?: AppIconPresentation;
   color: string;
   category: MiniAppCategory;
   availability: MiniAppAvailability;
@@ -36,6 +38,7 @@ export function getPhoneApps(installed: readonly InstalledApp[]): PhoneApp[] {
       name: app.name,
       description: app.description,
       icon: LuPackage,
+      iconPresentation: "contained",
       color: "text-[var(--phone-accent)]",
       category: "utilities",
       availability: "available",

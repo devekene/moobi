@@ -35,7 +35,10 @@ vi.mock("@/context/ClockContext", () => ({
   useClock: () => ({ ringingAlarmId: null, silenceRingingAudio: () => false }),
 }));
 vi.mock("@/lib/phone-screenshot", () => ({
-  downloadPhoneDisplayScreenshot: vi.fn(async () => {}),
+  downloadPhoneDisplayScreenshot: vi.fn(async () => ({
+    filename: "moobi-home.png",
+    gallerySaved: true,
+  })),
 }));
 
 describe("right-side camera button", () => {
@@ -72,9 +75,11 @@ describe("right-side camera button", () => {
     let rejectCapture: (error: Error) => void = () => {};
     vi.mocked(downloadPhoneDisplayScreenshot).mockImplementationOnce(
       () =>
-        new Promise<void>((_resolve, reject) => {
-          rejectCapture = reject;
-        }),
+        new Promise<{ filename: string; gallerySaved: boolean }>(
+          (_resolve, reject) => {
+            rejectCapture = reject;
+          },
+        ),
     );
     hardware.props?.onHardwareButton("camera-control");
     hardware.props?.onHardwareButton("camera-control");

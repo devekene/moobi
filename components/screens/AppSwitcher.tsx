@@ -8,6 +8,7 @@ import { usePhoneStore } from "@/stores/usePhoneStore";
 import { useAppPreviewStore } from "@/stores/useAppPreviewStore";
 import { usePhoneApps } from "@/hooks/usePhoneApps";
 import type { PhoneAppId } from "@/lib/phone-apps";
+import AppIconArtwork from "@/components/icons/AppIconArtwork";
 import HomeWallpaper from "@/components/screens/home/HomeWallpaper";
 
 const AppSwitcher = () => {
@@ -176,7 +177,6 @@ const AppSwitcher = () => {
           >
             {screens.map((screen, index) => {
               const app = getApp(screen);
-              const Icon = app.icon;
               return (
                 <motion.article
                   key={screen}
@@ -215,10 +215,12 @@ const AppSwitcher = () => {
                         index < screens.length - 1 ? "calc(12cqw + 12px)" : 12,
                     }}
                   >
-                    <span
-                      className={`flex size-7 shrink-0 items-center justify-center rounded-lg bg-[var(--phone-surface-elevated)] text-lg shadow-sm ${app.color}`}
-                    >
-                      <Icon aria-hidden="true" />
+                    <span className="flex size-7 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[var(--phone-surface-elevated)] text-lg shadow-sm">
+                      <AppIconArtwork
+                        icon={app.icon}
+                        color={app.color}
+                        presentation={app.iconPresentation}
+                      />
                     </span>
                     <span className="min-w-0 flex-1 truncate text-sm font-semibold tracking-tight">
                       {app.name}
@@ -256,10 +258,12 @@ const AppSwitcher = () => {
                       />
                     ) : (
                       <span className="flex h-full flex-col items-center justify-center gap-4 bg-linear-to-b from-[var(--phone-surface-elevated)] to-[var(--phone-canvas)] p-6 text-center">
-                        <span
-                          className={`flex size-16 items-center justify-center rounded-2xl bg-[var(--phone-surface)] text-4xl ${app.color}`}
-                        >
-                          <Icon aria-hidden="true" />
+                        <span className="flex size-16 items-center justify-center overflow-hidden rounded-2xl bg-[var(--phone-surface)] text-4xl">
+                          <AppIconArtwork
+                            icon={app.icon}
+                            color={app.color}
+                            presentation={app.iconPresentation}
+                          />
                         </span>
                         <span className="text-lg font-semibold">
                           {app.name}

@@ -12,6 +12,7 @@ import {
 } from "@/lib/app-library";
 import type { PhoneApp } from "@/lib/phone-apps";
 import { usePhoneApps } from "@/hooks/usePhoneApps";
+import AppIconArtwork from "@/components/icons/AppIconArtwork";
 import styles from "./AppLibrary.module.css";
 
 type AppLibraryProps = {
@@ -45,7 +46,6 @@ const AppLibrary = ({ onLaunch }: AppLibraryProps) => {
   }, [isSearchMode]);
 
   const appIcon = (app: PhoneApp) => {
-    const Icon = app.icon;
     return (
       <button
         key={app.id}
@@ -56,11 +56,12 @@ const AppLibrary = ({ onLaunch }: AppLibraryProps) => {
         className="flex min-w-0 flex-col items-center gap-1.5 rounded-2xl p-2 text-[var(--phone-text)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
       >
         <span className="flex aspect-square w-[clamp(3.5rem,17cqw,5rem)] items-center justify-center overflow-hidden rounded-[14px] bg-[var(--phone-surface-elevated)]/75 shadow-sm backdrop-blur-sm">
-          <span
-            className={`flex h-full w-full items-center justify-center text-[2rem] ${app.color}`}
-          >
-            <Icon aria-hidden="true" />
-          </span>
+          <AppIconArtwork
+            icon={app.icon}
+            color={app.color}
+            presentation={app.iconPresentation}
+            className="text-[2rem]"
+          />
         </span>
         <span className="max-w-full truncate text-[13px] leading-tight font-semibold text-[var(--phone-text)] drop-shadow-[0_1px_3px_rgba(0,0,0,.7)]">
           {app.name}
@@ -70,35 +71,35 @@ const AppLibrary = ({ onLaunch }: AppLibraryProps) => {
   };
 
   const appPreview = (app: PhoneApp) => {
-    const Icon = app.icon;
     return (
       <span
         key={app.id}
         aria-hidden="true"
         className="flex aspect-square w-[min(100%,clamp(2.85rem,18cqw,4.1rem))] items-center justify-center overflow-hidden rounded-[14px] bg-[var(--phone-surface-elevated)]/70 shadow-md backdrop-blur-sm"
       >
-        <span
-          className={`flex h-full w-full items-center justify-center text-[2.15rem] ${app.color}`}
-        >
-          <Icon />
-        </span>
+        <AppIconArtwork
+          icon={app.icon}
+          color={app.color}
+          presentation={app.iconPresentation}
+          className="text-[2.15rem]"
+        />
       </span>
     );
   };
 
   const miniAppPreview = (app: PhoneApp) => {
-    const Icon = app.icon;
     return (
       <span
         key={app.id}
         aria-hidden="true"
         className="flex aspect-square w-full max-w-[26px] items-center justify-center overflow-hidden rounded-[6px] bg-[var(--phone-surface-elevated)]/80 shadow-sm"
       >
-        <span
-          className={`flex h-full w-full items-center justify-center text-[0.9rem] ${app.color}`}
-        >
-          <Icon />
-        </span>
+        <AppIconArtwork
+          icon={app.icon}
+          color={app.color}
+          presentation={app.iconPresentation}
+          className="text-[0.9rem]"
+        />
       </span>
     );
   };
@@ -230,7 +231,6 @@ const AppLibrary = ({ onLaunch }: AppLibraryProps) => {
                     </h2>
                     <div>
                       {apps.map((app) => {
-                        const Icon = app.icon;
                         return (
                           <button
                             key={app.id}
@@ -240,9 +240,12 @@ const AppLibrary = ({ onLaunch }: AppLibraryProps) => {
                             className="focus-visible:outline-inset flex w-full items-center gap-3 border-b border-white/15 px-3 py-2.5 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
                           >
                             <span className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-[13px] border border-white/25 bg-[var(--phone-surface-elevated)]/70 text-2xl shadow-md backdrop-blur-sm">
-                              <span className={app.color}>
-                                <Icon aria-hidden="true" />
-                              </span>
+                              <AppIconArtwork
+                                icon={app.icon}
+                                color={app.color}
+                                presentation={app.iconPresentation}
+                                className="text-2xl"
+                              />
                             </span>
                             <span className="min-w-0 flex-1 truncate text-sm font-medium text-[var(--phone-text)]">
                               {app.name}

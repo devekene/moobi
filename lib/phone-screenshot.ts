@@ -20,6 +20,10 @@ export const downloadPhoneScreenshot = async (
 
   if (!blob) throw new Error("The phone screenshot could not be created.");
 
+  const gallerySaved = await useGalleryStore
+    .getState()
+    .saveScreenshot(blob, screen, date);
+
   const objectUrl = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = objectUrl;
@@ -28,6 +32,10 @@ export const downloadPhoneScreenshot = async (
   link.click();
   link.remove();
   window.setTimeout(() => URL.revokeObjectURL(objectUrl), 0);
+  return {
+    filename: getPhoneScreenshotFilename(screen, date),
+    gallerySaved,
+  } satisfies PhoneScreenshotResult;
 };
 
 export const downloadPhoneDisplayScreenshot = async (
@@ -39,5 +47,11 @@ export const downloadPhoneDisplayScreenshot = async (
     '[data-phone-display="true"]',
   );
   if (!display) throw new Error("The phone display is not ready yet.");
-  await downloadPhoneScreenshot(display, screen);
+  return downloadPhoneScreenshot(display, screen);
 };
+import { useGalleryStore } from "@/stores/useGalleryStore";
+
+export interface PhoneScreenshotResult {
+  filename: string;
+  gallerySaved: boolean;
+}

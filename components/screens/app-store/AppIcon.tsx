@@ -14,6 +14,7 @@ export default function AppIcon({
       className={styles.appIcon}
       data-app={app.id}
       data-large={large}
+      data-presentation={app.iconPresentation ?? "contained"}
       aria-hidden="true"
     >
       <Icon />

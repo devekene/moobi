@@ -29,6 +29,7 @@ import {
 import { usePhoneStore } from "@/stores/usePhoneStore";
 import { useHomeScreenStore } from "@/stores/useHomeScreenStore";
 import { usePhoneApps } from "@/hooks/usePhoneApps";
+import AppIconArtwork from "@/components/icons/AppIconArtwork";
 import { isPhoneAppId, type PhoneAppId, type PhoneApp } from "@/lib/phone-apps";
 
 const dockAppIdSet = new Set<PhoneAppId>(DOCK_APP_IDS);
@@ -255,7 +256,6 @@ const HomeScreen = () => {
 
   const appIcon = (app: PhoneApp, isDock = false, page = phonePage) => {
     const group = isDock ? "dock" : `page-${page}`;
-    const Icon = app.icon;
     return (
       <button
         key={app.id}
@@ -284,14 +284,12 @@ const HomeScreen = () => {
         onClick={() => openApp(app)}
       >
         <span className="relative flex aspect-square w-[clamp(2.75rem,20cqw,4.25rem)] items-center justify-center rounded-[17px] border border-white/25 bg-white/25 shadow-lg backdrop-blur-sm">
-          <span
-            className={cn(
-              "flex h-full w-full items-center justify-center rounded-[15px] text-[1.75rem]",
-              app.color,
-            )}
-          >
-            <Icon aria-hidden="true" />
-          </span>
+          <AppIconArtwork
+            icon={app.icon}
+            color={app.color}
+            presentation={app.iconPresentation}
+            className="rounded-[15px] text-[1.75rem]"
+          />
           {isEditing && (
             <span
               aria-hidden="true"

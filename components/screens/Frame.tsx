@@ -99,7 +99,13 @@ const Frame = ({ children }: { children: React.ReactNode }) => {
             frameRef.current,
             phone.currentScreen,
           )
-            .then(() => setHardwareStatus("Screenshot saved."))
+            .then(({ gallerySaved }) =>
+              setHardwareStatus(
+                gallerySaved
+                  ? "Screenshot saved to Gallery."
+                  : "Screenshot downloaded, but Gallery could not save it.",
+              ),
+            )
             .catch(() =>
               setHardwareStatus("Could not capture the screen. Try again."),
             )
