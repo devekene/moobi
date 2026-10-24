@@ -73,15 +73,19 @@ and compressed, and avoid invented ratings, downloads, or installation claims.
 and provide an honest description. Camera and File Manager are not registered
 and do not appear in app discovery.
 
-Only trusted bundled screens execute in this app origin. Moobi does not accept
-or execute user-submitted mini-app JavaScript. A future extension preview needs
+Only trusted bundled screens execute in this app origin. Settings → App Sandbox
+can now preview a local self-contained package in an opaque sandbox origin; see
+[the slice 1 sandbox contract and security limits](mini-app-sandbox.md). This is
+a local developer tool. [Private publishing and installation](private-app-store.md)
+now use Supabase and a separate cookie-free runtime hostname. Public extension hosting needs
 an isolated origin and a reviewed sandboxed iframe boundary, restrictive CSP,
 and a schema-validated `postMessage` protocol. Do not enable `allow-same-origin`
 for untrusted content or bridge arbitrary host APIs into a preview.
 
 ## Store behavior
 
-Mi Store lists this same catalog. Search and category filters only return
+Mi Store lists this curated bundled catalog; its separate Private apps flow
+manages authorized external releases through the shared phone app resolver. Search and category filters only return
 registered entries, details show their actual availability, and Open records a
 recent app through the shared phone store. A preview entry opens its explanatory
 screen rather than simulating installation of an app that is not present.

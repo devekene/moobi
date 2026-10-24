@@ -9,6 +9,15 @@ import React, { useEffect, useMemo, useRef } from "react";
 import { useAppPreviews } from "@/hooks/useAppPreviews";
 import { getMiniApp, isMiniAppId, MINI_APPS } from "@/lib/app-registry";
 import { usePhoneStore } from "@/stores/usePhoneStore";
+import { isExternalAppId } from "@/lib/phone-apps";
+
+const InstalledAppScreen = dynamic(
+  () => import("@/components/mini-apps/InstalledAppScreen"),
+  {
+    loading: () => <Loader />,
+    ssr: false,
+  },
+);
 
 const dynamicScreens = Object.fromEntries(
   MINI_APPS.map((app) => [
@@ -60,8 +69,23 @@ const Phone = () => {
             <LockScreen />
           ) : currentScreen === "home" ? (
             <HomeScreen />
+          ) : isExternalAppId(currentScreen) ? (
+            <div
+              ref={appViewport}
+              className="phone-app-safe-area"
+              data-layout="contained"
+            >
+              <InstalledAppScreen
+                key={currentScreen}
+                appId={currentScreen.slice(9)}
+              />
+            </div>
           ) : Screen ? (
-            <div ref={appViewport} className="phone-app-safe-area" data-layout={viewport}>
+            <div
+              ref={appViewport}
+              className="phone-app-safe-area"
+              data-layout={viewport}
+            >
               <Screen />
             </div>
           ) : (

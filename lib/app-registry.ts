@@ -391,7 +391,12 @@ export type RegisteredMiniApp = MiniAppDefinition & {
   };
 };
 export type PhoneScreen =
-  "screen-boot" | "screen-shutdown" | "screen-lock" | "home" | MiniAppId;
+  | "screen-boot"
+  | "screen-shutdown"
+  | "screen-lock"
+  | "home"
+  | MiniAppId
+  | import("@/lib/phone-apps").ExternalAppId;
 
 const miniAppsById = new Map<MiniAppId, RegisteredMiniApp>(
   MINI_APPS.map((app) => [app.id, app]),

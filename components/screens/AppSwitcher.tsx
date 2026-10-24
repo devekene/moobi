@@ -6,7 +6,8 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { LuX } from "react-icons/lu";
 import { usePhoneStore } from "@/stores/usePhoneStore";
 import { useAppPreviewStore } from "@/stores/useAppPreviewStore";
-import { getMiniApp, isMiniAppId, type MiniAppId } from "@/lib/app-registry";
+import { usePhoneApps } from "@/hooks/usePhoneApps";
+import type { PhoneAppId } from "@/lib/phone-apps";
 import HomeWallpaper from "@/components/screens/home/HomeWallpaper";
 
 const AppSwitcher = () => {
@@ -17,9 +18,20 @@ const AppSwitcher = () => {
     closeApp,
     setShowAppSwitcher,
   } = usePhoneStore();
+  const apps = usePhoneApps();
+  const appById = new Map(apps.map((app) => [app.id, app]));
+  const getApp = (id: PhoneAppId) => {
+    const app = appById.get(id);
+    if (!app) throw new Error("Installed app is unavailable.");
+    return app;
+  };
   const previews = useAppPreviewStore((state) => state.previews);
   const screens = [
-    ...new Set([...history, currentScreen].filter(isMiniAppId)),
+    ...new Set(
+      [...history, currentScreen].filter((id): id is PhoneAppId =>
+        apps.some((app) => app.id === id),
+      ),
+    ),
   ].reverse();
   const dialog = useRef<HTMLDivElement>(null);
   const rail = useRef<HTMLDivElement>(null);
@@ -57,9 +69,9 @@ const AppSwitcher = () => {
     }
   }, [screens.length]);
 
-  const dismiss = (screen: MiniAppId) => {
+  const dismiss = (screen: PhoneAppId) => {
     closeApp(screen);
-    setAnnouncement(`${getMiniApp(screen).name} closed.`);
+    setAnnouncement(`${getApp(screen).name} closed.`);
   };
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -163,7 +175,7 @@ const AppSwitcher = () => {
             }}
           >
             {screens.map((screen, index) => {
-              const app = getMiniApp(screen);
+              const app = getApp(screen);
               const Icon = app.icon;
               return (
                 <motion.article

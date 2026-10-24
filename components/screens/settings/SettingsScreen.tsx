@@ -8,6 +8,7 @@ import type { ReactNode } from "react";
 import BatteryControls from "@/components/screens/BatteryControls";
 import InfoScreen from "@/components/screens/info/InfoScreen";
 import WallpaperSettings from "@/components/screens/settings/WallpaperSettings";
+import dynamic from "next/dynamic";
 import {
   DisplaySettings,
   SoundSettings,
@@ -21,11 +22,23 @@ import {
   LuMonitor,
   LuSearch,
   LuVolume2,
+  LuCode,
 } from "react-icons/lu";
 import { MdBattery3Bar } from "react-icons/md";
 
+const AppSandbox = dynamic(() => import("@/components/mini-apps/AppSandbox"), {
+  loading: () => <p role="status">Opening App Sandbox…</p>,
+  ssr: false,
+});
+
 type CategoryId =
-  "display" | "wallpaper" | "sound" | "battery" | "security" | "about";
+  | "display"
+  | "wallpaper"
+  | "sound"
+  | "battery"
+  | "security"
+  | "about"
+  | "sandbox";
 type SettingsCategory = {
   id: CategoryId;
   title: string;
@@ -69,6 +82,13 @@ const categories: SettingsCategory[] = [
     title: "Security",
     subtitle: "PIN lock for this virtual phone",
     icon: <LuLockKeyhole />,
+  },
+  {
+    id: "sandbox",
+    tone: "purple",
+    title: "App Sandbox",
+    subtitle: "Preview a local mini-app package",
+    icon: <LuCode />,
   },
   {
     id: "about",
@@ -239,6 +259,7 @@ export default function SettingsScreen() {
           {activeCategory === "sound" && <SoundSettings />}
           {activeCategory === "battery" && <BatteryControls />}
           {activeCategory === "security" && <SecuritySettings />}
+          {activeCategory === "sandbox" && <AppSandbox />}
         </section>
       )}
     </main>

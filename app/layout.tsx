@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { StorageBoundary } from "@/components/StorageBoundary";
 import { ClockProvider } from "@/context/ClockContext";
 import { ChessGameProvider } from "@/components/screens/chess/GameContext";
+import { PrivateStoreBoundary } from "@/components/PrivateStoreBoundary";
 
 export const metadata: Metadata = {
   title: "Moobi",
@@ -50,6 +51,7 @@ export default function RootLayout({
     <html lang="en" className="dark" suppressHydrationWarning>
       <body className="bg-black antialiased">
         <StorageBoundary>
+          <PrivateStoreBoundary />
           <ThemeProvider>
             <ClockProvider>
               <ChessGameProvider>

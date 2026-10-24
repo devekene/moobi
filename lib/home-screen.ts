@@ -7,11 +7,11 @@ export const DOCK_APP_IDS: MiniAppId[] = [
   // "music-player",
 ];
 
-export const reconcileHomeAppOrder = (
-  registeredIds: readonly MiniAppId[],
+export const reconcileHomeAppOrder = <T extends string>(
+  registeredIds: readonly T[],
   savedIds: readonly string[],
-): MiniAppId[] => {
-  const isRegistered = (id: string): id is MiniAppId =>
+): T[] => {
+  const isRegistered = (id: string): id is T =>
     registeredIds.some((registeredId) => registeredId === id);
   const saved = savedIds.filter(isRegistered);
   return [
@@ -20,11 +20,11 @@ export const reconcileHomeAppOrder = (
   ];
 };
 
-export const moveHomeApp = (
-  appIds: readonly MiniAppId[],
-  draggedId: MiniAppId,
-  targetId: MiniAppId,
-): MiniAppId[] => {
+export const moveHomeApp = <T extends string>(
+  appIds: readonly T[],
+  draggedId: T,
+  targetId: T,
+): T[] => {
   const fromIndex = appIds.indexOf(draggedId);
   const targetIndex = appIds.indexOf(targetId);
   if (fromIndex < 0 || targetIndex < 0 || fromIndex === targetIndex) {

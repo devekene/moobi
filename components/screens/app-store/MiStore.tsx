@@ -16,6 +16,20 @@ import {
 } from "@/lib/app-registry";
 import { usePhoneStore } from "@/stores/usePhoneStore";
 import styles from "./store.module.css";
+import { useInstalledAppsStore } from "@/stores/useInstalledAppsStore";
+import dynamic from "next/dynamic";
+const PrivateAppLibrary = dynamic(
+  () => import("@/components/mini-apps/PrivateAppLibrary"),
+  {
+    loading: () => <p role="status">Opening private apps…</p>,
+    ssr: false,
+  },
+);
+
+const PublicAppStore = dynamic(
+  () => import("@/components/mini-apps/PublicAppStore"),
+  { loading: () => <p role="status">Opening community apps…</p>, ssr: false },
+);
 
 const categories: readonly (MiniAppCategory | "all")[] = [
   "all",
@@ -24,6 +38,11 @@ const categories: readonly (MiniAppCategory | "all")[] = [
 const featured = getMiniApp("music-player");
 
 export default function MiStore() {
+  const accountKey = useInstalledAppsStore(
+    (state) => state.user?.id ?? "guest",
+  );
+  const [showPublicApps, setShowPublicApps] = useState(false);
+  const [showPrivateApps, setShowPrivateApps] = useState(false);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<MiniAppCategory | "all">("all");
   const [selectedApp, setSelectedApp] = useState<RegisteredMiniApp | null>(
@@ -100,7 +119,35 @@ export default function MiStore() {
         }
       }}
     >
-      {selectedApp ? (
+      {showPublicApps ? (
+        <>
+          <button
+            type="button"
+            className={styles.back}
+            onClick={() => setShowPublicApps(false)}
+          >
+            Back to Store
+          </button>
+          <PublicAppStore
+            key={accountKey}
+            onAccount={() => {
+              setShowPublicApps(false);
+              setShowPrivateApps(true);
+            }}
+          />
+        </>
+      ) : showPrivateApps ? (
+        <>
+          <button
+            type="button"
+            className={styles.back}
+            onClick={() => setShowPrivateApps(false)}
+          >
+            Back to Store
+          </button>
+          <PrivateAppLibrary />
+        </>
+      ) : selectedApp ? (
         <AppDetails
           key={selectedApp.id}
           app={selectedApp}
@@ -122,6 +169,20 @@ export default function MiStore() {
             </span>
           </header>
           <p className={styles.intro}>Small apps. Great discoveries.</p>
+          <button
+            type="button"
+            className={styles.primaryButton}
+            onClick={() => setShowPrivateApps(true)}
+          >
+            Private apps & publishing
+          </button>
+          <button
+            type="button"
+            className={styles.primaryButton}
+            onClick={() => setShowPublicApps(true)}
+          >
+            Explore community apps
+          </button>
           <AppSearch query={query} onQueryChange={setQuery} />
           <nav className={styles.filters} aria-label="Filter store apps">
             {categories.map((option) => (

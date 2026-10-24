@@ -1,0 +1,136 @@
+.library {
+  display: grid;
+  gap: 16px;
+  padding: 8px 0 24px;
+  color: var(--phone-text);
+}
+.library h1 {
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+.library h2 {
+  font-size: 20px;
+  font-weight: 650;
+  letter-spacing: -0.025em;
+}
+.library p {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--phone-text-secondary);
+}
+.library .eyebrow {
+  color: var(--phone-accent);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+}
+.card {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid var(--phone-border);
+  border-radius: 22px;
+  background: var(--phone-surface);
+  overflow-wrap: anywhere;
+}
+.library button,
+.panel button {
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid var(--phone-border);
+  border-radius: 14px;
+  background: var(--phone-surface-elevated);
+  color: var(--phone-text);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.library button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.library .primary {
+  background: var(--phone-accent);
+  color: var(--phone-on-accent);
+}
+.library label {
+  display: grid;
+  gap: 6px;
+  margin: 10px 0;
+  font-size: 13px;
+}
+.library input,
+.library textarea,
+.library select {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px;
+  border: 1px solid var(--phone-border);
+  border-radius: 12px;
+  background: var(--phone-canvas);
+  color: var(--phone-text);
+}
+.library textarea,
+.library select {
+  min-height: 88px;
+  resize: vertical;
+}
+.library .check {
+  display: flex;
+  align-items: center;
+}
+.library .check input {
+  width: 24px;
+  flex-shrink: 0;
+}
+.account,
+.tabs {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.account span {
+  flex: 1;
+  min-width: 0;
+}
+.tabs button {
+  flex: 1;
+}
+.tabs button[aria-pressed="true"] {
+  border-color: var(--phone-accent);
+  color: var(--phone-accent);
+}
+.notice {
+  padding: 12px;
+  border: 1px solid var(--phone-border);
+  border-radius: 14px;
+  background: var(--phone-surface-elevated);
+}
+.release {
+  display: grid;
+  gap: 8px;
+  border-top: 1px solid var(--phone-border);
+  padding: 12px 0;
+}
+.release code {
+  font-size: 11px;
+  color: var(--phone-text-muted);
+}
+.panel {
+  display: grid;
+  gap: 12px;
+  padding: 20px;
+  color: var(--phone-text);
+}
+.library :is(button, input, textarea, select):focus-visible,
+.panel button:focus-visible {
+  outline: 2px solid var(--phone-focus);
+  outline-offset: 2px;
+}
+.library progress {
+  width: 100%;
+  accent-color: var(--phone-accent);
+}

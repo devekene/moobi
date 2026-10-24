@@ -6,17 +6,17 @@ import {
   type StateStorage,
 } from "zustand/middleware";
 import { mobileApps } from "@/lib/app-registry";
-import type { MiniAppId } from "@/lib/app-registry";
+import type { PhoneAppId } from "@/lib/phone-apps";
 import { DOCK_APP_IDS } from "@/lib/home-screen";
 
 export type HomeScreenState = {
-  appOrders: Record<string, MiniAppId[]>;
-  dockOrder: MiniAppId[];
-  setAppOrder: (page: number, appIds: MiniAppId[]) => void;
-  setDockOrder: (appIds: MiniAppId[]) => void;
+  appOrders: Record<string, PhoneAppId[]>;
+  dockOrder: PhoneAppId[];
+  setAppOrder: (page: number, appIds: PhoneAppId[]) => void;
+  setDockOrder: (appIds: PhoneAppId[]) => void;
 };
 
-const defaultAppOrders: Record<string, MiniAppId[]> = {};
+const defaultAppOrders: Record<string, PhoneAppId[]> = {};
 mobileApps.forEach((apps, page) => {
   defaultAppOrders[String(page)] = apps.map((app) => app.id);
 });

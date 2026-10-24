@@ -64,12 +64,10 @@ export default function AppDetails({
           <LuArrowLeft aria-hidden="true" />
           <span>App Store</span>
         </button>
-        <span className={styles.eyebrow}>THE COLLECTION</span>
       </nav>
       <header className={styles.detailHeader}>
         <AppIcon app={app} large />
         <div>
-          <span className={styles.eyebrow}>{app.category}</span>
           <h1 ref={headingRef} tabIndex={-1}>
             {app.name}
           </h1>
@@ -81,11 +79,6 @@ export default function AppDetails({
           {app.availability === "available" ? "Open app" : "Open preview"}
           <LuArrowUpRight aria-hidden="true" />
         </button>
-        <span>
-          Included in Moobi
-          <br />
-          <strong>Ready to open</strong>
-        </span>
       </div>
       <dl className={styles.facts}>
         <div>
@@ -209,7 +202,7 @@ export default function AppDetails({
         </section>
       )}
       <section className={styles.about}>
-        <span className={styles.eyebrow}>A LITTLE MORE ABOUT IT</span>
+        <span className={styles.eyebrow}>ABOUT</span>
         <h2>Meet {app.name}.</h2>
         <p>{listing?.story ?? app.description}</p>
         <ul>

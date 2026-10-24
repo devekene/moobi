@@ -1,0 +1,115 @@
+.lab {
+  color: var(--phone-text);
+  padding-bottom: 16px;
+}
+.intro,
+.note,
+.status {
+  color: var(--phone-text-secondary);
+  font-size: 13px;
+  line-height: 1.55;
+  margin: 12px 0;
+}
+.card {
+  padding: 18px;
+  border: 1px solid var(--phone-border);
+  border-radius: 22px;
+  background: var(--phone-surface);
+}
+.card h2 {
+  font-size: 24px;
+  font-weight: 650;
+  letter-spacing: -0.035em;
+  margin: 8px 0;
+}
+.card p {
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.eyebrow {
+  color: var(--phone-text-muted);
+  letter-spacing: 0.1em;
+}
+.digest {
+  font-family: monospace;
+}
+.lab button,
+.file {
+  display: block;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid var(--phone-border);
+  border-radius: 14px;
+  background: var(--phone-surface);
+  color: var(--phone-text);
+  font-size: 13px;
+  text-align: center;
+  cursor: pointer;
+}
+.lab button:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+.lab .primary {
+  width: 100%;
+  margin-top: 16px;
+  background: var(--phone-accent);
+  color: var(--phone-on-accent);
+}
+.actions {
+  display: grid;
+  gap: 8px;
+  margin: 16px 0;
+}
+.file {
+  text-align: left;
+}
+.file input {
+  display: block;
+  width: 100%;
+  font-size: 12px;
+  margin-top: 8px;
+  min-height: 44px;
+}
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.toolbar button {
+  flex: 1;
+}
+.frame {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  min-height: 300px;
+  border: 1px solid var(--phone-border);
+  border-radius: 16px;
+  background: var(--phone-canvas);
+}
+.preview[data-installed="true"] {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+.preview[data-installed="true"] .frame {
+  flex: 1;
+  min-height: 0;
+  aspect-ratio: auto;
+  border-radius: 0;
+  border: 0;
+}
+.preview[data-installed="true"] .toolbar {
+  padding: 6px 12px;
+}
+.preview[data-installed="true"] .status {
+  padding: 0 12px;
+  font-size: 11px;
+  margin: 4px 0;
+}
+.lab :is(button, input, summary):focus-visible {
+  outline: 2px solid var(--phone-focus);
+  outline-offset: 2px;
+}

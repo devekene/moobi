@@ -2,6 +2,13 @@
 
 ## Product direction
 
+The external-app publishing, installation, and update roadmap is documented in
+[App store platform plan](docs/app-store-platform-plan.md). It extends this plan
+with staged delivery slices. Local previews and Supabase-backed private publishing
+and installation are implemented; see [setup and limits](docs/private-app-store.md).
+Public review/discovery and safe release updates are implemented in code; complete
+the [slice 3 database and reviewer setup](docs/public-app-store.md) to enable them.
+
 Moobi is a browser-based mini-app platform first and a virtual phone playground second. A visitor should be able to open the phone, try useful and playful mini apps, and eventually add or preview mini apps of their own. The phone should feel responsive and coherent enough to invite exploration, without making the experience heavy or pretending browser capabilities it does not have.
 
 The product should combine:

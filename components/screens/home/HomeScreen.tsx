@@ -15,13 +15,7 @@ import WeatherWidget from "@/components/screens/weather-app/WeatherWidget";
 import CalendarWidget from "@/components/screens/calendar/CalendarWidget";
 import AppLibrary from "@/components/screens/home/AppLibrary";
 import { cn } from "@/lib/utils";
-import {
-  getMiniApp,
-  isMiniAppId,
-  mobileApps,
-  type MiniAppId,
-  type RegisteredMiniApp,
-} from "@/lib/app-registry";
+import { getMiniApp } from "@/lib/app-registry";
 import {
   APP_LIBRARY_PAGE_INDEX,
   HOME_SCREEN_PAGE_COUNT,
@@ -34,18 +28,28 @@ import {
 } from "@/lib/home-screen";
 import { usePhoneStore } from "@/stores/usePhoneStore";
 import { useHomeScreenStore } from "@/stores/useHomeScreenStore";
+import { usePhoneApps } from "@/hooks/usePhoneApps";
+import { isPhoneAppId, type PhoneAppId, type PhoneApp } from "@/lib/phone-apps";
 
-const dockAppIdSet = new Set<MiniAppId>(DOCK_APP_IDS);
+const dockAppIdSet = new Set<PhoneAppId>(DOCK_APP_IDS);
 
-type DragSource = { appId: MiniAppId; group: string };
+type DragSource = { appId: PhoneAppId; group: string };
 
 const HomeScreen = () => {
+  const phoneApps = usePhoneApps();
+  const pages = useMemo(
+    () =>
+      Array.from({ length: HOME_SCREEN_PAGE_COUNT }, (_, page) =>
+        phoneApps.filter((app) => app.homePage === page),
+      ),
+    [phoneApps],
+  );
   const { setCurrentScreen, fetchPhonePage, setPhonePage, phonePage } =
     usePhoneStore();
   const { appOrders, dockOrder, setAppOrder, setDockOrder } =
     useHomeScreenStore();
   const [isEditing, setIsEditing] = useState(false);
-  const [draggingAppId, setDraggingAppId] = useState<MiniAppId | null>(null);
+  const [draggingAppId, setDraggingAppId] = useState<PhoneAppId | null>(null);
   const [now, setNow] = useState(() => new Date());
   const longPressTimer = useRef<number | null>(null);
   const pointerOrigin = useRef<{ id: number; x: number; y: number } | null>(
@@ -61,16 +65,16 @@ const HomeScreen = () => {
 
   const orderedPages = useMemo(
     () =>
-      mobileApps.map((apps, page) => {
+      pages.map((apps, page) => {
         const appById = new Map(apps.map((app) => [app.id, app]));
         return reconcileHomeAppOrder(
           apps.map((app) => app.id),
           appOrders[String(page)] ?? [],
         )
           .map((id) => appById.get(id))
-          .filter((app): app is RegisteredMiniApp => app !== undefined);
+          .filter((app): app is PhoneApp => app !== undefined);
       }),
-    [appOrders],
+    [appOrders, pages],
   );
   const visiblePages = useMemo(
     () =>
@@ -118,7 +122,7 @@ const HomeScreen = () => {
     setIsEditing(false);
   };
 
-  const saveReorder = (source: DragSource, targetId: MiniAppId) => {
+  const saveReorder = (source: DragSource, targetId: PhoneAppId) => {
     if (source.appId === targetId) return;
     if (source.group === "dock") {
       const next = moveHomeApp(
@@ -147,7 +151,7 @@ const HomeScreen = () => {
 
   const beginPointer = (
     event: ReactPointerEvent<HTMLButtonElement>,
-    appId: MiniAppId,
+    appId: PhoneAppId,
     group: string,
   ) => {
     if (event.pointerType === "mouse" && event.button !== 0) return;
@@ -192,7 +196,7 @@ const HomeScreen = () => {
     if (
       targetGroup === draggedApp.current.group &&
       targetId !== undefined &&
-      isMiniAppId(targetId)
+      isPhoneAppId(targetId)
     ) {
       saveReorder(draggedApp.current, targetId);
     }
@@ -206,7 +210,7 @@ const HomeScreen = () => {
     setDraggingAppId(null);
   };
 
-  const openApp = (app: RegisteredMiniApp) => {
+  const openApp = (app: PhoneApp) => {
     if (suppressClick.current) {
       suppressClick.current = false;
       return;
@@ -217,7 +221,7 @@ const HomeScreen = () => {
 
   const reorderWithKeyboard = (
     event: ReactKeyboardEvent<HTMLButtonElement>,
-    appId: MiniAppId,
+    appId: PhoneAppId,
     group: string,
   ) => {
     if (event.key === "F2" && !isEditing) {
@@ -249,11 +253,7 @@ const HomeScreen = () => {
     saveReorder({ appId, group }, ids[to]);
   };
 
-  const appIcon = (
-    app: RegisteredMiniApp,
-    isDock = false,
-    page = phonePage,
-  ) => {
+  const appIcon = (app: PhoneApp, isDock = false, page = phonePage) => {
     const group = isDock ? "dock" : `page-${page}`;
     const Icon = app.icon;
     return (

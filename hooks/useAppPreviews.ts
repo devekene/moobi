@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, type RefObject } from "react";
-import { isMiniAppId } from "@/lib/app-registry";
+import { isPhoneAppId } from "@/lib/phone-apps";
 import { usePhoneStore } from "@/stores/usePhoneStore";
 import { useAppPreviewStore } from "@/stores/useAppPreviewStore";
 
@@ -17,7 +17,7 @@ export function useAppPreviews(viewport: RefObject<HTMLDivElement | null>) {
         disposed ||
         capturing ||
         document.visibilityState !== "visible" ||
-        !isMiniAppId(screen) ||
+        !isPhoneAppId(screen) ||
         !next.history.includes(screen) ||
         (next.currentScreen === screen &&
           !(next.showAppSwitcher && !previous.showAppSwitcher))

@@ -1,26 +1,27 @@
 import { create } from "zustand";
-import type { MiniAppId } from "@/lib/app-registry";
+import type { PhoneAppId } from "@/lib/phone-apps";
 
 // Session-only, bounded images. Recents must never persist screenshots of app content.
 export const createAppPreviewStore = (
   urls: Pick<typeof URL, "createObjectURL" | "revokeObjectURL"> = URL,
 ) =>
   create<{
-    previews: Partial<Record<MiniAppId, string>>;
-    save: (app: MiniAppId, image: Blob) => void;
+    previews: Partial<Record<PhoneAppId, string>>;
+    save: (app: PhoneAppId, image: Blob) => void;
     retain: (apps: readonly string[]) => void;
   }>((set, get) => ({
     previews: {},
     save: (app, image) => {
       const previews = { ...get().previews };
-      if (previews[app]) urls.revokeObjectURL(previews[app]);
+      const previous = previews[app];
+      if (previous) urls.revokeObjectURL(previous);
       delete previews[app];
       previews[app] = urls.createObjectURL(image);
       const entries = Object.entries(previews);
       if (entries.length > 8) {
         const oldest = entries[0];
         if (oldest) {
-          urls.revokeObjectURL(oldest[1]);
+          if (oldest[1]) urls.revokeObjectURL(oldest[1]);
           set({ previews: Object.fromEntries(entries.slice(1)) });
           return;
         }
@@ -31,7 +32,9 @@ export const createAppPreviewStore = (
       const entries = Object.entries(get().previews);
       const removed = entries.filter(([app]) => !apps.includes(app));
       if (!removed.length) return;
-      removed.forEach(([, url]) => urls.revokeObjectURL(url));
+      removed.forEach(([, url]) => {
+        if (url) urls.revokeObjectURL(url);
+      });
       set({
         previews: Object.fromEntries(
           entries.filter(([app]) => apps.includes(app)),

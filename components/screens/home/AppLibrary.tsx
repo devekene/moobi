@@ -10,26 +10,31 @@ import {
   getAppLibraryCategoryPreview,
   type AppLibraryCategoryId,
 } from "@/lib/app-library";
-import type { RegisteredMiniApp } from "@/lib/app-registry";
+import type { PhoneApp } from "@/lib/phone-apps";
+import { usePhoneApps } from "@/hooks/usePhoneApps";
 import styles from "./AppLibrary.module.css";
 
 type AppLibraryProps = {
-  onLaunch: (app: RegisteredMiniApp) => void;
+  onLaunch: (app: PhoneApp) => void;
 };
 
 const AppLibrary = ({ onLaunch }: AppLibraryProps) => {
+  const phoneApps = usePhoneApps();
   const [query, setQuery] = useState("");
   const [isSearchMode, setIsSearchMode] = useState(false);
   const [activeCategory, setActiveCategory] =
     useState<AppLibraryCategoryId | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const categories = useMemo(() => getAppLibraryCategories(), []);
+  const categories = useMemo(
+    () => getAppLibraryCategories("", phoneApps),
+    [phoneApps],
+  );
   const alphabeticalGroups = useMemo(
-    () => getAlphabeticalAppGroups(query),
-    [query],
+    () => getAlphabeticalAppGroups(query, phoneApps),
+    [query, phoneApps],
   );
   const activeApps = activeCategory
-    ? getAppLibraryCategoryApps(activeCategory, query)
+    ? getAppLibraryCategoryApps(activeCategory, query, phoneApps)
     : [];
   const activeTitle = APP_LIBRARY_CATEGORIES.find(
     ({ id }) => id === activeCategory,
@@ -39,7 +44,7 @@ const AppLibrary = ({ onLaunch }: AppLibraryProps) => {
     if (isSearchMode) searchInputRef.current?.focus();
   }, [isSearchMode]);
 
-  const appIcon = (app: RegisteredMiniApp) => {
+  const appIcon = (app: PhoneApp) => {
     const Icon = app.icon;
     return (
       <button
@@ -64,7 +69,7 @@ const AppLibrary = ({ onLaunch }: AppLibraryProps) => {
     );
   };
 
-  const appPreview = (app: RegisteredMiniApp) => {
+  const appPreview = (app: PhoneApp) => {
     const Icon = app.icon;
     return (
       <span
@@ -81,7 +86,7 @@ const AppLibrary = ({ onLaunch }: AppLibraryProps) => {
     );
   };
 
-  const miniAppPreview = (app: RegisteredMiniApp) => {
+  const miniAppPreview = (app: PhoneApp) => {
     const Icon = app.icon;
     return (
       <span
@@ -102,7 +107,7 @@ const AppLibrary = ({ onLaunch }: AppLibraryProps) => {
     <div className="relative h-full overflow-hidden">
       {!activeCategory && (
         <div
-          className="absolute inset-0 overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="absolute inset-0 [scrollbar-width:none] overflow-y-auto overscroll-contain [&::-webkit-scrollbar]:hidden"
           style={{
             paddingInline: "6%",
             paddingTop: "calc(var(--phone-safe-area-top) + 8px)",
@@ -170,6 +175,7 @@ const AppLibrary = ({ onLaunch }: AppLibraryProps) => {
                 const preview = getAppLibraryCategoryPreview(
                   category.id,
                   query,
+                  phoneApps,
                 );
                 return (
                   <button

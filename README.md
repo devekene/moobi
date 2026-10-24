@@ -8,6 +8,13 @@ Live: [moobi.vercel.app](https://moobi.vercel.app)
 
 ## 💡 Overview
 
+Developer platform: [app store roadmap](docs/app-store-platform-plan.md) and
+[local mini-app sandbox contract](docs/mini-app-sandbox.md). Preview a package at
+**Settings → App Sandbox**, or use **Mi Store → Private apps & publishing** for
+account-based upload and installation. Follow the [Supabase and runtime setup](docs/private-app-store.md).
+Public review/discovery and safe release updates are implemented in code; complete
+the [slice 3 database and reviewer setup](docs/public-app-store.md) to enable them.
+
 Moobi aims to simulate a mobile OS experience entirely within the browser. You can install and run apps, browse locally hosted development, use music, a clock, and more. It’s also a showcase of front-end craftsmanship — blending UI/UX, dynamic imports, state orchestration, and embedded previews.
 
 Think of it as **virtual phone meets portfolio**.
@@ -45,7 +52,8 @@ Here’s what Moobi can (or will) do:
 
 ---
 
-## 
+##
+
 Each mini-app (e.g. `components/screens/clock`) can hold its own UI and possibly its own state logic (or use shared stores). The `Frame` component wraps them in the mobile phone shell.
 
 ---
@@ -157,38 +165,45 @@ App previews are best-effort frozen captures taken when leaving an app or openin
 The frame's volume, Action, side/power, and Camera Control buttons operate the virtual phone. Volume and Silent mode affect Moobi's music and gallery video only; they do not control the visitor's operating-system audio or physical phone.
 
 Battery drain, charging, and the charging cable are simulations owned by the virtual phone. Battery level persists in this browser, drains only while the Moobi tab is visible, and can be recharged or reset from Control Center. Moobi never reads or changes the actual device battery or charging hardware.
+
 ## 🧠 How Moobi Works (Architecture Notes)
 
 Here’s a quick dive into how the magic is wired:
 
 ### ✅ Frame & Root Shell
+
 - The `Frame` component is always mounted.
 - Inside it, the active screen (home, browser, clock, etc.) is swapped using **Zustand** + **dynamic imports**.
 
 ### ✅ State Management via Zustand
+
 - `usePhoneStore` handles navigation and control center state like:
-    - `currentScreen`
-    - `history`
-    - control center visibility
+  - `currentScreen`
+  - `history`
+  - control center visibility
 - `usePhoneSettingsStore` owns persistent phone-level display and sound settings:
-    - brightness
-    - virtual media volume
-    - silent mode
+  - brightness
+  - virtual media volume
+  - silent mode
 - App-specific stores (e.g., music, notes) manage only their internal states.
 
 ### ✅ Dynamic Imports & Memoization
+
 - Each screen UI is **lazily loaded** to keep bundles lightweight.
 - Once a screen is loaded, it’s memoized, so re-opening it won’t trigger the loader again.
 
 ### ✅ Live Dev Preview / Browser Mode
+
 - URLs (e.g., `http://localhost:3000`) are embedded using an `<iframe>`.
 - Proxy/headers may be used to bypass embed restrictions.
 
 ### ✅ Gesture Handling & UI Transitions
+
 - Swipes (e.g., swipe-up to Home or AppSwitcher) handled with `react-swipeable` + custom logic.
 - Transitions and animations rely on **CSS, Framer motion, and Motion**.
 
 ### ✅ App Registry & Metadata
+
 - `lib/app-registry.ts` owns typed app IDs, launch targets, icons, categories,
   descriptions, versions, availability, home placement, and lazy screen loaders.
 - Home, Mi Store, and App Switcher read from the same registry. Camera and File
