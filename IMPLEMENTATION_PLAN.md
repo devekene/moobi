@@ -98,7 +98,7 @@ Tasks:
 
 1. Create a typed iPhone model catalog with verified model-specific dimensions, aspect ratios, front/back details, and minimum usable preview sizes. Start with iPhones only.
 2. Make the phone adapt to viewport width, height, safe areas, and orientation while preserving the selected virtual model's credible proportions. Filter or disable catalog options that cannot be presented at the minimum usable size in the current viewport; do not infer the visitor's physical model from viewport dimensions.
-3. Add a device picker that lets users switch the virtual shell. Changing models updates the front, back, proportions, camera layout, and other model-specific details while preserving the active app and system state.
+3. Add the device picker inside the virtual phone's Settings app. Changing models updates the shell, proportions, and model-specific details while preserving the active app and system state. Keep presentation controls out of the surrounding page.
 4. Refine frame materials, glass, bezels, speaker/camera details, buttons, shadows, reflections, and surrounding stage. Keep the frame lightweight and readable at small sizes.
 5. Make home, lock screen, status bar, dock, widgets, and control center feel like one operating system.
 6. Add accessible input handling, visible focus, pointer/touch affordances, and robust small-screen fallbacks.
@@ -108,28 +108,28 @@ Acceptance:
 
 - The phone fits common narrow and short viewports without clipping core controls.
 - Only virtual iPhone models that can meet the minimum usable preview size are offered for the current viewport; users can switch among available models.
-- Each model's front and back visibly match its catalog design and proportions, and switching models preserves app and phone state.
+- Each model's front-facing shell matches its catalog design and proportions, and switching models preserves app and phone state.
 - Interactions remain responsive during transitions; motion never traps or delays the user.
 - Keyboard and screen-reader users can identify and operate major system controls.
 - Visual checks cover desktop, narrow mobile, landscape, both themes, and reduced motion.
 
-### Slice 5 — 3D device, turntable, and hardware details
+### Slice 5 — 3D device and hardware details
 
-Add the ability to turn each selected virtual iPhone and see its model-specific back as an enhancement to the responsive shell.
+Render each selected virtual iPhone as a polished, front-facing 3D shell without placing a separate control console around the phone.
 
 Tasks:
 
 1. Build front and back geometry/details from the selected iPhone catalog entry, using CSS 3D transforms and layered, optimized assets where possible; use WebGL/3D libraries only if CSS cannot meet the visual requirement.
-2. Support drag/touch turntable interaction, a clear front/back affordance, reset-to-front behavior, and keyboard-accessible alternatives.
+2. Keep the active phone front-facing and immediately usable. Model selection belongs in Settings; do not add turn, reset, refresh, screenshot, or navigation strips outside the chassis.
 3. Design the rear camera array, materials, logo/mark, side buttons, and charging port as part of the same device system.
-4. Keep screen interaction disabled or clearly unavailable when the phone is turned away; preserve the current app and state when turning back.
-5. Respect reduced motion and provide a static device presentation when 3D effects are unavailable or costly. If the selected model no longer fits after a viewport change, scale it within the supported range or prompt the user to choose an available model.
+4. Preserve the current app and state when switching device models.
+5. Respect reduced motion and provide a static device presentation when 3D effects are unavailable or costly. If the selected model no longer fits after a viewport change, select an available model without resetting phone state.
 
 Acceptance:
 
-- Front/back transition is smooth, controllable, reversible, and usable by touch, pointer, and keyboard.
+- The device remains front-facing and usable without surrounding presentation controls.
 - The device remains crisp without excessive GPU use or large blocking assets.
-- Device rotation does not unmount apps or lose their state.
+- Model changes do not unmount apps or lose their state.
 
 ### Slice 6 — Simulated battery and charging
 
@@ -190,7 +190,7 @@ Acceptance:
 2. Light/dark phone tokens and persisted phone appearance.
 3. Typed app registry and platform contract.
 4. Responsive premium phone shell and motion system.
-5. 3D turntable device.
+5. Front-facing 3D device.
 6. Simulated battery and charging.
 7. Focused mini-app polish and app-author preview workflow.
 8. Performance, accessibility, documentation, and release verification.

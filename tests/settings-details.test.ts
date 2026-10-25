@@ -13,10 +13,12 @@ vi.mock("@/stores/useBatteryStore", () => ({
 
 import BatteryControls from "@/components/screens/BatteryControls";
 import {
+  DeviceSettings,
   DisplaySettings,
   SoundSettings,
   SecuritySettings,
 } from "@/components/screens/settings/SettingsDetails";
+import { useDeviceStore } from "@/stores/useDeviceStore";
 import PinLockControls from "@/components/PinLockControls";
 import InfoScreen from "@/components/screens/info/InfoScreen";
 
@@ -24,6 +26,10 @@ beforeEach(() => {
   battery.level = 85;
   battery.chargerPhase = "disconnected";
   battery.lowBatteryDismissed = false;
+  useDeviceStore.setState({
+    selectedModelId: "iphone-16",
+    availableModelIds: ["iphone-16", "iphone-16-pro"],
+  });
 });
 
 describe("Settings detail screens", () => {
@@ -44,6 +50,15 @@ describe("Settings detail screens", () => {
     );
     expect(html).toContain('for="settings-volume"');
     expect(html).toContain("hardware haptics are not used");
+  });
+
+  it("offers viewport-compatible virtual models inside Settings", () => {
+    const html = renderToStaticMarkup(createElement(DeviceSettings));
+    expect(html).toContain('role="radiogroup"');
+    expect(html).toContain('aria-label="Virtual iPhone model"');
+    expect(html).toContain('role="radio" aria-checked="true"');
+    expect(html).toContain("iPhone 16 Pro");
+    expect(html).toContain("iPhone 17 Pro Max");
   });
 
   it("shows battery level and a charger action without invented usage history", () => {

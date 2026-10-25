@@ -26,7 +26,6 @@ import {
   PHONE_SCREEN_INSET_MM,
   getRearCameraGeometry,
 } from "@/lib/phone-geometry";
-import type { DeviceRotation } from "@/lib/device-rotation";
 import type { ChargerPhase } from "@/lib/battery";
 import {
   isHardwareButtonId,
@@ -46,7 +45,6 @@ const DISPLAY_SURFACE_GAP_MM = 0.015;
 type PhoneModel3DProps = {
   model: IPhoneModel;
   size: PreviewSize;
-  rotation: DeviceRotation;
   brightness: number;
   isOn: boolean;
   chargerPhase: ChargerPhase;
@@ -57,7 +55,6 @@ type PhoneModel3DProps = {
   ringingAlarmId: number | null;
   onHardwareButton: (button: HardwareButtonId) => void;
   onHardwareButtonRelease: (button: HardwareButtonId) => void;
-  onWebGLStatusChange: (available: boolean) => void;
   children: React.ReactNode;
 };
 
@@ -616,7 +613,6 @@ const addDeviceGeometry = (
 const PhoneModel3D = ({
   model,
   size,
-  rotation,
   brightness,
   isOn,
   chargerPhase,
@@ -627,11 +623,10 @@ const PhoneModel3D = ({
   ringingAlarmId,
   onHardwareButton,
   onHardwareButtonRelease,
-  onWebGLStatusChange,
   children,
 }: PhoneModel3DProps) => {
-  // Extra transparent render space keeps the complete handset inside both
-  // renderer viewports while it turns through any orientation.
+  // Extra transparent render space keeps the complete handset and charger
+  // cable inside both renderer viewports.
   const renderSize = getPhoneRenderSize(size, chargerPhase !== "disconnected");
   const hostRef = useRef<HTMLDivElement>(null);
   const deviceRef = useRef<THREE.Group | null>(null);
@@ -741,7 +736,6 @@ const PhoneModel3D = ({
       disposeScene(scene);
       const fallbackFrame = window.requestAnimationFrame(() => {
         setWebglUnavailable(true);
-        onWebGLStatusChange(false);
       });
       return () => window.cancelAnimationFrame(fallbackFrame);
     }
@@ -911,7 +905,6 @@ const PhoneModel3D = ({
     deviceRef.current = device;
     renderRef.current = render;
     render();
-    onWebGLStatusChange(true);
 
     let frame = 0;
     const observer = new ResizeObserver(() => {
@@ -965,7 +958,6 @@ const PhoneModel3D = ({
     };
   }, [
     model,
-    onWebGLStatusChange,
     renderSize.height,
     renderSize.width,
     size.height,
@@ -986,18 +978,6 @@ const PhoneModel3D = ({
     target.style.filter = `brightness(${brightness})`;
     mount.append(target);
   }, [brightness, size.height, size.width, webglUnavailable]);
-
-  useEffect(() => {
-    const device = deviceRef.current;
-    if (!device) return;
-    device.rotation.set(
-      THREE.MathUtils.degToRad(rotation.pitch),
-      THREE.MathUtils.degToRad(rotation.yaw),
-      0,
-      "XYZ",
-    );
-    renderRef.current?.();
-  }, [rotation.pitch, rotation.yaw]);
 
   useEffect(() => {
     const device = deviceRef.current;

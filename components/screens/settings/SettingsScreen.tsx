@@ -10,6 +10,7 @@ import InfoScreen from "@/components/screens/info/InfoScreen";
 import WallpaperSettings from "@/components/screens/settings/WallpaperSettings";
 import dynamic from "next/dynamic";
 import {
+  DeviceSettings,
   DisplaySettings,
   SoundSettings,
   SecuritySettings,
@@ -21,6 +22,7 @@ import {
   LuImage,
   LuMonitor,
   LuSearch,
+  LuSmartphone,
   LuVolume2,
   LuCode,
 } from "react-icons/lu";
@@ -33,6 +35,7 @@ const AppSandbox = dynamic(() => import("@/components/mini-apps/AppSandbox"), {
 
 type CategoryId =
   | "display"
+  | "device"
   | "wallpaper"
   | "sound"
   | "battery"
@@ -54,6 +57,13 @@ const categories: SettingsCategory[] = [
     title: "Display & Brightness",
     subtitle: "Appearance and screen brightness",
     icon: <LuMonitor />,
+  },
+  {
+    id: "device",
+    tone: "gray",
+    title: "Virtual iPhone",
+    subtitle: "Choose the model shown in Moobi",
+    icon: <LuSmartphone />,
   },
   {
     id: "wallpaper",
@@ -201,9 +211,9 @@ export default function SettingsScreen() {
 
           <div className={styles.categories}>
             {[
-              categories.slice(0, 4),
-              categories.slice(4, 5),
-              categories.slice(5),
+              categories.slice(0, 5),
+              categories.slice(5, 6),
+              categories.slice(6),
             ].map((group, index) => {
               const rows = group.filter((category) =>
                 visibleCategories.includes(category),
@@ -256,6 +266,7 @@ export default function SettingsScreen() {
           {activeCategory === "about" && <InfoScreen showHeading={false} />}
           {activeCategory === "wallpaper" && <WallpaperSettings />}
           {activeCategory === "display" && <DisplaySettings />}
+          {activeCategory === "device" && <DeviceSettings />}
           {activeCategory === "sound" && <SoundSettings />}
           {activeCategory === "battery" && <BatteryControls />}
           {activeCategory === "security" && <SecuritySettings />}

@@ -22,11 +22,13 @@ import { useCalculatorStore } from "@/stores/useCalculatorStore";
 import { useGuessStore } from "@/stores/useGuessStore";
 import { useMailStore } from "@/stores/useMailStore";
 import { useSnakeStore } from "@/stores/useSnakeStore";
+import { useLudoStore } from "@/stores/useLudoStore";
 
 const stores = [
   useMailStore,
   useGuessStore,
   useSnakeStore,
+  useLudoStore,
   useBrowserCacheStore,
   useCalendarStore,
   useCalculatorStore,

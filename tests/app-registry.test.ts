@@ -1,5 +1,8 @@
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import ChessMogulIcon from "@/components/icons/ChessMogulIcon";
+import LudoRoyaleIcon from "@/components/icons/LudoRoyaleIcon";
 import {
   getAppMetadata,
   getMiniApp,
@@ -39,6 +42,20 @@ describe("mini-app registry", () => {
 
   it("lets Chess anchor game controls at the display bottom", () => {
     expect(getMiniApp("chess").viewport).toBe("full-bleed");
+  });
+
+  it("shares the Ludo Royale identity and full-display board contract", () => {
+    const app = getMiniApp("ludo");
+    expect(app.viewport).toBe("full-bleed");
+    expect(app.icon).toBe(LudoRoyaleIcon);
+    expect(renderToStaticMarkup(createElement(app.icon))).toContain(
+      "/images/ludo-capture-icon.webp",
+    );
+    expect(app.previewCapabilities.screenshotUrls).toEqual([
+      "/images/appstore/screenshots/ludo-setup.svg",
+      "/images/appstore/screenshots/ludo-match.svg",
+    ]);
+    expect(app.store?.highlights).toHaveLength(3);
   });
 
   it("shares the Chess Mogul identity across launch and store metadata", () => {
@@ -116,6 +133,7 @@ describe("mini-app registry", () => {
       "snake",
       "guess",
       "chess",
+      "ludo",
     ]);
     expect(searchMiniApps("missing app")).toEqual([]);
   });

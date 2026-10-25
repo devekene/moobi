@@ -10,6 +10,7 @@ import MoBrowserIcon from "@/components/icons/MoBrowserIcon";
 import ChessMogulIcon from "@/components/icons/ChessMogulIcon";
 import GuessIcon from "@/components/icons/GuessIcon";
 import SnakeIcon from "@/components/icons/SnakeIcon";
+import LudoRoyaleIcon from "@/components/icons/LudoRoyaleIcon";
 import {
   CalculatorIcon,
   CalendarIcon,
@@ -374,6 +375,41 @@ export const MINI_APPS = [
     availability: "available",
     homePage: 1,
     loadScreen: () => import("@/components/screens/chess/Home"),
+  },
+  {
+    id: "ludo",
+    viewport: "full-bleed",
+    store: {
+      tagline: "Every roll has a little drama.",
+      headline: "Bring the table.\nChase the crown.",
+      story:
+        "Gather around a faithful classic Ludo board with four colored homes, round seeds, and two dice rolled right from the center. Face three distinct AI rivals, settle a quick duel, or pass the phone for a four-player local match.",
+      highlights: [
+        "Solo, duel, and four-player Pass & Play",
+        "Bold, balanced, and tactical AI rivals",
+        "Two-dice turns, safe squares, captures, and doubles",
+      ],
+      previewCaptions: ["Choose your captain", "Race every seed home"],
+    },
+    name: "Ludo Royale",
+    icon: LudoRoyaleIcon,
+    iconPresentation: "full-bleed",
+    color: "bg-transparent text-white",
+    category: "games",
+    launchTarget: { kind: "phone-screen", screen: "ludo" },
+    description: "Play classic two-dice Ludo solo or with friends.",
+    version: "1.1.0",
+    previewCapabilities: {
+      bundled: true,
+      executesUserCode: false,
+      screenshotUrls: [
+        "/images/appstore/screenshots/ludo-setup.svg",
+        "/images/appstore/screenshots/ludo-match.svg",
+      ],
+    },
+    availability: "available",
+    homePage: 1,
+    loadScreen: () => import("@/components/screens/ludo/LudoGame"),
   },
   {
     id: "gallery",

@@ -23,6 +23,7 @@ describe("App Store catalog", () => {
       "guess",
       "music-player",
       "chess",
+      "ludo",
     ]);
     for (const app of MINI_APPS.filter((entry) => entry.store === null)) {
       expect(searchStoreApps(app.name)).not.toContainEqual(app);
@@ -38,6 +39,7 @@ describe("App Store catalog", () => {
       "snake",
       "guess",
       "chess",
+      "ludo",
     ]);
     expect(searchStoreApps("snake", "entertainment")).toEqual([]);
     expect(searchStoreApps("", "system")).toEqual([]);

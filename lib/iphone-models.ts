@@ -144,8 +144,7 @@ export const getModelPreviewSize = (
   viewport: PreviewViewport,
 ): PreviewSize => {
   const availableWidth = Math.max(0, viewport.width - 32);
-  // Reserve room for the model picker and the phone's system action controls.
-  const availableHeight = Math.max(0, viewport.height - 172);
+  const availableHeight = Math.max(0, viewport.height - 32);
   const aspect = model.dimensionsMm.width / model.dimensionsMm.height;
   const height = Math.min(640, availableHeight, availableWidth / aspect);
   return { width: height * aspect, height };

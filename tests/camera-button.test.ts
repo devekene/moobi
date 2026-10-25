@@ -9,7 +9,6 @@ import { usePhoneStore } from "@/stores";
 const hardware = vi.hoisted(() => ({
   props: null as ComponentProps<typeof VirtualIPhone> | null,
   root: {} as HTMLDivElement,
-  isPhone: false,
 }));
 
 vi.mock("react", async (importOriginal) => {
@@ -27,10 +26,6 @@ vi.mock("@/components/screens/VirtualIPhone", () => ({
     return null;
   },
 }));
-vi.mock("@/components/ActionButtons", () => ({ default: () => null }));
-vi.mock("@/hooks/useIsPhoneBrowser", () => ({
-  useIsPhoneBrowser: () => hardware.isPhone,
-}));
 vi.mock("@/context/ClockContext", () => ({
   useClock: () => ({ ringingAlarmId: null, silenceRingingAudio: () => false }),
 }));
@@ -44,18 +39,16 @@ vi.mock("@/lib/phone-screenshot", () => ({
 describe("right-side camera button", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    hardware.isPhone = false;
     usePhoneStore.setState({ currentScreen: "home", showControlCenter: true });
     renderToStaticMarkup(createElement(Frame, null, null));
   });
 
-  it("hides frame controls only for phone browsers", () => {
-    expect(hardware.props?.showDeviceControls).toBe(true);
-    hardware.isPhone = true;
+  it("keeps model and presentation controls out of the surrounding frame", () => {
     const html = renderToStaticMarkup(createElement(Frame, null, null));
-    expect(hardware.props?.showDeviceControls).toBe(false);
-    expect(html).toContain('class="hidden w-full max-w-[44rem]');
-    expect(html).toContain('class="hidden shrink-0"');
+    expect(html).not.toContain("virtual-iphone-model");
+    expect(html).not.toContain("Show back");
+    expect(html).not.toContain("Reset phone");
+    expect(html).not.toContain("Phone options");
   });
 
   it("exports the current display without navigating or dismissing overlays", async () => {

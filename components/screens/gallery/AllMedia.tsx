@@ -87,13 +87,6 @@ function MediaTile({
           <LuHeart aria-hidden="true" />
         </span>
       )}
-      {featured && (
-        <span className={styles.featureCopy}>
-          <small>Featured moment</small>
-          <strong>{label}</strong>
-          <span>Open to watch</span>
-        </span>
-      )}
     </button>
   );
 }
@@ -207,20 +200,19 @@ export default function AllMedia({
               </p>
             )}
 
-            {featured && (
-              <MediaTile
-                item={featured}
-                featured
-                favorite={favoriteIds.has(featured.id)}
-                onOpenMedia={onOpenMedia}
-              />
-            )}
+            {/*{featured && (*/}
+            {/*  <MediaTile*/}
+            {/*    item={featured}*/}
+            {/*    featured*/}
+            {/*    favorite={favoriteIds.has(featured.id)}*/}
+            {/*    onOpenMedia={onOpenMedia}*/}
+            {/*  />*/}
+            {/*)}*/}
 
             {capturedItems.length > 0 && (
               <section className={styles.collection}>
                 <div className={styles.sectionHeading}>
                   <div>
-                    <span>From this virtual phone</span>
                     <h2>Screenshots</h2>
                   </div>
                   <span>{capturedItems.length} saved</span>
@@ -263,7 +255,6 @@ export default function AllMedia({
           <>
             <header className={styles.header}>
               <div>
-                <span className={styles.eyebrow}>Made for you</span>
                 <h1>Highlights</h1>
               </div>
             </header>
@@ -299,7 +290,6 @@ export default function AllMedia({
           <>
             <header className={styles.header}>
               <div>
-                <span className={styles.eyebrow}>Organized for you</span>
                 <h1>Albums</h1>
               </div>
             </header>

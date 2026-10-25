@@ -6,12 +6,15 @@ import {
   LuLockKeyhole,
   LuMoon,
   LuShieldCheck,
+  LuSmartphone,
   LuSun,
   LuVolume1,
   LuVolume2,
 } from "react-icons/lu";
 import { usePhoneAppearanceStore } from "@/stores/usePhoneAppearanceStore";
 import { usePhoneSettingsStore } from "@/stores/usePhoneSettingsStore";
+import { useDeviceStore } from "@/stores/useDeviceStore";
+import { IPHONE_MODELS } from "@/lib/iphone-models";
 import PinLockControls from "@/components/PinLockControls";
 import styles from "./settings.module.css";
 
@@ -133,6 +136,72 @@ export function DisplaySettings() {
           lowIcon={<LuSun />}
           highIcon={<LuSun />}
         />
+      </SettingsSection>
+    </div>
+  );
+}
+
+export function DeviceSettings() {
+  const selectedModelId = useDeviceStore((state) => state.selectedModelId);
+  const availableModelIds = useDeviceStore(
+    (state) => state.availableModelIds,
+  );
+  const setSelectedModelId = useDeviceStore(
+    (state) => state.setSelectedModelId,
+  );
+  const selectedModel =
+    IPHONE_MODELS.find((model) => model.id === selectedModelId) ??
+    IPHONE_MODELS[0];
+
+  return (
+    <div className={styles.detailStack}>
+      <div className={styles.featureHero} data-tone="blue">
+        <span className={styles.featureGlyph} aria-hidden="true">
+          <LuSmartphone />
+        </span>
+        <h2>{selectedModel.name}</h2>
+        <p>
+          Change the virtual shell without closing apps or resetting your phone.
+        </p>
+      </div>
+      <SettingsSection
+        title="Phone model"
+        hint="Availability depends on the space available for the virtual phone."
+      >
+        <div
+          className={styles.modelChoices}
+          role="radiogroup"
+          aria-label="Virtual iPhone model"
+        >
+          {IPHONE_MODELS.map((model) => {
+            const available = availableModelIds.includes(model.id);
+            const selected = selectedModelId === model.id;
+            return (
+              <button
+                key={model.id}
+                type="button"
+                role="radio"
+                aria-checked={selected}
+                disabled={!available}
+                className={styles.modelChoice}
+                onClick={() => setSelectedModelId(model.id)}
+              >
+                <span className={styles.modelSilhouette} aria-hidden="true">
+                  <i />
+                </span>
+                <span className={styles.modelCopy}>
+                  <strong>{model.name}</strong>
+                  <span>
+                    {model.displayDiagonalInches.toFixed(1)}-inch display
+                  </span>
+                </span>
+                <span className={styles.modelStatus}>
+                  {!available ? "Unavailable" : selected ? <LuCheck /> : null}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </SettingsSection>
     </div>
   );

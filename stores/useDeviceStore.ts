@@ -9,7 +9,9 @@ import { IPHONE_MODELS, type IPhoneModelId } from "@/lib/iphone-models";
 
 type DeviceState = {
   selectedModelId: IPhoneModelId;
+  availableModelIds: readonly IPhoneModelId[];
   setSelectedModelId: (modelId: IPhoneModelId) => void;
+  setAvailableModelIds: (modelIds: readonly IPhoneModelId[]) => void;
 };
 
 export const createDeviceStore = (storage: StateStorage) =>
@@ -17,7 +19,10 @@ export const createDeviceStore = (storage: StateStorage) =>
     persist(
       (set) => ({
         selectedModelId: IPHONE_MODELS[0].id,
+        availableModelIds: IPHONE_MODELS.map((model) => model.id),
         setSelectedModelId: (selectedModelId) => set({ selectedModelId }),
+        setAvailableModelIds: (availableModelIds) =>
+          set({ availableModelIds }),
       }),
       {
         name: "moobi-virtual-iphone-model",

@@ -1,14 +1,18 @@
 "use client";
 
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { usePhoneStore } from "@/stores";
 import { useClock } from "@/context/ClockContext";
 import VirtualIPhone from "@/components/screens/VirtualIPhone";
-import ActionButtons from "@/components/ActionButtons";
 import { usePhoneAppearanceStore } from "@/stores/usePhoneAppearanceStore";
 import {
   getAvailableIPhoneModels,
-  isIPhoneModelId,
   getModelPreviewSize,
   IPHONE_MODELS,
 } from "@/lib/iphone-models";
@@ -17,14 +21,12 @@ import { useBatteryStore } from "@/stores/useBatteryStore";
 import { usePhoneSettingsStore } from "@/stores/usePhoneSettingsStore";
 import { PHONE_VOLUME_STEP, type HardwareButtonId } from "@/lib/phone-buttons";
 import { downloadPhoneDisplayScreenshot } from "@/lib/phone-screenshot";
-import { useIsPhoneBrowser } from "@/hooks/useIsPhoneBrowser";
 import {
   CHARGER_CONNECTION_DURATION_MS,
   LOW_BATTERY_THRESHOLD,
 } from "@/lib/battery";
 
 const Frame = ({ children }: { children: React.ReactNode }) => {
-  const showDeviceControls = !useIsPhoneBrowser();
   const [hardwareStatus, setHardwareStatus] = useState("");
   const [isOn, setIsOn] = useState(true);
   const {
@@ -41,6 +43,9 @@ const Frame = ({ children }: { children: React.ReactNode }) => {
   const selectedModelId = useDeviceStore((state) => state.selectedModelId);
   const setSelectedModelId = useDeviceStore(
     (state) => state.setSelectedModelId,
+  );
+  const setAvailableModelIds = useDeviceStore(
+    (state) => state.setAvailableModelIds,
   );
   const [viewport, setViewport] = useState({ width: 390, height: 844 });
   const frameRef = useRef<HTMLDivElement>(null);
@@ -205,7 +210,10 @@ const Frame = ({ children }: { children: React.ReactNode }) => {
     return () => observer.disconnect();
   }, []);
 
-  const availableModels = getAvailableIPhoneModels(viewport);
+  const availableModels = useMemo(
+    () => getAvailableIPhoneModels(viewport),
+    [viewport],
+  );
   const currentModel =
     IPHONE_MODELS.find((model) => model.id === selectedModelId) ??
     IPHONE_MODELS[0];
@@ -217,70 +225,29 @@ const Frame = ({ children }: { children: React.ReactNode }) => {
   const deviceSize = getModelPreviewSize(displayedModel, viewport);
 
   useEffect(() => {
+    setAvailableModelIds(availableModels.map((model) => model.id));
     if (
       availableModels.length > 0 &&
       !availableModels.some((model) => model.id === selectedModelId)
     ) {
       setSelectedModelId(availableModels[0].id);
     }
-  }, [availableModels, selectedModelId, setSelectedModelId]);
+  }, [
+    availableModels,
+    selectedModelId,
+    setAvailableModelIds,
+    setSelectedModelId,
+  ]);
 
   const brightnessValue = 0.3 + (brightness / 100) * 0.9;
 
   return (
     <div
       ref={frameRef}
-      className="phone-theme relative flex h-full min-h-0 w-full flex-col items-center gap-2 px-2 py-2 sm:gap-3"
+      className="phone-theme relative flex h-full min-h-0 w-full items-center justify-center p-2"
       data-phone-theme={appearance}
     >
-      <div
-        className={`${showDeviceControls ? "flex" : "hidden"} w-full max-w-[44rem] shrink-0 items-center justify-center gap-2`}
-      >
-        <label htmlFor="virtual-iphone-model" className="sr-only">
-          Virtual iPhone model
-        </label>
-        <select
-          id="virtual-iphone-model"
-          value={displayedModel.id}
-          onChange={(event) => {
-            if (isIPhoneModelId(event.target.value)) {
-              setSelectedModelId(event.target.value);
-            }
-          }}
-          className="max-w-full rounded-full border border-[var(--phone-border)] bg-[var(--phone-surface)] px-4 py-2 text-sm font-medium text-[var(--phone-text)] shadow-sm transition outline-none focus-visible:ring-2 focus-visible:ring-[var(--phone-focus)] disabled:opacity-60"
-          aria-label="Choose virtual iPhone model"
-          disabled={availableModels.length === 0}
-        >
-          {availableModels.length === 0 ? (
-            <option value={displayedModel.id}>
-              No model fits this viewport
-            </option>
-          ) : (
-            availableModels.map((model) => (
-              <option key={model.id} value={model.id}>
-                {model.name}
-              </option>
-            ))
-          )}
-        </select>
-        {availableModels.length === 0 && (
-          <p className="max-w-40 text-xs text-[var(--phone-text-muted)]">
-            Enlarge the window to preview a virtual iPhone at a usable size.
-          </p>
-        )}
-      </div>
-
-      {hardwareStatus && (
-        <p
-          role="status"
-          className="text-center text-xs text-[var(--phone-text-muted)]"
-        >
-          {hardwareStatus}
-        </p>
-      )}
-
       <VirtualIPhone
-        showDeviceControls={showDeviceControls}
         model={displayedModel}
         size={deviceSize}
         brightness={brightnessValue}
@@ -297,15 +264,12 @@ const Frame = ({ children }: { children: React.ReactNode }) => {
       </VirtualIPhone>
 
       <p className="sr-only" role="status" aria-live="polite">
+        {hardwareStatus}
+        {hardwareStatus && lowBattery ? " " : ""}
         {lowBattery
           ? `Virtual phone battery low: ${Math.round(batteryLevel)} percent remaining.`
           : ""}
       </p>
-
-      {/* Action Buttons */}
-      <div className={`${showDeviceControls ? "block" : "hidden"} shrink-0`}>
-        <ActionButtons isOn={isOn} setIsOn={setIsOn} />
-      </div>
     </div>
   );
 };

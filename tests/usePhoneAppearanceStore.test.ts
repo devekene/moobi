@@ -62,11 +62,21 @@ describe("phone appearance", () => {
 
   it("persists the virtual model without resetting the active app or system state", () => {
     const deviceStore = createDeviceStore(storage);
+    deviceStore.getState().setAvailableModelIds(["iphone-16-pro"]);
     deviceStore.getState().setSelectedModelId("iphone-16-pro");
+
+    expect(deviceStore.getState().availableModelIds).toEqual([
+      "iphone-16-pro",
+    ]);
 
     const restoredStore = createDeviceStore(storage);
 
     expect(restoredStore.getState().selectedModelId).toBe("iphone-16-pro");
+    expect(restoredStore.getState().availableModelIds).toEqual([
+      "iphone-16",
+      "iphone-16-pro",
+      "iphone-17-pro-max",
+    ]);
     expect(usePhoneStore.getState()).toMatchObject({
       currentScreen: "notes",
       phonePage: 2,
