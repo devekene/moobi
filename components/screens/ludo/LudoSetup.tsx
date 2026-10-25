@@ -1,8 +1,8 @@
+import Image from "next/image";
 import {
   LuBot,
   LuCheck,
   LuChevronRight,
-  LuCrown,
   LuDices,
   LuShieldCheck,
   LuSparkles,
@@ -10,32 +10,37 @@ import {
   LuTrophy,
   LuUsers,
 } from "react-icons/lu";
+import LudoRoyaleIcon from "@/components/icons/LudoRoyaleIcon";
 import {
   LUDO_MODES,
+  LUDO_CAPTURE_STYLES,
   LUDO_PROTECTION_RULES,
   LUDO_STRATEGIES,
+  type LudoCaptureStyle,
   type LudoMode,
   type LudoProtection,
   type LudoStrategy,
 } from "@/lib/ludo";
 import { LUDO_AVATARS, useLudoStore } from "@/stores/useLudoStore";
-import { LUDO_COLORS } from "./ludo-board";
 import styles from "./ludo.module.css";
 
 const MODES: LudoMode[] = ["solo", "duel", "party"];
 const PROTECTION_RULES: LudoProtection[] = ["safe", "open"];
+const CAPTURE_STYLES: LudoCaptureStyle[] = ["continue", "leave"];
 const STRATEGIES: LudoStrategy[] = ["bold", "balanced", "tactical"];
 
 export default function LudoSetup() {
   const {
     mode,
     protection,
+    captureStyle,
     strategy,
     avatar,
     games,
     wins,
     chooseMode,
     chooseProtection,
+    chooseCaptureStyle,
     chooseStrategy,
     chooseAvatar,
     start,
@@ -45,29 +50,34 @@ export default function LudoSetup() {
     <div className={styles.setup}>
       <header className={styles.heroHeader}>
         <div className={styles.brandMark}>
-          <LuCrown />
-          <span>LUDO</span>
+          <span className={styles.brandIcon}>
+            <LudoRoyaleIcon aria-hidden="true" />
+          </span>
+          <span>LUDO ROYALE</span>
         </div>
         <span className={styles.edition}>CLASSIC BOARD · TWO DICE</span>
       </header>
       <section className={styles.hero}>
+        <Image
+          className={styles.heroImage}
+          src="/images/ludo-capture-icon.webp"
+          alt=""
+          fill
+          priority
+          sizes="(max-width: 520px) 100vw, 430px"
+        />
         <div className={styles.heroCopy}>
-          <span>THE CLASSIC RACE</span>
+          <span>CAPTURE OR RETURN TO BASE</span>
           <h1>
-            Roll. Move.
+            Hunt the board.
             <br />
-            <em>Get home.</em>
+            <em>Own the escape.</em>
           </h1>
-        </div>
-        <div className={styles.heroArt} aria-hidden="true">
-          <div className={styles.heroBoard}>
-            {LUDO_COLORS.map((color) => (
-              <i key={color} data-color={color} />
-            ))}
-            <span>
-              <b>⚄</b>
-              <b>⚂</b>
-            </span>
+          <p>Two dice. Four captains. Every move can send someone home.</p>
+          <div className={styles.heroTags} aria-hidden="true">
+            <span>CAPTURE</span>
+            <i />
+            <span>ESCAPE</span>
           </div>
         </div>
       </section>
@@ -179,6 +189,34 @@ export default function LudoSetup() {
               </button>
             );
           })}
+        </div>
+      </section>
+      <section className={styles.setupSection}>
+        <div className={styles.sectionTitle}>
+          <span>What happens after a capture?</span>
+          <small>Capture style</small>
+        </div>
+        <div
+          className={styles.ruleCards}
+          role="radiogroup"
+          aria-label="Capture style"
+        >
+          {CAPTURE_STYLES.map((item) => (
+            <button
+              key={item}
+              type="button"
+              role="radio"
+              aria-checked={captureStyle === item}
+              className={captureStyle === item ? styles.selectedRule : ""}
+              onClick={() => chooseCaptureStyle(item)}
+            >
+              {item === "continue" ? <LuChevronRight /> : <LuTrophy />}
+              <span>
+                <b>{LUDO_CAPTURE_STYLES[item].name}</b>
+                <small>{LUDO_CAPTURE_STYLES[item].detail}</small>
+              </span>
+            </button>
+          ))}
         </div>
       </section>
       {mode !== "party" && (

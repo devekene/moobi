@@ -10,6 +10,7 @@ import {
   moveLudoSeed,
   rollLudo,
   type DicePair,
+  type LudoCaptureStyle,
   type LudoGame,
   type LudoMode,
   type LudoProtection,
@@ -21,6 +22,7 @@ export const LUDO_AVATARS = ["🦊", "🦁", "🐼", "🐯", "🦅", "🐸"] as 
 type LudoState = {
   mode: LudoMode;
   protection: LudoProtection;
+  captureStyle: LudoCaptureStyle;
   strategy: LudoStrategy;
   avatar: string;
   games: number;
@@ -28,6 +30,7 @@ type LudoState = {
   game: LudoGame | null;
   chooseMode: (mode: LudoMode) => void;
   chooseProtection: (protection: LudoProtection) => void;
+  chooseCaptureStyle: (captureStyle: LudoCaptureStyle) => void;
   chooseStrategy: (strategy: LudoStrategy) => void;
   chooseAvatar: (avatar: string) => void;
   start: () => void;
@@ -73,6 +76,7 @@ export const createLudoStore = (storage: StateStorage) => {
       (set) => ({
         mode: "solo",
         protection: "safe",
+        captureStyle: "continue",
         strategy: "balanced",
         avatar: LUDO_AVATARS[0],
         games: 0,
@@ -81,6 +85,8 @@ export const createLudoStore = (storage: StateStorage) => {
         chooseMode: (mode) => set((state) => (state.game ? {} : { mode })),
         chooseProtection: (protection) =>
           set((state) => (state.game ? {} : { protection })),
+        chooseCaptureStyle: (captureStyle) =>
+          set((state) => (state.game ? {} : { captureStyle })),
         chooseStrategy: (strategy) =>
           set((state) => (state.game ? {} : { strategy })),
         chooseAvatar: (avatar) =>
@@ -96,6 +102,7 @@ export const createLudoStore = (storage: StateStorage) => {
               state.avatar,
               state.strategy,
               state.protection,
+              state.captureStyle,
             ),
             games: state.games + 1,
           })),
@@ -128,9 +135,10 @@ export const createLudoStore = (storage: StateStorage) => {
         name: "moobi-ludo",
         storage: createJSONStorage(() => preferencesStorage),
         skipHydration: true,
-        partialize: ({ mode, protection, strategy, avatar, games, wins }) => ({
+        partialize: ({ mode, protection, captureStyle, strategy, avatar, games, wins }) => ({
           mode,
           protection,
+          captureStyle,
           strategy,
           avatar,
           games,
@@ -145,6 +153,7 @@ export const createLudoStore = (storage: StateStorage) => {
                 ? saved.mode
                 : "solo",
             protection: saved.protection === "open" ? "open" : "safe",
+            captureStyle: saved.captureStyle === "leave" ? "leave" : "continue",
             strategy:
               saved.strategy === "bold" || saved.strategy === "tactical"
                 ? saved.strategy

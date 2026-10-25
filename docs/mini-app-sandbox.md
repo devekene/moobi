@@ -145,12 +145,13 @@ JavaScript use data URLs, its bootstrap is inline and hash-authorized, and stora
 is host-side. Restarting a package already in memory needs no package HTTP fetch.
 Resource-dependency tests verify this property.
 
-This is not an offline installation guarantee. Refreshing the site still requires
-the Moobi shell and its lazy-loaded chunks. The local preview does not persist
-package bytes. Slice 2 persists installed packages and atomically manages records,
-but its session and separate runtime still require network access. Full offline
-startup and launch need a reviewed shell/runtime caching strategy. Do not introduce an origin-wide service worker as a shortcut
-before that design is reviewed.
+The Moobi PWA now supports offline startup for a narrowly allowlisted public
+shell; see [PWA and offline boundary](./pwa.md). Its service worker deliberately
+excludes API routes, package responses, authenticated data, and the separate
+mini-app runtime. The local preview does not persist package bytes. Slice 2
+persists installed packages and atomically manages records, but its session and
+separate runtime still require network access. Offline shell startup therefore
+does not promise offline installation or launch for mini apps.
 
 ## Validation
 

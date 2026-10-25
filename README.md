@@ -17,6 +17,11 @@ the [slice 3 database and reviewer setup](docs/public-app-store.md) to enable th
 
 Moobi aims to simulate a mobile OS experience entirely within the browser. You can install and run apps, browse locally hosted development, use music, a clock, and more. It’s also a showcase of front-end craftsmanship — blending UI/UX, dynamic imports, state orchestration, and embedded previews.
 
+Moobi can also be installed as a PWA. Its public phone shell can reopen offline
+after a successful production load; APIs, media streams, Store packages, and the
+separate mini-app runtime remain network-only. See the [PWA and offline
+boundary](docs/pwa.md) for the exact cache policy and release checks.
+
 Think of it as **virtual phone meets portfolio**.
 
 ---

@@ -12,6 +12,7 @@ import {
   HOME_AREAS,
   LUDO_COLORS,
   START_ARROWS,
+  baseCaptain,
   ludoBoardCellColor,
   seedPosition,
 } from "./ludo-board";
@@ -46,16 +47,17 @@ export default function LudoBoard({
   const automaticMove = selectedDie === null ? forcedSeedMove(game) : null;
   const stacks = new Map<string, number>();
   const seedViews = game.players.flatMap((player) =>
-    game.seeds[player.id].map((savedProgress, index) => {
+    game.seeds[player.id].flatMap((savedProgress, index) => {
       const progress =
         movingSeed?.playerId === player.id && movingSeed.seedIndex === index
           ? movingSeed.progress
           : savedProgress;
+      if (progress === HOME_PROGRESS) return [];
       const [row, col] = seedPosition(player.color, progress, index);
       const key = `${row}-${col}`;
       const stack = stacks.get(key) ?? 0;
       stacks.set(key, stack + 1);
-      return { player, progress, index, row, col, stack };
+      return [{ player, progress, index, row, col, stack }];
     }),
   );
   const canRoll =
@@ -68,10 +70,26 @@ export default function LudoBoard({
   return (
     <div className={styles.boardStage}>
       <div className={styles.boardFrame}>
+        {LUDO_COLORS.map((color) => {
+          const captain = baseCaptain(game, color);
+          return (
+            <div
+              key={`${color}-captain`}
+              className={styles.homeBadge}
+              data-position={color}
+              data-color={color}
+              data-active={active.color === color}
+              aria-label={`${captain.name}, ${color} captain${active.color === color ? ", current turn" : ""}`}
+            >
+              <span>{captain.avatar}</span>
+              <b>{captain.name}</b>
+            </div>
+          );
+        })}
         <div
           className={styles.board}
           role="group"
-          aria-label={`Ludo board with ${game.protection === "safe" ? "protected" : "open"} capture rules. ${active.name}'s turn.`}
+          aria-label={`Ludo board with ${game.protection === "safe" ? "protected" : "open"} squares and ${game.captureStyle === "leave" ? "capture and leave" : "capture and continue"} rules. ${active.name}'s turn.`}
         >
           {Array.from({ length: 225 }, (_, cell) => {
             const row = Math.floor(cell / 15);
@@ -98,7 +116,7 @@ export default function LudoBoard({
             );
           })}
           {LUDO_COLORS.map((color) => {
-            const owner = game.players.find((player) => player.color === color);
+            const captain = baseCaptain(game, color);
             return (
               <span
                 key={color}
@@ -107,7 +125,9 @@ export default function LudoBoard({
                 style={HOME_AREAS[color]}
                 aria-hidden="true"
               >
-                {owner && <span className={styles.yardAvatar}>{owner.avatar}</span>}
+                <span className={styles.yardAvatar}>
+                  {captain.avatar}
+                </span>
               </span>
             );
           })}

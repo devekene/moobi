@@ -1,9 +1,12 @@
 import type { CSSProperties } from "react";
 import {
   globalTrackIndex,
+  HOME_LANE_START_PROGRESS,
   START_INDEX,
   TRACK,
   type LudoColor,
+  type LudoGame,
+  type LudoPlayer,
 } from "@/lib/ludo";
 
 export const LUDO_COLORS: readonly LudoColor[] = [
@@ -19,6 +22,26 @@ export const COLOR_LABELS: Record<LudoColor, string> = {
   green: "Green",
   red: "Red",
 };
+
+export const BASE_CAPTAINS: Record<
+  LudoColor,
+  Pick<LudoPlayer, "name" | "avatar">
+> = {
+  blue: { name: "Zuri", avatar: "🐯" },
+  yellow: { name: "Sol", avatar: "🦁" },
+  green: { name: "Maji", avatar: "🐼" },
+  red: { name: "Ruby", avatar: "🦊" },
+};
+
+export function baseCaptain(
+  game: LudoGame,
+  color: LudoColor,
+): Pick<LudoPlayer, "name" | "avatar"> {
+  const player = game.players.find((candidate) => candidate.color === color);
+  return player
+    ? { name: player.name, avatar: player.avatar }
+    : BASE_CAPTAINS[color];
+}
 
 export const HOME_LANES: Record<
   LudoColor,
@@ -132,6 +155,7 @@ export function seedPosition(
   index: number,
 ) {
   if (progress < 0) return YARDS[color][index];
-  if (progress > 51) return HOME_LANES[color][progress - 52];
+  if (progress >= HOME_LANE_START_PROGRESS)
+    return HOME_LANES[color][progress - HOME_LANE_START_PROGRESS];
   return TRACK[globalTrackIndex(color, progress) ?? 0];
 }

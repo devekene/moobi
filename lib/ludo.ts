@@ -2,6 +2,7 @@ export type LudoColor = "blue" | "yellow" | "green" | "red";
 export type LudoMode = "solo" | "duel" | "party";
 export type LudoStrategy = "bold" | "balanced" | "tactical";
 export type LudoProtection = "safe" | "open";
+export type LudoCaptureStyle = "continue" | "leave";
 export type LudoController = "human" | "bot";
 export type LudoPhase = "roll" | "move" | "complete";
 export type DicePair = readonly [number, number];
@@ -18,6 +19,7 @@ export type LudoPlayer = {
 export type LudoGame = {
   mode: LudoMode;
   protection: LudoProtection;
+  captureStyle: LudoCaptureStyle;
   players: LudoPlayer[];
   seeds: Record<string, number[]>;
   currentPlayer: number;
@@ -56,6 +58,16 @@ export const LUDO_PROTECTION_RULES = {
     detail: "Every square on the shared track can be captured",
   },
 } satisfies Record<LudoProtection, { name: string; detail: string }>;
+export const LUDO_CAPTURE_STYLES = {
+  continue: {
+    name: "Capture & Continue",
+    detail: "Send rivals to their yard and keep racing",
+  },
+  leave: {
+    name: "Capture & Leave",
+    detail: "A capturing seed scores and leaves the race",
+  },
+} satisfies Record<LudoCaptureStyle, { name: string; detail: string }>;
 
 export const TRACK: readonly (readonly [number, number])[] = [
   [6, 1], [6, 2], [6, 3], [6, 4], [6, 5],
@@ -75,7 +87,9 @@ export const START_INDEX: Record<LudoColor, number> = {
   red: 39,
 };
 export const SAFE_TRACK_INDEXES = new Set([0, 8, 13, 21, 26, 34, 39, 47]);
-export const HOME_PROGRESS = 57;
+export const LAST_SHARED_PROGRESS = 50;
+export const HOME_LANE_START_PROGRESS = 51;
+export const HOME_PROGRESS = 56;
 
 const BOT_PROFILES: ReadonlyArray<Omit<LudoPlayer, "strategy">> = [
   { id: "maji", name: "Maji", avatar: "🐼", color: "green", controller: "bot" },
@@ -88,6 +102,7 @@ export function createLudoGame(
   avatar: string,
   strategy: LudoStrategy,
   protection: LudoProtection = "safe",
+  captureStyle: LudoCaptureStyle = "continue",
 ): LudoGame {
   const human: LudoPlayer = {
     id: "you",
@@ -97,7 +112,8 @@ export function createLudoGame(
     controller: "human",
     strategy,
   };
-  const rivals = BOT_PROFILES.slice(0, mode === "duel" ? 1 : 3).map(
+  const rivalProfiles = mode === "duel" ? [BOT_PROFILES[1]] : BOT_PROFILES;
+  const rivals = rivalProfiles.map(
     (profile, index): LudoPlayer => ({
       ...profile,
       name: mode === "party" ? `Player ${index + 2}` : profile.name,
@@ -109,6 +125,7 @@ export function createLudoGame(
   return {
     mode,
     protection,
+    captureStyle,
     players,
     seeds: Object.fromEntries(players.map((player) => [player.id, [-1, -1, -1, -1]])),
     currentPlayer: 0,
@@ -122,7 +139,7 @@ export function createLudoGame(
 }
 
 export function globalTrackIndex(color: LudoColor, progress: number): number | null {
-  if (progress < 0 || progress > 51) return null;
+  if (progress < 0 || progress > LAST_SHARED_PROGRESS) return null;
   return (START_INDEX[color] + progress) % TRACK.length;
 }
 
@@ -223,9 +240,17 @@ export function rollLudo(game: LudoGame, values: DicePair): LudoGame {
     phase: "move",
     lastEvent: `${player.name} rolled ${dice[0]} and ${dice[1]}`,
   };
-  return availableDice(rolled).length
-    ? rolled
-    : nextTurn(rolled, `${player.name} rolled ${dice[0]} and ${dice[1]} · no legal move`);
+  if (availableDice(rolled).length) return rolled;
+  const message = `${player.name} rolled ${dice[0]} and ${dice[1]} · no legal move`;
+  return dice[0] === 6 && dice[1] === 6
+    ? {
+        ...rolled,
+        phase: "roll",
+        dice: null,
+        remainingDice: [false, false],
+        lastEvent: `${message} · double six, roll again`,
+      }
+    : nextTurn(rolled, message);
 }
 
 function landingCount(game: LudoGame, player: LudoPlayer, progress: number): number {
@@ -270,6 +295,8 @@ export function moveLudoSeed(game: LudoGame, seedIndex: number, dieIndex: 0 | 1)
       });
     }
   }
+  if (captures > 0 && game.captureStyle === "leave")
+    seeds[player.id][seedIndex] = HOME_PROGRESS;
   if (seeds[player.id].every((seed) => seed === HOME_PROGRESS))
     return {
       ...game,
@@ -278,51 +305,165 @@ export function moveLudoSeed(game: LudoGame, seedIndex: number, dieIndex: 0 | 1)
       dice: null,
       remainingDice: [false, false],
       winnerId: player.id,
-      lastEvent: `${player.name} brings every seed home!`,
+      lastEvent: `${player.name} scores every seed!`,
     };
   const remainingDice: [boolean, boolean] = [...game.remainingDice];
   remainingDice[dieIndex] = false;
   const message = captures
-    ? `${player.name} sent ${captures} seed${captures === 1 ? "" : "s"} home`
+    ? game.captureStyle === "leave"
+      ? `${player.name} captured ${captures} seed${captures === 1 ? "" : "s"} and scored`
+      : `${player.name} sent ${captures} seed${captures === 1 ? "" : "s"} home`
     : progress === HOME_PROGRESS
       ? `${player.name} brought a seed home`
       : `${player.name} moved seed ${seedIndex + 1} by ${die}`;
   const moved: LudoGame = { ...game, seeds, remainingDice, lastEvent: message };
   if (availableDice(moved).length) return moved;
-  if (game.dice[0] === game.dice[1])
+  if (game.dice[0] === 6 && game.dice[1] === 6)
     return {
       ...moved,
       phase: "roll",
       dice: null,
       remainingDice: [false, false],
-      lastEvent: `${message} · doubles, roll again`,
+      lastEvent: `${message} · double six, roll again`,
     };
   return nextTurn(moved, message);
 }
 
+function opponentThreats(
+  game: LudoGame,
+  player: LudoPlayer,
+  progress: number,
+): number {
+  const target = globalTrackIndex(player.color, progress);
+  if (
+    target === null ||
+    (game.protection === "safe" && SAFE_TRACK_INDEXES.has(target))
+  )
+    return 0;
+  return game.players.reduce((threats, opponent) => {
+    if (opponent.id === player.id) return threats;
+    return threats + game.seeds[opponent.id].filter((seed) => {
+      const position = globalTrackIndex(opponent.color, seed);
+      if (position === null) return false;
+      const distance = (target - position + TRACK.length) % TRACK.length;
+      return distance >= 1 && distance <= 6 && seed + distance <= LAST_SHARED_PROGRESS;
+    }).length;
+  }, 0);
+}
+
+function captureThreatsCreated(
+  game: LudoGame,
+  player: LudoPlayer,
+  progress: number,
+): number {
+  const position = globalTrackIndex(player.color, progress);
+  if (position === null) return 0;
+  return game.players.reduce((targets, opponent) => {
+    if (opponent.id === player.id) return targets;
+    return targets + game.seeds[opponent.id].filter((seed) => {
+      const target = globalTrackIndex(opponent.color, seed);
+      if (
+        target === null ||
+        (game.protection === "safe" && SAFE_TRACK_INDEXES.has(target))
+      )
+        return false;
+      const distance = (target - position + TRACK.length) % TRACK.length;
+      return distance >= 1 && distance <= 6 && progress + distance <= LAST_SHARED_PROGRESS;
+    }).length;
+  }, 0);
+}
+
+function botMoveScore(game: LudoGame, move: BotMove): number {
+  if (game.dice === null) return Number.NEGATIVE_INFINITY;
+  const player = game.players[game.currentPlayer];
+  const previous = game.seeds[player.id][move.seedIndex];
+  const progress = previous === -1 ? 0 : previous + game.dice[move.dieIndex];
+  const target = globalTrackIndex(player.color, progress);
+  const capture = landingCount(game, player, progress);
+  const safe =
+    game.protection === "safe" &&
+    target !== null &&
+    SAFE_TRACK_INDEXES.has(target);
+  const home =
+    progress === HOME_PROGRESS ||
+    (capture > 0 && game.captureStyle === "leave");
+  const activeSeeds = game.seeds[player.id].filter(
+    (seed) => seed >= 0 && seed < HOME_PROGRESS,
+  ).length;
+  const yardSeeds = game.seeds[player.id].filter((seed) => seed === -1).length;
+  const alliesAtTarget = target === null
+    ? 0
+    : game.seeds[player.id].filter(
+        (seed, index) =>
+          index !== move.seedIndex && globalTrackIndex(player.color, seed) === target,
+      ).length;
+  const threats = opponentThreats(game, player, progress);
+  const pressure = captureThreatsCreated(game, player, progress);
+  const release = previous === -1;
+  const releaseNeed = release ? (activeSeeds === 0 ? 420 : activeSeeds === 1 ? 300 : 140) : 0;
+  const formation = alliesAtTarget > 0 ? 260 + alliesAtTarget * 90 : 0;
+  const exposurePenalty = threats * (player.strategy === "tactical" ? 260 : 150);
+
+  if (player.strategy === "bold")
+    return (
+      capture * 1200 +
+      (home ? 620 : 0) +
+      releaseNeed +
+      formation * 0.65 +
+      pressure * 145 +
+      (safe ? 90 : 0) +
+      progress * 2 -
+      exposurePenalty * 0.55 +
+      (yardSeeds > 0 && activeSeeds >= 2 && !release ? -30 : 0)
+    );
+  if (player.strategy === "tactical")
+    return (
+      capture * 600 +
+      (home ? 1050 : 0) +
+      releaseNeed * 1.15 +
+      formation * 1.4 +
+      pressure * 220 +
+      (safe ? 800 : 0) +
+      progress * 1.5 -
+      exposurePenalty
+    );
+  return (
+    capture * 900 +
+    (home ? 880 : 0) +
+    releaseNeed +
+    formation +
+    pressure * 120 +
+    (safe ? 180 : 0) +
+    progress * 1.75 -
+    exposurePenalty * 0.8
+  );
+}
+
 export function chooseBotMove(game: LudoGame): BotMove | null {
   if (game.dice === null) return null;
-  const player = game.players[game.currentPlayer];
   const candidates = availableDice(game).flatMap((dieIndex) =>
     movableSeeds(game, dieIndex).map((seedIndex) => ({ dieIndex, seedIndex })),
   );
-  const score = ({ dieIndex, seedIndex }: BotMove) => {
-    const previous = game.seeds[player.id][seedIndex];
-    const progress = previous === -1 ? 0 : previous + game.dice![dieIndex];
-    const target = globalTrackIndex(player.color, progress);
-    const capture = landingCount(game, player, progress);
-    const safe =
-      game.protection === "safe" &&
-      target !== null &&
-      SAFE_TRACK_INDEXES.has(target);
-    const home = progress === HOME_PROGRESS;
-    if (player.strategy === "bold")
-      return capture * 1000 + (previous === -1 ? 80 : 0) + progress + (home ? 500 : 0);
-    if (player.strategy === "tactical")
-      return (home ? 1000 : 0) + (safe ? 280 : 0) + capture * 220 + progress * 2;
-    return (home ? 900 : 0) + capture * 500 + (previous === -1 ? 120 : 0) + progress;
+  const scoreWithFollowUp = (move: BotMove) => {
+    const immediate = botMoveScore(game, move);
+    const preview = moveLudoSeed(game, move.seedIndex, move.dieIndex);
+    const sameTurn =
+      preview.phase === "move" &&
+      preview.currentPlayer === game.currentPlayer &&
+      preview.dice !== null;
+    if (!sameTurn) return immediate;
+    const followUps = availableDice(preview).flatMap((dieIndex) =>
+      movableSeeds(preview, dieIndex).map((seedIndex) => ({ dieIndex, seedIndex })),
+    );
+    const bestFollowUp = followUps.reduce(
+      (best, followUp) => Math.max(best, botMoveScore(preview, followUp)),
+      0,
+    );
+    return immediate + bestFollowUp * 0.55;
   };
-  return candidates.sort((a, b) => score(b) - score(a) || a.dieIndex - b.dieIndex)[0] ?? null;
+  return candidates.sort(
+    (a, b) => scoreWithFollowUp(b) - scoreWithFollowUp(a) || a.dieIndex - b.dieIndex,
+  )[0] ?? null;
 }
 
 export function playerProgress(game: LudoGame, playerId: string): number {

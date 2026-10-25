@@ -2,9 +2,9 @@
 
 import { useRef, useState } from "react";
 import { LuArrowLeft, LuCrown } from "react-icons/lu";
+import LudoRoyaleIcon from "@/components/icons/LudoRoyaleIcon";
 import { useLudoStore } from "@/stores/useLudoStore";
 import LudoBoard from "./LudoBoard";
-import { COLOR_LABELS } from "./ludo-board";
 import styles from "./ludo.module.css";
 import { useLudoMatchController } from "./useLudoMatchController";
 
@@ -44,11 +44,14 @@ export default function LudoMatch() {
           <LuArrowLeft />
         </button>
         <div>
-          <LuCrown />
-          <span>LUDO</span>
+          <span className={styles.brandIcon}>
+            <LudoRoyaleIcon aria-hidden="true" />
+          </span>
+          <span>LUDO ROYALE</span>
         </div>
         <span className={styles.turnNumber}>
-          {game.protection === "safe" ? "PROTECTED" : "OPEN BOARD"}
+          {game.protection === "safe" ? "PROTECTED" : "OPEN"} ·{" "}
+          {game.captureStyle === "leave" ? "LEAVE" : "RACE"}
         </span>
       </header>
       <LudoBoard
@@ -62,17 +65,6 @@ export default function LudoMatch() {
         onRoll={beginRoll}
         onMove={animateMove}
       />
-      <section className={styles.turnPanel} aria-live="polite">
-        <div className={styles.turnIdentity}>
-          <span className={styles.activeAvatar} data-color={active.color}>
-            {active.avatar}
-          </span>
-          <span>
-            <small>{COLOR_LABELS[active.color]} player</small>
-            <b>{active.name}&apos;s turn</b>
-          </span>
-        </div>
-      </section>
       {(winner || confirmLeave) && (
         <div
           className={styles.overlay}
@@ -88,9 +80,13 @@ export default function LudoMatch() {
               <>
                 <span className={styles.winnerAvatar}>{winner.avatar}</span>
                 <LuCrown className={styles.winnerCrown} />
-                <small>EVERY SEED IS HOME</small>
+                <small>EVERY SEED IS SCORED</small>
                 <h2 id="ludo-dialog-title">{winner.name} wins.</h2>
-                <p>A clean run around the board.</p>
+                <p>
+                  {game.captureStyle === "leave"
+                    ? "Captured rivals and finished the race."
+                    : "A clean run around the board."}
+                </p>
                 <button
                   type="button"
                   className={styles.primary}
